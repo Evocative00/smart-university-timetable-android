@@ -1,8 +1,10 @@
-package com.syu.smarttimetable;
+package com.syu.smarttimetable.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.syu.smarttimetable.R;
 
 public class MainActivity extends AppCompatActivity {
 
