@@ -1,4 +1,4 @@
 package com.syu.smarttimetable.data.repository;
 
-public class LectureRepository {
+public class UserRepository {
 }

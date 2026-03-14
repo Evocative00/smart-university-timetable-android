@@ -1,4 +1,4 @@
-package com.syu.smarttimetable.ui;
+package com.syu.smarttimetable.ui.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 

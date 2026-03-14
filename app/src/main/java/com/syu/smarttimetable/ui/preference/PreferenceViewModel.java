@@ -1,4 +1,4 @@
 package com.syu.smarttimetable.ui.preference;
 
-public class PreferenceActivity {
+public class PreferenceViewModel {
 }

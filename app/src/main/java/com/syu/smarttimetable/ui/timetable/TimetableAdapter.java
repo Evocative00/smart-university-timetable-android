@@ -1,4 +1,4 @@
 package com.syu.smarttimetable.ui.timetable;
 
-public class TimetableActivity {
+public class TimetableAdapter {
 }
