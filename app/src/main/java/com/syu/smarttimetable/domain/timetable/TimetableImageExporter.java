@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.domain.timetable;public class TimetableImageExporter {
+package com.syu.smarttimetable.domain.timetable;
+
+public class TimetableImageExporter {
 }

@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.domain.recommendation.rules;public class PreferFreeDayRule {
+package com.syu.smarttimetable.domain.recommendation.rules;
+
+public class PreferFreeDayRule {
 }

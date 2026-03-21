@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.domain.recommendation.rules;public class PreferredCreditRangeRule {
+package com.syu.smarttimetable.domain.recommendation.rules;
+
+public class PreferredCreditRangeRule {
 }

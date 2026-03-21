@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.domain.recommendation.constraints;public class CreditRangeConstraint {
+package com.syu.smarttimetable.domain.recommendation.constraints;
+
+public class CreditRangeConstraint {
 }

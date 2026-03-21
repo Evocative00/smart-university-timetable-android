@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.domain.recommendation.rules;public class RecommendationRule {
+package com.syu.smarttimetable.domain.recommendation.rules;
+
+public class RecommendationRule {
 }

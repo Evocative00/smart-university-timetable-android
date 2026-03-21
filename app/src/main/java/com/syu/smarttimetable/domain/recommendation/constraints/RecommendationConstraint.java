@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.domain.recommendation.constraints;public class RecommendationConstraint {
+package com.syu.smarttimetable.domain.recommendation.constraints;
+
+public class RecommendationConstraint {
 }

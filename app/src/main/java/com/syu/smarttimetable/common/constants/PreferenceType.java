@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.common.constants;public class PreferenceType {
+package com.syu.smarttimetable.common.constants;
+
+public class PreferenceType {
 }

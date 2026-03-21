@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.data.model;public class TimeSlot {
+package com.syu.smarttimetable.data.model;
+
+public class TimeSlot {
 }

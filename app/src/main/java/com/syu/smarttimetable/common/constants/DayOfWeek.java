@@ -1,2 +1,4 @@
-package com.syu.smarttimetable.common.constants;public class DayOfWeek {
+package com.syu.smarttimetable.common.constants;
+
+public class DayOfWeek {
 }
