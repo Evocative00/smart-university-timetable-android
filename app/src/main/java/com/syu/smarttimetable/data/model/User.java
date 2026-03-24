@@ -5,17 +5,22 @@ public class User {
     private String email;
     private String name;
     private int grade;
-    private String major;
+    private String department;
+    private String majorDetail;
+    private String studentId;
 
     public User() {
     }
 
-    public User(String userId, String email, String name, int grade, String major) {
+    public User(String userId, String email, String name, int grade,
+                String department, String majorDetail, String studentId) {
         this.userId = userId;
         this.email = email;
         this.name = name;
         this.grade = grade;
-        this.major = major;
+        this.department = department;
+        this.majorDetail = majorDetail;
+        this.studentId = studentId;
     }
 
     public String getUserId() {
@@ -50,11 +55,27 @@ public class User {
         this.grade = grade;
     }
 
-    public String getMajor() {
-        return major;
+    public String getDepartment() {
+        return department;
     }
 
-    public void setMajor(String major) {
-        this.major = major;
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getMajorDetail() {
+        return majorDetail;
+    }
+
+    public void setMajorDetail(String majorDetail) {
+        this.majorDetail = majorDetail;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 }

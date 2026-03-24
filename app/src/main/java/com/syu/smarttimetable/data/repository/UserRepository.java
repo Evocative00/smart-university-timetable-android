@@ -36,8 +36,12 @@ public class UserRepository {
         return authDataSource.getFirebaseAuth().getCurrentUser();
     }
 
-    public void saveUser(User user) {
-        userDataSource.saveUser(user);
+    public Task<Void> saveUser(User user) {
+        return userDataSource.saveUser(user);
+    }
+
+    public Task<Void> updateUserInfo(User user) {
+        return userDataSource.updateUser(user);
     }
 
     public Task<DocumentSnapshot> getUser(String userId) {

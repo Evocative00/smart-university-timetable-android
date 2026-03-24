@@ -56,16 +56,22 @@ public class SignupActivity extends AppCompatActivity {
                                 email,
                                 name,
                                 0,
+                                "",
+                                "",
                                 ""
                         );
 
-                        userRepository.saveUser(user);
+                        userRepository.saveUser(user)
+                                .addOnSuccessListener(unused -> {
+                                    Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(this, UserInfoActivity.class);
-                        startActivity(intent);
-                        finish();
+                                    Intent intent = new Intent(this, UserInfoActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "기본 사용자 저장 실패: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                                );
                     }
                 })
                 .addOnFailureListener(e ->

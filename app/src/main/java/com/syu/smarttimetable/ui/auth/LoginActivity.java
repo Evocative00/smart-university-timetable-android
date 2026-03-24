@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.ui.main.MainActivity;
+import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -51,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(authResult -> {
                     Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
 
-                    Intent intent = new Intent(this, MainActivity.class);
+                    Intent intent = new Intent(this, UserInfoActivity.class);
                     startActivity(intent);
                     finish();
                 })

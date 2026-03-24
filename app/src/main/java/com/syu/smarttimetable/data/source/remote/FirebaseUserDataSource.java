@@ -1,5 +1,6 @@
 package com.syu.smarttimetable.data.source.remote;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.syu.smarttimetable.data.model.User;
 
@@ -11,8 +12,14 @@ public class FirebaseUserDataSource {
         this.firestore = FirebaseFirestore.getInstance();
     }
 
-    public void saveUser(User user) {
-        firestore.collection("users")
+    public Task<Void> saveUser(User user) {
+        return firestore.collection("users")
+                .document(user.getUserId())
+                .set(user);
+    }
+
+    public Task<Void> updateUser(User user) {
+        return firestore.collection("users")
                 .document(user.getUserId())
                 .set(user);
     }
