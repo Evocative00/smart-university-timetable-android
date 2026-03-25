@@ -1,4 +1,4 @@
-package com.syu.smarttimetable.data.model;
+package com.syu.smarttimetable.data.model.user;
 
 public class User {
     private String userId;
