@@ -16,7 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.User;
 import com.syu.smarttimetable.data.repository.UserRepository;
-import com.syu.smarttimetable.ui.main.MainActivity;
+import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
 
 public class UserInfoActivity extends AppCompatActivity {
 
@@ -163,7 +163,7 @@ public class UserInfoActivity extends AppCompatActivity {
                             .addOnSuccessListener(unused -> {
                                 Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show();
 
-                                Intent intent = new Intent(this, MainActivity.class);
+                                Intent intent = new Intent(this, HardConstraintActivity.class);
                                 startActivity(intent);
                                 finish();
                             })

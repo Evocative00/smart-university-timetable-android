@@ -26,6 +26,7 @@
         <activity android:name=".ui.main.MainActivity"/>
         <activity android:name=".ui.auth.SignupActivity"/>
         <activity android:name=".ui.onboarding.UserInfoActivity"/>
+        <activity android:name=".ui.constraint.HardConstraintActivity"/>
     </application>
 
 
