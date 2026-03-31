@@ -11,7 +11,7 @@ public class RequiredLectureConstraint implements RecommendationConstraint {
 
     @Override
     public boolean isValid(List<Lecture> timetable, RecommendationRequest request) {
-        return containsAllFixedLectures(timetable, request.getFixedLectureKeys());
+        return containsAllFixedLectures(timetable, new HashSet<>(request.getFixedLectureKeys()));
     }
 
     @Override

@@ -22,4 +22,11 @@
         android:text="메인 화면은 추후 구현 예정입니다."
         android:textSize="16sp" />
 
+    <Button
+        android:id="@+id/btn_go_recommendation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="시간표 추천 테스트" />
+
 </LinearLayout>

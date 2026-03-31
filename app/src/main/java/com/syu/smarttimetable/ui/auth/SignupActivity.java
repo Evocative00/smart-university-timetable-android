@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.User;
 import com.syu.smarttimetable.data.repository.UserRepository;
-import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
+import com.syu.smarttimetable.ui.constraint.onboarding.UserInfoActivity;
 
 public class SignupActivity extends AppCompatActivity {
 

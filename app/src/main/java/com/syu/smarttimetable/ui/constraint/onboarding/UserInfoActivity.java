@@ -1,4 +1,4 @@
-package com.syu.smarttimetable.ui.onboarding;
+package com.syu.smarttimetable.ui.constraint.onboarding;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+// 이 아래 import 잘 보셈
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;

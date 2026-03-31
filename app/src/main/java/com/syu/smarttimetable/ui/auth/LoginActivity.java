@@ -11,8 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.repository.UserRepository;
-import com.syu.smarttimetable.ui.main.MainActivity;
-import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
+import com.syu.smarttimetable.ui.constraint.onboarding.UserInfoActivity;
 
 public class LoginActivity extends AppCompatActivity {
 

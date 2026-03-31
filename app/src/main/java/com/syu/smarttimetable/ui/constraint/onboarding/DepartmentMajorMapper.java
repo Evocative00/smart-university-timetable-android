@@ -1,4 +1,4 @@
-package com.syu.smarttimetable.ui.onboarding;
+package com.syu.smarttimetable.ui.constraint.onboarding;
 
 public final class DepartmentMajorMapper {
 
