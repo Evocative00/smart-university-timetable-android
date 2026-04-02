@@ -17,7 +17,6 @@ import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
-import com.syu.smarttimetable.ui.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hard_constraint);
 
-        bindViews(); // 먼저 UI 연결
+        bindViews();
 
         lectureRepository = new LectureRepository();
 
@@ -194,7 +193,7 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         Toast.makeText(this, "하드제약 저장 완료", Toast.LENGTH_SHORT).show();
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
         startActivity(intent);
         finish();

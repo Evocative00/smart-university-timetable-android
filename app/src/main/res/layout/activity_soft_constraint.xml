@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="소프트 제약 설정"
+            android:textStyle="bold"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="1) 만들 공강 요일" />
+
+        <CheckBox
+            android:id="@+id/checkboxMonday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="월요일" />
+
+        <CheckBox
+            android:id="@+id/checkboxTuesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="화요일" />
+
+        <CheckBox
+            android:id="@+id/checkboxWednesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="수요일" />
+
+        <CheckBox
+            android:id="@+id/checkboxThursday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="목요일" />
+
+        <CheckBox
+            android:id="@+id/checkboxFriday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="금요일" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="2) 오전/오후 공강 선호" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupFreeTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioNone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="상관없음" />
+
+            <RadioButton
+                android:id="@+id/radioMorning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오전" />
+
+            <RadioButton
+                android:id="@+id/radioAfternoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오후" />
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/checkboxLunch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="3) 점심시간(12~13시) 비우기" />
+
+        <CheckBox
+            android:id="@+id/checkboxAvoidLongGap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4) 3시간 이상 공강 만들지 않기" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="5) 선호 교수(쉼표로 구분)" />
+
+        <EditText
+            android:id="@+id/editPreferredProfessors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="예: 김교수, 이교수"
+            android:inputType="text" />
+
+        <CheckBox
+            android:id="@+id/checkboxTravelTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="6) 강의실 간 이동시간 고려" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonSkip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="건너뛰기" />
+
+            <Button
+                android:id="@+id/buttonRecommend"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="추천 받기" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
