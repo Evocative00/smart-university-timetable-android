@@ -2,4 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="smart_background">#F5F7FB</color>
+    <color name="smart_primary">#4F46E5</color>
+    <color name="smart_primary_dark">#3730A3</color>
+    <color name="smart_surface_alt">#EEF2FF</color>
+    <color name="smart_chip_bg">#E0E7FF</color>
+    <color name="smart_text_primary">#111827</color>
+    <color name="smart_text_secondary">#6B7280</color>
+    <color name="smart_grid_header">#E5E7EB</color>
+    <color name="smart_grid_side">#F3F4F6</color>
+    <color name="smart_grid_empty">#FFFFFF</color>
+    <color name="smart_grid_fill">#6366F1</color>
 </resources>
