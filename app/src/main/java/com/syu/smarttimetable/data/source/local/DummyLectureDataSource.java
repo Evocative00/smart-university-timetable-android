@@ -54,7 +54,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "733",                          // 과목 코드
                         "소프트웨어 원리",                   // 과목명
                         "신인수",                        // 교수
@@ -62,7 +62,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "노작교육실습장",      // 강의실
                         CourseCategory.MAJOR,           // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -72,7 +72,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "734",                          // 과목 코드
                         "소프트웨어 원리",                   // 과목명
                         "신인수",                        // 교수
@@ -80,7 +80,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관409호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,           // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -90,7 +90,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "1878",                          // 과목 코드
                         "인생설계와 진로 I",              // 과목명
                         "정수목",                        // 교수
@@ -98,7 +98,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관403호(컴과실습실)",      // 강의실
                         CourseCategory.GENERAL,           // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -108,7 +108,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "1879",                          // 과목 코드
                         "인생설계와 진로 I",              // 과목명
                         "정수목",                        // 교수
@@ -116,7 +116,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관404호(컴과실습실)",      // 강의실
                         CourseCategory.GENERAL,           // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -126,7 +126,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "723",                          // 과목 코드
                         "인생설계와 진로 I",              // 과목명
                         "김병국",                        // 교수
@@ -134,7 +134,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관410호(컴과실습실)",      // 강의실
                         CourseCategory.GENERAL,           // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -144,7 +144,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "722",                          // 과목 코드
                         "인생설계와 진로 I",              // 과목명
                         "김병국",                        // 교수
@@ -152,7 +152,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관404호(컴과실습실)",      // 강의실
                         CourseCategory.GENERAL,           // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -162,7 +162,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "754",                          // 과목 코드
                         "인성과사회",              // 과목명
                         "김동혜",                        // 교수
@@ -170,7 +170,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "사무엘관109호강의실",      // 강의실
                         CourseCategory.GENERAL,           // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -180,7 +180,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  //홀짝 나중에 구분
+                new Lecture(
                         "753",                          // 과목 코드
                         "인성과사회",              // 과목명
                         "김동혜",                        // 교수
@@ -188,7 +188,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "바울관207호강의실",      // 강의실
                         CourseCategory.GENERAL,           // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -216,7 +216,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "1759",                          // 과목 코드
                         "AI를 위한 미적분학",              // 과목명
                         "이한청",                        // 교수
@@ -224,7 +224,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관409호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -234,7 +234,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "1758",                          // 과목 코드
                         "AI를 위한 미적분학",              // 과목명
                         "이한청",                        // 교수
@@ -242,7 +242,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         1,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관403호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -253,7 +253,7 @@ public class DummyLectureDataSource {
                 ),
 
                 // 2학년 과목 시작
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "749",                          // 과목 코드
                         "객체지향프로그래밍 I",              // 과목명
                         "안영아",                        // 교수
@@ -261,7 +261,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관409호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -271,7 +271,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "748",                          // 과목 코드
                         "객체지향프로그래밍 I",              // 과목명
                         "최희식",                        // 교수
@@ -279,7 +279,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관409호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -290,7 +290,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "737",                          // 과목 코드
                         "객체지향프로그래밍응용",              // 과목명
                         "최희식",                        // 교수
@@ -298,7 +298,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,             // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관409호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -308,7 +308,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "738",                          // 과목 코드
                         "객체지향프로그래밍응용",              // 과목명
                         "안영아",                        // 교수
@@ -316,7 +316,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,                 // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관409호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,           // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -326,15 +326,15 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
-                        "1721",                          // 과목 코드
+                new Lecture(
+                        "1756",                          // 과목 코드
                         "디지털 논리회로",              // 과목명
                         "정수목",                        // 교수
                         3,                              // 학점
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관404호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -344,15 +344,15 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
-                        "774",                          // 과목 코드
+                new Lecture(
+                        "1757",                          // 과목 코드
                         "디지털 논리회로",              // 과목명
                         "정수목",                        // 교수
                         3,                              // 학점
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관404호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -362,7 +362,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "742",                          // 과목 코드
                         "생활과 윤리",              // 과목명
                         "김동혜",                        // 교수
@@ -370,7 +370,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,      // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "요한관323호(中)강의실",      // 강의실
                         CourseCategory.GENERAL,          // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -380,7 +380,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "743",                          // 과목 코드
                         "생활과 윤리",              // 과목명
                         "김동혜",                        // 교수
@@ -388,7 +388,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,      // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "에스라관113호강의실",      // 강의실
                         CourseCategory.GENERAL,          // 전공, 교양
                         RequirementType.REQUIRED,       // 필수, 선택
@@ -398,7 +398,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "719",                          // 과목 코드
                         "선형대수학",              // 과목명
                         "권윤기",                        // 교수
@@ -406,7 +406,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,               // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관403호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -417,7 +417,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture(  // 홀짝 구분 나중에
+                new Lecture(
                         "718",                          // 과목 코드
                         "선형대수학",              // 과목명
                         "권윤기",                        // 교수
@@ -425,7 +425,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,               // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관403호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,           // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -490,7 +490,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "752",                          // 과목 코드
                         "컴퓨터프로그래밍",              // 과목명
                         "이현주",                        // 교수
@@ -498,7 +498,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,               // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관410호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -508,7 +508,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "751",                          // 과목 코드
                         "컴퓨터프로그래밍",              // 과목명
                         "이현주",                        // 교수
@@ -516,7 +516,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,               // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관410호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -526,7 +526,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "740",                          // 과목 코드
                         "컴퓨터프로그래밍응용",              // 과목명
                         "김병국",                        // 교수
@@ -534,7 +534,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,               // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관403호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -544,7 +544,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "739",                          // 과목 코드
                         "컴퓨터프로그래밍응용",              // 과목명
                         "김병국",                        // 교수
@@ -552,7 +552,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.NONE,               // 세부 전공 여부
                         2,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관403호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -655,7 +655,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( //홀짝 구분 나중에
+                new Lecture(
                         "776",                          // 과목 코드
                         "시스템프로그래밍",              // 과목명
                         "홍성옥",                        // 교수
@@ -663,7 +663,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         3,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관410호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -673,7 +673,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( //홀짝 구분 나중에
+                new Lecture(
                         "775",                          // 과목 코드
                         "시스템프로그래밍",              // 과목명
                         "홍성옥",                        // 교수
@@ -681,7 +681,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         3,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관411호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -691,7 +691,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( //홀짝 구분 나중에
+                new Lecture(
                         "769",                          // 과목 코드
                         "운영체제",                     // 과목명
                         "공준익",                        // 교수
@@ -699,7 +699,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         3,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관404호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -710,7 +710,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( //홀짝 구분 나중에
+                new Lecture(
                         "770",                          // 과목 코드
                         "운영체제",                     // 과목명
                         "공준익",                        // 교수
@@ -718,7 +718,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         3,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관404호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -783,7 +783,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "766",                          // 과목 코드
                         "컴퓨터네트워크",               // 과목명
                         "조양현",                        // 교수
@@ -791,7 +791,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         3,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관411호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -801,7 +801,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "767",                          // 과목 코드
                         "컴퓨터네트워크",               // 과목명
                         "조양현",                        // 교수
@@ -809,7 +809,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.COMPUTERSCIENCE,      // 세부 전공 여부
                         3,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관411호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -874,7 +874,7 @@ public class DummyLectureDataSource {
                 ),
 
                 // 4학년 과목 시작
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "762",                          // 과목 코드
                         "기계학습",                     // 과목명
                         "왕수현",                        // 교수
@@ -882,7 +882,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.SOFTWARE,              // 세부 전공 여부
                         4,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.EVEN,                // 홀 / 짝
                         "제1실습관411호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -892,7 +892,7 @@ public class DummyLectureDataSource {
                         )
                 ),
 
-                new Lecture( // 홀짝 구분 나중에
+                new Lecture(
                         "763",                          // 과목 코드
                         "기계학습",                     // 과목명
                         "왕수현",                        // 교수
@@ -900,7 +900,7 @@ public class DummyLectureDataSource {
                         Department.COMPUTER_SCIENCE,    // 학과
                         MajorType.SOFTWARE,              // 세부 전공 여부
                         4,                              // 학년
-                        ClassParity.ALL,                // 홀 / 짝
+                        ClassParity.ODD,                // 홀 / 짝
                         "제1실습관411호(컴과실습실)",      // 강의실
                         CourseCategory.MAJOR,          // 전공, 교양
                         RequirementType.OPTIONAL,       // 필수, 선택
@@ -1833,7 +1833,7 @@ public class DummyLectureDataSource {
                 ),
 
                 new Lecture(
-                        "1653",                          // 과목 코드
+                        "1653",                          // 과목 코드ㅎ
                         "글로컬 영어 I",                    // 과목명
                         "백정혜",                  // 교수
                         3,                              // 학점

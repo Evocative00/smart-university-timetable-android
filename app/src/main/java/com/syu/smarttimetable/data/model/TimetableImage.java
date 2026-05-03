@@ -1,4 +1,4 @@
 package com.syu.smarttimetable.data.model;
 
-public class TimetableImage {
+public class  TimetableImage {
 }
