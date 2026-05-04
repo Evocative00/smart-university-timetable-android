@@ -2,12 +2,19 @@ package com.syu.smarttimetable.ui.constraint;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -116,24 +123,63 @@ public class HardConstraintActivity extends AppCompatActivity {
                 ? CourseCategory.MAJOR
                 : CourseCategory.GENERAL;
 
-        List<String> lectureDisplayList = new ArrayList<>();
-
         for (Lecture lecture : allLectures) {
             if (lecture != null && lecture.getCategory() == targetCategory) {
                 filteredLectures.add(lecture);
-                lectureDisplayList.add(buildLectureDisplayText(lecture));
             }
         }
 
-        ArrayAdapter<String> lectureAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                lectureDisplayList
-        );
-
         autoLecture.setText("", false);
-        autoLecture.setAdapter(lectureAdapter);
-        autoLecture.setOnClickListener(v -> autoLecture.showDropDown());
+        autoLecture.setFocusable(false);
+        autoLecture.setFocusableInTouchMode(false);
+        autoLecture.setOnClickListener(v -> showLectureSearchDialog());
+    }
+
+    private void showLectureSearchDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_lecture_search, null);
+        EditText etSearch = dialogView.findViewById(R.id.et_search);
+        etSearch.setHint("강의명 / 교수명으로 검색");
+        ListView lvLectures = dialogView.findViewById(R.id.lv_lectures);
+
+        List<String> allDisplayList = new ArrayList<>();
+        for (Lecture lecture : filteredLectures) {
+            allDisplayList.add(buildLectureDisplayText(lecture));
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_list_item_1, new ArrayList<>(allDisplayList));
+        lvLectures.setAdapter(adapter);
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle("강의 검색")
+                .setView(dialogView)
+                .setNegativeButton("닫기", null)
+                .create();
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().toLowerCase().trim();
+                adapter.clear();
+                for (String item : allDisplayList) {
+                    if (item.toLowerCase().contains(query)) {
+                        adapter.add(item);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        lvLectures.setOnItemClickListener((parent, view, position, id) -> {
+            String selected = (String) parent.getItemAtPosition(position);
+            autoLecture.setText(selected, false);
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void setupButtons() {

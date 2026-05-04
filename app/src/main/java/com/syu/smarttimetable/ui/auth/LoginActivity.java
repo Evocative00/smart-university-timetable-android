@@ -50,11 +50,24 @@ public class LoginActivity extends AppCompatActivity {
 
         userRepository.login(email, password)
                 .addOnSuccessListener(authResult -> {
-                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(this, UserInfoActivity.class);
-                    startActivity(intent);
-                    finish();
+                    String uid = userRepository.getCurrentFirebaseUser().getUid();
+                    userRepository.getUser(uid)
+                            .addOnSuccessListener(doc -> {
+                                String name = doc.getString("name");
+                                String msg = (name != null && !name.isEmpty())
+                                        ? name + "님 환영합니다!"
+                                        : "환영합니다!";
+                                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(this, UserInfoActivity.class);
+                                startActivity(intent);
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "환영합니다!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(this, UserInfoActivity.class);
+                                startActivity(intent);
+                                finish();
+                            });
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "로그인 실패: " + e.getMessage(), Toast.LENGTH_LONG).show()
