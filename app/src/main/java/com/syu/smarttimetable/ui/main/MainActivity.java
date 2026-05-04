@@ -41,14 +41,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupUi() {
-        tvMainTitle.setText("SmartTimetable");
+        tvMainTitle.setText(R.string.app_name);
 
         if (recommendationRequest != null) {
             tvMainSubtitle.setText("하드제약과 소프트제약 입력이 완료되었습니다. 추천 결과를 확인해보세요.");
+            btnStartRecommendation.setText("추천 결과 보기");
             btnViewResult.setEnabled(true);
             btnViewResult.setAlpha(1f);
         } else {
             tvMainSubtitle.setText("학점, 고정 과목, 선호 조건을 입력해서 자동 시간표 추천을 시작하세요.");
+            btnStartRecommendation.setText("추천 시작하기");
             btnViewResult.setEnabled(false);
             btnViewResult.setAlpha(0.5f);
         }
@@ -56,7 +58,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupButtons() {
         btnStartRecommendation.setOnClickListener(v -> {
-            Intent intent = new Intent(this, HardConstraintActivity.class);
+            if (recommendationRequest == null) {
+                Intent intent = new Intent(this, HardConstraintActivity.class);
+                startActivity(intent);
+                return;
+            }
+
+            Intent intent = new Intent(this, RecommendationActivity.class);
+            intent.putExtra("recommendationRequest", recommendationRequest);
             startActivity(intent);
         });
 

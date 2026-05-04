@@ -1,6 +1,8 @@
 package com.syu.smarttimetable.data.model.enums;
 
-public enum MajorType {
+import java.io.Serializable;
+
+public enum MajorType implements Serializable {
     COMPUTERSCIENCE, // 컴퓨터공학부
     SOFTWARE,  // 소프트웨어 전공
     // ALL, // 모든 세부전공이 들을 수 있음 fix : 26.03.18 department로 범위가 정해져 있어서 헷갈릴 뿐 실효성 없어서 삭제

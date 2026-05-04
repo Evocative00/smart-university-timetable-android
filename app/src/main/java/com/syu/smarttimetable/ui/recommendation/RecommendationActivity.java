@@ -1,6 +1,7 @@
 package com.syu.smarttimetable.ui.recommendation;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecommendationActivity extends AppCompatActivity {
+
+    private static final String TAG = "RecommendationActivity";
 
     private TextView tvScreenTitle;
     private TextView tvScreenSubtitle;
@@ -95,34 +98,71 @@ public class RecommendationActivity extends AppCompatActivity {
 
     private void loadRecommendations() {
         if (recommendationRequest == null) {
+            Log.e(TAG, "recommendationRequest is null");
             showEmptyState("추천 요청 정보가 없습니다.");
             return;
         }
 
-        LectureRepository lectureRepository = new LectureRepository();
-        List<Lecture> allLectures = lectureRepository.getAllLectures();
+        showLoadingState();
 
-        if (allLectures == null || allLectures.isEmpty()) {
-            showEmptyState("강의 데이터가 없습니다.");
-            return;
-        }
+        new Thread(() -> {
+            try {
+                Log.d(TAG, "Starting recommendation calculation...");
 
-        RecommendationEngine engine = new RecommendationEngine();
-        List<RecommendationEngine.TimetableScoreTuple> results =
-                engine.recommend(allLectures, recommendationRequest);
+                LectureRepository lectureRepository = new LectureRepository();
+                List<Lecture> allLectures = lectureRepository.getAllLectures();
 
-        recommendationResults.clear();
-        recommendationResults.addAll(results);
-        currentIndex = 0;
+                Log.d(TAG, "Loaded " + (allLectures == null ? 0 : allLectures.size()) + " lectures");
 
-        if (recommendationResults.isEmpty()) {
-            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.");
-            return;
-        }
+                if (allLectures == null || allLectures.isEmpty()) {
+                    Log.e(TAG, "No lectures found");
+                    runOnUiThread(() -> showEmptyState("강의 데이터가 없습니다."));
+                    return;
+                }
 
-        contentContainer.setVisibility(View.VISIBLE);
-        emptyStateContainer.setVisibility(View.GONE);
-        renderCurrentRecommendation();
+                RecommendationEngine engine = new RecommendationEngine();
+                List<RecommendationEngine.TimetableScoreTuple> results =
+                        engine.recommend(allLectures, recommendationRequest);
+
+                Log.d(TAG, "Recommendation complete. Results: " + (results == null ? 0 : results.size()));
+
+                runOnUiThread(() -> {
+                    try {
+                        recommendationResults.clear();
+                        recommendationResults.addAll(results);
+                        currentIndex = 0;
+
+                        if (recommendationResults.isEmpty()) {
+                            Log.w(TAG, "No matching timetables found");
+                            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.");
+                            return;
+                        }
+
+                        contentContainer.setVisibility(View.VISIBLE);
+                        emptyStateContainer.setVisibility(View.GONE);
+                        renderCurrentRecommendation();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in UI update", e);
+                        showEmptyState("시간표를 표시하는 중 오류가 발생했습니다.");
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error during recommendation", e);
+                runOnUiThread(() -> showEmptyState("추천 결과를 불러오는 중 오류가 발생했습니다."));
+            }
+        }).start();
+    }
+
+    private void showLoadingState() {
+        contentContainer.setVisibility(View.GONE);
+        emptyStateContainer.setVisibility(View.VISIBLE);
+
+        TextView emptyMessage = findViewById(R.id.tv_empty_message);
+        emptyMessage.setText("추천 시간표를 생성하는 중입니다...");
+
+        btnPrev.setEnabled(false);
+        btnNext.setEnabled(false);
+        btnRegenerate.setEnabled(false);
     }
 
     private void renderCurrentRecommendation() {
@@ -131,38 +171,51 @@ public class RecommendationActivity extends AppCompatActivity {
             return;
         }
 
-        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        try {
+            Log.d(TAG, "Rendering recommendation " + (currentIndex + 1));
 
-        tvScreenTitle.setText("추천 시간표");
-        tvScreenSubtitle.setText("하드제약을 만족하는 후보 중 소프트제약 점수가 높은 시간표입니다.");
+            RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
 
-        tvRank.setText((currentIndex + 1) + " / " + recommendationResults.size());
-        tvScore.setText(String.valueOf(current.getScore()));
-        tvCredits.setText(current.getTimetable().getTotalCredits() + "학점");
+            tvScreenTitle.setText("추천 시간표");
+            tvScreenSubtitle.setText("하드제약을 만족하는 후보 중 소프트제약 점수가 높은 시간표입니다.");
 
-        RecommendationAdapter.renderPreferenceChips(
-                this,
-                chipContainer,
-                recommendationRequest
-        );
+            tvRank.setText((currentIndex + 1) + " / " + recommendationResults.size());
+            tvScore.setText(String.valueOf(current.getScore()));
+            tvCredits.setText(current.getTimetable().getTotalCredits() + "학점");
 
-        RecommendationAdapter.renderTimetableGrid(
-                this,
-                timetableTable,
-                current.getTimetable()
-        );
+            RecommendationAdapter.renderPreferenceChips(
+                    this,
+                    chipContainer,
+                    recommendationRequest
+            );
 
-        RecommendationAdapter.renderLectureList(
-                this,
-                lectureListContainer,
-                current.getTimetable()
-        );
+            Log.d(TAG, "Rendering timetable grid...");
+            RecommendationAdapter.renderTimetableGrid(
+                    this,
+                    timetableTable,
+                    current.getTimetable()
+            );
 
-        btnPrev.setEnabled(currentIndex > 0);
-        btnNext.setEnabled(currentIndex < recommendationResults.size() - 1);
+            Log.d(TAG, "Rendering lecture list...");
+            RecommendationAdapter.renderLectureList(
+                    this,
+                    lectureListContainer,
+                    current.getTimetable()
+            );
 
-        btnPrev.setAlpha(currentIndex > 0 ? 1f : 0.4f);
-        btnNext.setAlpha(currentIndex < recommendationResults.size() - 1 ? 1f : 0.4f);
+            btnPrev.setEnabled(currentIndex > 0);
+            btnNext.setEnabled(currentIndex < recommendationResults.size() - 1);
+            btnRegenerate.setEnabled(true);
+
+            btnPrev.setAlpha(currentIndex > 0 ? 1f : 0.4f);
+            btnNext.setAlpha(currentIndex < recommendationResults.size() - 1 ? 1f : 0.4f);
+            btnRegenerate.setAlpha(1f);
+
+            Log.d(TAG, "Rendering complete");
+        } catch (Exception e) {
+            Log.e(TAG, "Error rendering recommendation", e);
+            showEmptyState("시간표를 표시하는 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     private void showEmptyState(String message) {
@@ -171,6 +224,14 @@ public class RecommendationActivity extends AppCompatActivity {
 
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
         emptyMessage.setText(message);
+
+        btnPrev.setEnabled(false);
+        btnNext.setEnabled(false);
+        btnRegenerate.setEnabled(true);
+
+        btnPrev.setAlpha(0.4f);
+        btnNext.setAlpha(0.4f);
+        btnRegenerate.setAlpha(1f);
 
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }

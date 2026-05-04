@@ -214,23 +214,27 @@ public class RecommendationAdapter {
         int slotStart = hour * 60;
         int slotEnd = (hour + 1) * 60;
 
-        for (Lecture lecture : timetable.getLecturesReadOnly()) {
-            if (lecture == null || lecture.getTimes() == null) {
-                continue;
-            }
-
-            for (LectureTime time : lecture.getTimes()) {
-                if (time == null) {
+        try {
+            for (Lecture lecture : timetable.getLecturesReadOnly()) {
+                if (lecture == null || lecture.getTimes() == null || lecture.getTimes().isEmpty()) {
                     continue;
                 }
 
-                boolean sameDay = time.getDay() == day;
-                boolean overlap = time.getStartTime() < slotEnd && time.getEndTime() > slotStart;
+                for (LectureTime time : lecture.getTimes()) {
+                    if (time == null) {
+                        continue;
+                    }
 
-                if (sameDay && overlap) {
-                    return lecture;
+                    boolean sameDay = time.getDay() == day;
+                    boolean overlap = time.getStartTime() < slotEnd && time.getEndTime() > slotStart;
+
+                    if (sameDay && overlap) {
+                        return lecture;
+                    }
                 }
             }
+        } catch (Exception e) {
+            return null;
         }
 
         return null;

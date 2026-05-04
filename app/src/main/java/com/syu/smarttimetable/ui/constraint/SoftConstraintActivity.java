@@ -129,7 +129,11 @@ public class SoftConstraintActivity extends AppCompatActivity {
     }
 
     private void navigateToMain(SoftConstraint softConstraint) {
-        int targetCredits = hardConstraint != null ? hardConstraint.getTargetCredits() : 0;
+        int targetCredits = hardConstraint != null ? hardConstraint.getTargetCredits() : 18;
+
+        // targetCredits를 중심으로 ±3 학점 범위 설정
+        int minCredits = Math.max(12, targetCredits - 3);
+        int maxCredits = Math.min(21, targetCredits + 3);
 
         Set<String> fixedLectureKeySet = new HashSet<>();
         if (hardConstraint != null && hardConstraint.getFixedLectureKeys() != null) {
@@ -137,7 +141,8 @@ public class SoftConstraintActivity extends AppCompatActivity {
         }
 
         RecommendationRequest recommendationRequest = new RecommendationRequest(
-                targetCredits,
+                minCredits,
+                maxCredits,
                 fixedLectureKeySet,
                 new HashSet<>(),
                 softConstraint

@@ -39,9 +39,15 @@ public class NoTimeConflictConstraint implements RecommendationConstraint {
             return false;
         }
 
+        // 시간 정보가 없는 강의는 충돌 불가
+        if (first.getTimes() == null || first.getTimes().isEmpty() ||
+            second.getTimes() == null || second.getTimes().isEmpty()) {
+            return false;
+        }
+
         for (LectureTime firstTime : first.getTimes()) {
             for (LectureTime secondTime : second.getTimes()) {
-                if (isTimeOverlap(firstTime, secondTime)) {
+                if (firstTime != null && secondTime != null && isTimeOverlap(firstTime, secondTime)) {
                     return true;
                 }
             }

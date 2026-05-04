@@ -7,8 +7,9 @@ import com.syu.smarttimetable.data.model.enums.GeneralArea;
 import com.syu.smarttimetable.data.model.enums.MajorType;
 import com.syu.smarttimetable.data.model.enums.RequirementType;
 
+import java.io.Serializable;
 import java.util.List;
-public class Lecture {   // 강의 하나를 나타내는 클래스
+public class Lecture implements Serializable {   // 강의 하나를 나타내는 클래스
 
     private String courseCode; 	  // 과목 코드
     private String courseName;   	// 과목명
