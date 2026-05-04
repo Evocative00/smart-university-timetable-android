@@ -11,13 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.repository.UserRepository;
-import com.syu.smarttimetable.ui.main.MainActivity;
 import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
-    private Button btnLogin, btnMoveSignup;
     private UserRepository userRepository;
 
     @Override
@@ -29,8 +27,8 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        btnMoveSignup = findViewById(R.id.btnMoveSignup);
+        Button btnLogin = findViewById(R.id.btnLogin);
+        Button btnMoveSignup = findViewById(R.id.btnMoveSignup);
 
         btnLogin.setOnClickListener(v -> login());
         btnMoveSignup.setOnClickListener(v -> {

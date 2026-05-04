@@ -57,4 +57,20 @@
     <string name="main_flow_desc">1. 하드제약 입력\n2. 소프트제약 입력\n3. 하드제약 통과 후보 생성\n4. 소프트제약 점수 기반 정렬</string>
     <string name="btn_start_recommendation">추천 시작하기</string>
     <string name="btn_view_result">추천 결과 보기</string>
+
+    <string name="recommendation_title">추천 시간표</string>
+    <string name="recommendation_subtitle">조건을 만족한 후보를 정렬했습니다.</string>
+    <string name="rank_default">1 / 1</string>
+    <string name="btn_prev">이전</string>
+    <string name="label_score">점수</string>
+    <string name="score_default">0</string>
+    <string name="label_credits">학점</string>
+    <string name="credits_default">0학점</string>
+    <string name="btn_regenerate">다시 생성</string>
+    <string name="reason_title">추천 이유</string>
+    <string name="reason_placeholder">추천 이유가 여기에 표시됩니다.</string>
+    <string name="timetable_preview_title">시간표 미리보기</string>
+    <string name="included_lectures_title">포함된 강의</string>
+    <string name="recommendation_empty_title">추천 결과 없음</string>
+    <string name="recommendation_empty_message">조건을 다시 조정해보세요.</string>
 </resources>
