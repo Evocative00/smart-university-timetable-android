@@ -164,6 +164,7 @@ public class UserInfoActivity extends AppCompatActivity {
                                 Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(this, HardConstraintActivity.class);
+                                intent.putExtra("userGrade", grade);
                                 startActivity(intent);
                                 finish();
                             })

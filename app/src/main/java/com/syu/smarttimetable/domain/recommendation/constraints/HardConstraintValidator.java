@@ -1,5 +1,7 @@
 package com.syu.smarttimetable.domain.recommendation.constraints;
 
+import android.util.Log;
+
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 
@@ -8,6 +10,8 @@ import java.util.List;
 
 public class HardConstraintValidator {
 
+    private static final String TAG = "HardConstraintValidator";
+
     private final List<RecommendationConstraint> constraints;
 
     public HardConstraintValidator() {
@@ -15,6 +19,7 @@ public class HardConstraintValidator {
         constraints.add(new CreditRangeConstraint());
         constraints.add(new RequiredLectureConstraint());
         constraints.add(new NoTimeConflictConstraint());
+        constraints.add(new BlockedTimeConstraint());
     }
 
     public ValidationResult validate(List<Lecture> timetable, RecommendationRequest request) {
@@ -25,9 +30,19 @@ public class HardConstraintValidator {
             return new ValidationResult(false, errors);
         }
 
+        int totalCredits = 0;
+        for (Lecture lecture : timetable) {
+            if (lecture != null) {
+                totalCredits += lecture.getCredits();
+            }
+        }
+        Log.d(TAG, "Validating timetable with " + timetable.size() + " lectures, " + totalCredits + " credits");
+
         for (RecommendationConstraint constraint : constraints) {
             if (!constraint.isValid(timetable, request)) {
-                errors.add(constraint.getErrorMessage());
+                String error = constraint.getErrorMessage();
+                errors.add(error);
+                Log.d(TAG, "Constraint failed: " + error);
             }
         }
 

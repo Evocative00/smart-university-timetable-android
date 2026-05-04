@@ -1,3 +1,60 @@
 <resources>
     <string name="app_name">SmartTimetable</string>
+
+    <string name="login_title">로그인</string>
+    <string name="login_desc">시간표 추천을 시작하려면 먼저 로그인해 주세요.</string>
+    <string name="hint_email">이메일</string>
+    <string name="hint_password">비밀번호</string>
+    <string name="btn_login">로그인</string>
+    <string name="btn_move_signup">회원가입 하러가기</string>
+
+    <string name="signup_title">회원가입</string>
+    <string name="signup_desc">기본 정보를 입력하고 나만의 시간표를 추천받아 보세요.</string>
+    <string name="hint_name">이름</string>
+    <string name="btn_signup">회원가입</string>
+
+    <string name="user_info_title">기본 정보 입력</string>
+    <string name="user_info_desc">학과, 학년, 학번을 입력하면 추천 조건이 자동으로 이어집니다.</string>
+    <string name="hint_department">학과 선택</string>
+    <string name="hint_major_detail">세부전공 선택</string>
+    <string name="hint_grade">학년 선택</string>
+    <string name="hint_student_id">학번 입력 (예: 2026123456)</string>
+    <string name="btn_save">저장</string>
+
+    <string name="hard_title">하드 제약 입력</string>
+    <string name="hard_desc">희망 학점과 꼭 포함할 과목을 선택해 주세요.</string>
+    <string name="hint_credits">희망 학점</string>
+    <string name="hint_category">과목 카테고리</string>
+    <string name="hint_lecture">고정할 과목 선택</string>
+    <string name="btn_add_fixed_lecture">고정 과목 추가</string>
+    <string name="selected_fixed_lectures_title">선택된 고정 과목</string>
+    <string name="selected_fixed_lectures_empty">선택된 고정 과목 없음</string>
+    <string name="btn_next">다음</string>
+
+    <string name="soft_title">소프트 제약 설정</string>
+    <string name="soft_desc">원하는 분위기에 맞게 추천 점수를 조정해 보세요.</string>
+    <string name="soft_free_day_title">1) 만들 공강 요일</string>
+    <string name="day_monday">월요일</string>
+    <string name="day_tuesday">화요일</string>
+    <string name="day_wednesday">수요일</string>
+    <string name="day_thursday">목요일</string>
+    <string name="day_friday">금요일</string>
+    <string name="soft_free_time_title">2) 오전/오후 공강 선호</string>
+    <string name="free_time_none">상관없음</string>
+    <string name="free_time_morning">오전</string>
+    <string name="free_time_afternoon">오후</string>
+    <string name="soft_lunch_title">3) 점심시간(12~13시) 비우기</string>
+    <string name="soft_gap_title">4) 3시간 이상 공강 만들지 않기</string>
+    <string name="soft_professor_title">5) 선호 교수(쉼표로 구분)</string>
+    <string name="hint_professors">예: 김교수, 이교수</string>
+    <string name="soft_travel_title">6) 강의실 간 이동시간 고려</string>
+    <string name="btn_skip">건너뛰기</string>
+    <string name="btn_recommend">추천 받기</string>
+
+    <string name="main_title">SmartTimetable</string>
+    <string name="main_desc">시간표 추천을 시작하세요.</string>
+    <string name="main_flow_title">자동 추천 흐름</string>
+    <string name="main_flow_desc">1. 하드제약 입력\n2. 소프트제약 입력\n3. 하드제약 통과 후보 생성\n4. 소프트제약 점수 기반 정렬</string>
+    <string name="btn_start_recommendation">추천 시작하기</string>
+    <string name="btn_view_result">추천 결과 보기</string>
 </resources>

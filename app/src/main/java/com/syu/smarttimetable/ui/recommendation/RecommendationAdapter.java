@@ -3,6 +3,7 @@ package com.syu.smarttimetable.ui.recommendation;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -99,7 +100,7 @@ public class RecommendationAdapter {
         LayoutInflater inflater = LayoutInflater.from(context);
 
         for (Lecture lecture : lectures) {
-            LinearLayout item = (LinearLayout) inflater.inflate(
+            View item = inflater.inflate(
                     R.layout.item_recommendation,
                     container,
                     false

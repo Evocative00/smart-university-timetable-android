@@ -30,13 +30,13 @@ public class HardConstraintActivity extends AppCompatActivity {
     private Button btnNext;
     private TextView tvSelectedLectures;
 
-    private LectureRepository lectureRepository;
     private final List<Lecture> allLectures = new ArrayList<>();
     private final List<Lecture> filteredLectures = new ArrayList<>();
     private final List<String> fixedLectureKeys = new ArrayList<>();
     private final List<String> selectedLectureDisplayTexts = new ArrayList<>();
 
     private String selectedCategory = "전공";
+    private int userGrade = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,8 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         bindViews();
 
-        lectureRepository = new LectureRepository();
+        LectureRepository lectureRepository = new LectureRepository();
+        userGrade = getIntent().getIntExtra("userGrade", 0);
 
         List<Lecture> lectures = lectureRepository.getAllLectures();
 
@@ -195,6 +196,7 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
+        intent.putExtra("userGrade", userGrade);
         startActivity(intent);
         finish();
     }

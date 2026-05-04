@@ -28,7 +28,7 @@
                     android:id="@+id/tv_main_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SmartTimetable"
+                    android:text="@string/main_title"
                     android:textColor="@color/white"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -38,7 +38,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="시간표 추천을 시작하세요."
+                    android:text="@string/main_desc"
                     android:textColor="@color/white"
                     android:textSize="15sp" />
 
@@ -62,16 +62,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="자동 추천 흐름"
+                    android:text="@string/main_flow_title"
                     android:textColor="@color/smart_text_primary"
-                    android:textSize="18sp"
+                    android:textSize="19sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="1. 하드제약 입력\n2. 소프트제약 입력\n3. 하드제약 통과 후보 생성\n4. 소프트제약 점수 기반 정렬"
+                    android:text="@string/main_flow_desc"
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="14sp" />
 
@@ -80,7 +80,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="추천 시작하기"
+                    android:text="@string/btn_start_recommendation"
                     app:cornerRadius="18dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -89,7 +89,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="추천 결과 보기"
+                    android:text="@string/btn_view_result"
                     app:cornerRadius="18dp" />
 
             </LinearLayout>

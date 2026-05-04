@@ -11,9 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.HardConstraint;
+import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.SoftConstraint;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.data.model.enums.FreeTimePreference;
+import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.main.MainActivity;
 
@@ -25,6 +27,8 @@ import java.util.Set;
 public class SoftConstraintActivity extends AppCompatActivity {
 
     private HardConstraint hardConstraint;
+    private int userGrade;
+    private LectureRepository lectureRepository;
 
     private CheckBox checkboxMonday;
     private CheckBox checkboxTuesday;
@@ -45,6 +49,8 @@ public class SoftConstraintActivity extends AppCompatActivity {
         setContentView(R.layout.activity_soft_constraint);
 
         hardConstraint = (HardConstraint) getIntent().getSerializableExtra("hardConstraint");
+        userGrade = getIntent().getIntExtra("userGrade", 0);
+        lectureRepository = new LectureRepository();
 
         bindViews();
         setupButtons();
@@ -131,14 +137,21 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private void navigateToMain(SoftConstraint softConstraint) {
         int targetCredits = hardConstraint != null ? hardConstraint.getTargetCredits() : 18;
 
-        // targetCredits를 중심으로 ±3 학점 범위 설정
-        int minCredits = Math.max(12, targetCredits - 3);
-        int maxCredits = Math.min(21, targetCredits + 3);
+        // 학점 범위를 좀 더 유연하게 설정 (±6 학점)
+        int minCredits = Math.max(12, targetCredits - 6);
+        int maxCredits = Math.min(21, targetCredits + 6);
 
         Set<String> fixedLectureKeySet = new HashSet<>();
         if (hardConstraint != null && hardConstraint.getFixedLectureKeys() != null) {
             fixedLectureKeySet.addAll(hardConstraint.getFixedLectureKeys());
         }
+
+        addChapelLectureKeyForGrade(fixedLectureKeySet);
+
+        android.util.Log.d("SoftConstraintActivity", "Creating RecommendationRequest:");
+        android.util.Log.d("SoftConstraintActivity", "  Min Credits: " + minCredits);
+        android.util.Log.d("SoftConstraintActivity", "  Max Credits: " + maxCredits);
+        android.util.Log.d("SoftConstraintActivity", "  Fixed Lectures: " + fixedLectureKeySet.size());
 
         RecommendationRequest recommendationRequest = new RecommendationRequest(
                 minCredits,
@@ -154,5 +167,37 @@ public class SoftConstraintActivity extends AppCompatActivity {
         intent.putExtra("recommendationRequest", recommendationRequest);
         startActivity(intent);
         finish();
+    }
+
+    private void addChapelLectureKeyForGrade(Set<String> fixedLectureKeySet) {
+        if (userGrade <= 0 || lectureRepository == null) {
+            android.util.Log.w("SoftConstraintActivity", "Cannot auto-add chapel: invalid grade=" + userGrade);
+            return;
+        }
+
+        List<Lecture> lectures = lectureRepository.getAllLectures();
+        if (lectures == null || lectures.isEmpty()) {
+            android.util.Log.w("SoftConstraintActivity", "Cannot auto-add chapel: lecture list empty");
+            return;
+        }
+
+        for (Lecture lecture : lectures) {
+            if (lecture == null || lecture.getCourseName() == null) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName().trim();
+            if (lecture.getGrade() == userGrade && isChapelCourseName(courseName)) {
+                fixedLectureKeySet.add(lecture.getCourseCode() + "|" + lecture.getCourseName() + "|" + lecture.getProfessor());
+                android.util.Log.d("SoftConstraintActivity", "Auto-added chapel for grade " + userGrade + ": " + lecture.getCourseCode());
+                return;
+            }
+        }
+
+        android.util.Log.w("SoftConstraintActivity", "No chapel lecture found for grade=" + userGrade);
+    }
+
+    private boolean isChapelCourseName(String courseName) {
+        return "채플".equals(courseName) || courseName.startsWith("채플(");
     }
 }

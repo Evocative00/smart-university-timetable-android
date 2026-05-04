@@ -1,140 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/smart_background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="소프트 제약 설정"
-            android:textStyle="bold"
-            android:textSize="20sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="1) 만들 공강 요일" />
-
-        <CheckBox
-            android:id="@+id/checkboxMonday"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="월요일" />
-
-        <CheckBox
-            android:id="@+id/checkboxTuesday"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="화요일" />
-
-        <CheckBox
-            android:id="@+id/checkboxWednesday"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="수요일" />
-
-        <CheckBox
-            android:id="@+id/checkboxThursday"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="목요일" />
-
-        <CheckBox
-            android:id="@+id/checkboxFriday"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="금요일" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="2) 오전/오후 공강 선호" />
-
-        <RadioGroup
-            android:id="@+id/radioGroupFreeTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <RadioButton
-                android:id="@+id/radioNone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="상관없음" />
-
-            <RadioButton
-                android:id="@+id/radioMorning"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="오전" />
-
-            <RadioButton
-                android:id="@+id/radioAfternoon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="오후" />
-        </RadioGroup>
-
-        <CheckBox
-            android:id="@+id/checkboxLunch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="3) 점심시간(12~13시) 비우기" />
-
-        <CheckBox
-            android:id="@+id/checkboxAvoidLongGap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="4) 3시간 이상 공강 만들지 않기" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="5) 선호 교수(쉼표로 구분)" />
-
-        <EditText
-            android:id="@+id/editPreferredProfessors"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="예: 김교수, 이교수"
-            android:inputType="text" />
+            app:cardBackgroundColor="@color/smart_primary"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="0dp">
 
-        <CheckBox
-            android:id="@+id/checkboxTravelTime"
-            android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/soft_title"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/soft_desc"
+                    android:textColor="@color/white"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="6) 강의실 간 이동시간 고려" />
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/soft_free_day_title"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <CheckBox android:id="@+id/checkboxMonday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_monday" />
+                <CheckBox android:id="@+id/checkboxTuesday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_tuesday" />
+                <CheckBox android:id="@+id/checkboxWednesday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_wednesday" />
+                <CheckBox android:id="@+id/checkboxThursday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_thursday" />
+                <CheckBox android:id="@+id/checkboxFriday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_friday" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="@string/soft_free_time_title"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroupFreeTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/radioNone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/free_time_none" />
+
+                    <RadioButton
+                        android:id="@+id/radioMorning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/free_time_morning" />
+
+                    <RadioButton
+                        android:id="@+id/radioAfternoon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/free_time_afternoon" />
+                </RadioGroup>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <CheckBox
+                    android:id="@+id/checkboxLunch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/soft_lunch_title" />
+
+                <CheckBox
+                    android:id="@+id/checkboxAvoidLongGap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/soft_gap_title" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="@string/soft_professor_title"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/hint_professors"
+                    app:boxBackgroundMode="outline">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editPreferredProfessors"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="personName"
+                        android:hint="@string/hint_professors"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <CheckBox
+                    android:id="@+id/checkboxTravelTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/soft_travel_title" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonSkip"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="건너뛰기" />
+                android:text="@string/btn_skip"
+                app:cornerRadius="18dp" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonRecommend"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="추천 받기" />
+                android:text="@string/btn_recommend"
+                app:cornerRadius="18dp" />
         </LinearLayout>
 
     </LinearLayout>

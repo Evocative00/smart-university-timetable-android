@@ -103,6 +103,12 @@ public class RecommendationActivity extends AppCompatActivity {
             return;
         }
 
+        Log.d(TAG, "Recommendation Request Details:");
+        Log.d(TAG, "  Min Credits: " + recommendationRequest.getMinCredits());
+        Log.d(TAG, "  Max Credits: " + recommendationRequest.getMaxCredits());
+        Log.d(TAG, "  Fixed Lectures: " + recommendationRequest.getFixedLectureKeys().size());
+        Log.d(TAG, "  Completed Courses: " + recommendationRequest.getCompletedCourseCodes().size());
+
         showLoadingState();
 
         new Thread(() -> {
@@ -134,7 +140,9 @@ public class RecommendationActivity extends AppCompatActivity {
 
                         if (recommendationResults.isEmpty()) {
                             Log.w(TAG, "No matching timetables found");
-                            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.");
+                            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.\n\n최소학점: " +
+                                recommendationRequest.getMinCredits() + "학점\n최대학점: " +
+                                recommendationRequest.getMaxCredits() + "학점");
                             return;
                         }
 
