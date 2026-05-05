@@ -58,6 +58,7 @@
     <string name="btn_start_recommendation">추천 시작하기</string>
     <string name="btn_view_result">추천 결과 보기</string>
 
+    <string name="btn_edit_conditions">입력 조건 수정</string>
     <string name="recommendation_title">추천 시간표</string>
     <string name="recommendation_subtitle">조건을 만족한 후보를 정렬했습니다.</string>
     <string name="rank_default">1 / 1</string>

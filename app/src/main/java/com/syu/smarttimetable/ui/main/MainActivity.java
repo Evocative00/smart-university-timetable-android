@@ -2,6 +2,7 @@ package com.syu.smarttimetable.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private RecommendationRequest recommendationRequest;
     private int userGrade = 0;
     private UserRepository userRepository;
+
     private TextView tvMainTitle;
     private TextView tvMainSubtitle;
     private Button btnStartRecommendation;
@@ -51,14 +53,25 @@ public class MainActivity extends AppCompatActivity {
 
         if (recommendationRequest != null) {
             tvMainSubtitle.setText("하드제약과 소프트제약 입력이 완료되었습니다. 추천 결과를 확인해보세요.");
-            btnStartRecommendation.setText("추천 결과 보기");
+
+            // 위쪽 진한 버튼: 실제 추천 결과 화면으로 이동
+            btnStartRecommendation.setText(getString(R.string.btn_view_result));
+
+            // 아래쪽 버튼: 조건 수정용
+            btnViewResult.setVisibility(View.VISIBLE);
             btnViewResult.setEnabled(true);
             btnViewResult.setAlpha(1f);
+            btnViewResult.setText(getString(R.string.btn_edit_conditions));
         } else {
             tvMainSubtitle.setText("학점, 고정 과목, 선호 조건을 입력해서 자동 시간표 추천을 시작하세요.");
-            btnStartRecommendation.setText("추천 시작하기");
+
+            // 아직 추천 요청이 없으면 추천 시작만 보여줌
+            btnStartRecommendation.setText(getString(R.string.btn_start_recommendation));
+
+            // 아래쪽 버튼은 숨김
+            btnViewResult.setVisibility(View.GONE);
             btnViewResult.setEnabled(false);
-            btnViewResult.setAlpha(0.5f);
+            btnViewResult.setAlpha(0f);
         }
     }
 
@@ -73,11 +86,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnViewResult.setOnClickListener(v -> {
-            if (recommendationRequest == null) {
-                return;
-            }
-
-            navigateToRecommendationResult();
+            // 아래 버튼은 "입력 조건 수정" 역할
+            navigateToHardConstraintWithGrade();
         });
     }
 
