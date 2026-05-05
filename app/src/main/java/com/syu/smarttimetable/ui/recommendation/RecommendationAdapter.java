@@ -3,6 +3,7 @@ package com.syu.smarttimetable.ui.recommendation;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -99,7 +100,7 @@ public class RecommendationAdapter {
         LayoutInflater inflater = LayoutInflater.from(context);
 
         for (Lecture lecture : lectures) {
-            LinearLayout item = (LinearLayout) inflater.inflate(
+            View item = inflater.inflate(
                     R.layout.item_recommendation,
                     container,
                     false
@@ -214,23 +215,27 @@ public class RecommendationAdapter {
         int slotStart = hour * 60;
         int slotEnd = (hour + 1) * 60;
 
-        for (Lecture lecture : timetable.getLecturesReadOnly()) {
-            if (lecture == null || lecture.getTimes() == null) {
-                continue;
-            }
-
-            for (LectureTime time : lecture.getTimes()) {
-                if (time == null) {
+        try {
+            for (Lecture lecture : timetable.getLecturesReadOnly()) {
+                if (lecture == null || lecture.getTimes() == null || lecture.getTimes().isEmpty()) {
                     continue;
                 }
 
-                boolean sameDay = time.getDay() == day;
-                boolean overlap = time.getStartTime() < slotEnd && time.getEndTime() > slotStart;
+                for (LectureTime time : lecture.getTimes()) {
+                    if (time == null) {
+                        continue;
+                    }
 
-                if (sameDay && overlap) {
-                    return lecture;
+                    boolean sameDay = time.getDay() == day;
+                    boolean overlap = time.getStartTime() < slotEnd && time.getEndTime() > slotStart;
+
+                    if (sameDay && overlap) {
+                        return lecture;
+                    }
                 }
             }
+        } catch (Exception e) {
+            return null;
         }
 
         return null;

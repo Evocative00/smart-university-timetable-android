@@ -2,7 +2,9 @@ package com.syu.smarttimetable.data.model;
 
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 
-public class LectureTime { // 강의의 시간만 따로 담당하는 클래스
+import java.io.Serializable;
+
+public class LectureTime implements Serializable { // 강의의 시간만 따로 담당하는 클래스
 
     // 요일
     private DayOfWeek day;

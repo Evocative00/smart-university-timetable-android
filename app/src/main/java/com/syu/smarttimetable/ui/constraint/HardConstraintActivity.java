@@ -14,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.model.Lecture;
-import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.data.repository.LectureRepository;
+import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 
 import java.util.ArrayList;

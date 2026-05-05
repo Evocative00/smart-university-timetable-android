@@ -1,6 +1,8 @@
 package com.syu.smarttimetable.data.model.enums;
 
-public enum FreeTimePreference {
+import java.io.Serializable;
+
+public enum FreeTimePreference implements Serializable {
     NONE,
 
     // 오전 공강 선호 = 오전을 비우고 싶음 = 수업은 오후 쪽 선호

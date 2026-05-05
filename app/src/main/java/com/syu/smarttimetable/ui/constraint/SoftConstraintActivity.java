@@ -10,10 +10,10 @@ import android.widget.RadioGroup;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
-import com.syu.smarttimetable.data.model.HardConstraint;
-import com.syu.smarttimetable.data.model.SoftConstraint;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.data.model.enums.FreeTimePreference;
+import com.syu.smarttimetable.data.model.HardConstraint;
+import com.syu.smarttimetable.data.model.SoftConstraint;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.main.MainActivity;
 

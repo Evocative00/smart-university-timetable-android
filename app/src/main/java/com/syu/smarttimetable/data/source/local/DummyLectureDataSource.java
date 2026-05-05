@@ -1,12 +1,12 @@
 package com.syu.smarttimetable.data.source.local;
 
+import com.syu.smarttimetable.data.model.Lecture;
+import com.syu.smarttimetable.data.model.LectureTime;
 import com.syu.smarttimetable.data.model.enums.ClassParity;
 import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.data.model.enums.Department;
 import com.syu.smarttimetable.data.model.enums.GeneralArea;
-import com.syu.smarttimetable.data.model.Lecture;
-import com.syu.smarttimetable.data.model.LectureTime;
 import com.syu.smarttimetable.data.model.enums.MajorType;
 import com.syu.smarttimetable.data.model.enums.RequirementType;
 

@@ -16,6 +16,7 @@ public class SoftConstraint implements Serializable {
     private boolean avoidGapOver3Hours;
     private List<String> preferredProfessors;
     private boolean considerTravelTime;
+    private List<LectureTime> blockedTimes;
 
     public SoftConstraint() {
         this.skipped = false;
@@ -25,6 +26,7 @@ public class SoftConstraint implements Serializable {
         this.avoidGapOver3Hours = false;
         this.preferredProfessors = new ArrayList<>();
         this.considerTravelTime = false;
+        this.blockedTimes = new ArrayList<>();
     }
 
     public SoftConstraint(boolean skipped,
@@ -34,6 +36,18 @@ public class SoftConstraint implements Serializable {
                           boolean avoidGapOver3Hours,
                           List<String> preferredProfessors,
                           boolean considerTravelTime) {
+        this(skipped, preferredFreeDays, freeTimePreference, keepLunch12To13Free,
+                avoidGapOver3Hours, preferredProfessors, considerTravelTime, new ArrayList<>());
+    }
+
+    public SoftConstraint(boolean skipped,
+                          List<DayOfWeek> preferredFreeDays,
+                          FreeTimePreference freeTimePreference,
+                          boolean keepLunch12To13Free,
+                          boolean avoidGapOver3Hours,
+                          List<String> preferredProfessors,
+                          boolean considerTravelTime,
+                          List<LectureTime> blockedTimes) {
         this.skipped = skipped;
         this.preferredFreeDays = preferredFreeDays != null ? preferredFreeDays : new ArrayList<>();
         this.freeTimePreference = freeTimePreference != null ? freeTimePreference : FreeTimePreference.NONE;
@@ -41,6 +55,7 @@ public class SoftConstraint implements Serializable {
         this.avoidGapOver3Hours = avoidGapOver3Hours;
         this.preferredProfessors = preferredProfessors != null ? preferredProfessors : new ArrayList<>();
         this.considerTravelTime = considerTravelTime;
+        this.blockedTimes = blockedTimes != null ? blockedTimes : new ArrayList<>();
     }
 
     public boolean isSkipped() {
@@ -97,5 +112,13 @@ public class SoftConstraint implements Serializable {
 
     public void setConsiderTravelTime(boolean considerTravelTime) {
         this.considerTravelTime = considerTravelTime;
+    }
+
+    public List<LectureTime> getBlockedTimes() {
+        return blockedTimes;
+    }
+
+    public void setBlockedTimes(List<LectureTime> blockedTimes) {
+        this.blockedTimes = blockedTimes != null ? blockedTimes : new ArrayList<>();
     }
 }

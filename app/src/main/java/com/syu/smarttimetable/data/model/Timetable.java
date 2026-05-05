@@ -1,10 +1,11 @@
 package com.syu.smarttimetable.data.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Timetable {
+public class Timetable implements Serializable {
 
     private final List<Lecture> lectures = new ArrayList<>();
 
