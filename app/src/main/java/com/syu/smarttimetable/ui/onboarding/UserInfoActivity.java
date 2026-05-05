@@ -2,14 +2,21 @@ package com.syu.smarttimetable.ui.onboarding;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,6 +24,10 @@ import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.User;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class UserInfoActivity extends AppCompatActivity {
 
@@ -28,6 +39,10 @@ public class UserInfoActivity extends AppCompatActivity {
     private Button btnSave;
 
     private UserRepository userRepository;
+
+    private interface SelectionCallback {
+        void onSelected(String item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,23 +68,27 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void setupDepartmentDropdown() {
         String[] departments = getResources().getStringArray(R.array.department_array);
-        ArrayAdapter<String> departmentAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                departments
+
+        autoDepartment.setText("", false);
+        autoDepartment.setFocusable(false);
+        autoDepartment.setFocusableInTouchMode(false);
+
+        autoDepartment.setOnClickListener(v ->
+                showSearchDialog(
+                        "학과 검색",
+                        "학과명을 입력해주세요",
+                        departments,
+                        selectedDepartment -> {
+                            autoDepartment.setText(selectedDepartment, false);
+                            updateMajorDetailUI(selectedDepartment);
+                        }
+                )
         );
-
-        autoDepartment.setAdapter(departmentAdapter);
-        autoDepartment.setOnClickListener(v -> autoDepartment.showDropDown());
-
-        autoDepartment.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedDepartment = (String) parent.getItemAtPosition(position);
-            updateMajorDetailUI(selectedDepartment);
-        });
     }
 
     private void setupGradeDropdown() {
         String[] grades = getResources().getStringArray(R.array.grade_array);
+
         ArrayAdapter<String> gradeAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -84,21 +103,91 @@ public class UserInfoActivity extends AppCompatActivity {
         String[] majorDetails = DepartmentMajorMapper.getMajorDetails(department);
 
         if (majorDetails.length > 0) {
-            layoutMajorDetail.setVisibility(android.view.View.VISIBLE);
-
-            ArrayAdapter<String> detailAdapter = new ArrayAdapter<>(
-                    this,
-                    android.R.layout.simple_dropdown_item_1line,
-                    majorDetails
-            );
+            layoutMajorDetail.setVisibility(View.VISIBLE);
 
             autoMajorDetail.setText("", false);
-            autoMajorDetail.setAdapter(detailAdapter);
-            autoMajorDetail.setOnClickListener(v -> autoMajorDetail.showDropDown());
+            autoMajorDetail.setFocusable(false);
+            autoMajorDetail.setFocusableInTouchMode(false);
+
+            autoMajorDetail.setOnClickListener(v ->
+                    showSearchDialog(
+                            "세부전공 검색",
+                            "세부전공명을 입력해주세요",
+                            majorDetails,
+                            selectedMajor -> autoMajorDetail.setText(selectedMajor, false)
+                    )
+            );
         } else {
-            layoutMajorDetail.setVisibility(android.view.View.GONE);
+            layoutMajorDetail.setVisibility(View.GONE);
             autoMajorDetail.setText("", false);
         }
+    }
+
+    private void showSearchDialog(String title,
+                                  String hint,
+                                  String[] items,
+                                  SelectionCallback callback) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_lecture_search, null);
+
+        EditText etSearch = dialogView.findViewById(R.id.et_search);
+        ListView lvItems = dialogView.findViewById(R.id.lv_lectures);
+
+        etSearch.setHint(hint);
+
+        List<String> allItems = new ArrayList<>(Arrays.asList(items));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_list_item_1,
+                new ArrayList<>(allItems)
+        );
+
+        lvItems.setAdapter(adapter);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(title)
+                .setView(dialogView)
+                .setNegativeButton("닫기", null)
+                .create();
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // 사용 안 함
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s == null ? "" : s.toString().toLowerCase().trim();
+
+                adapter.clear();
+
+                for (String item : allItems) {
+                    if (item != null && item.toLowerCase().contains(query)) {
+                        adapter.add(item);
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // 사용 안 함
+            }
+        });
+
+        lvItems.setOnItemClickListener((parent, view, position, id) -> {
+            String selected = (String) parent.getItemAtPosition(position);
+
+            if (callback != null) {
+                callback.onSelected(selected);
+            }
+
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void setupSaveButton() {
@@ -139,6 +228,7 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         int grade = parseGrade(gradeText);
+
         if (grade <= 0) {
             Toast.makeText(this, "학년 값이 올바르지 않습니다.", Toast.LENGTH_SHORT).show();
             return;
@@ -164,6 +254,7 @@ public class UserInfoActivity extends AppCompatActivity {
                                 Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(this, HardConstraintActivity.class);
+                                intent.putExtra("userGrade", grade);
                                 startActivity(intent);
                                 finish();
                             })

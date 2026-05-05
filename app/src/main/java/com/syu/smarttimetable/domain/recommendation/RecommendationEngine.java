@@ -1,5 +1,7 @@
 package com.syu.smarttimetable.domain.recommendation;
 
+import android.util.Log;
+
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.Timetable;
 import com.syu.smarttimetable.domain.recommendation.constraints.HardConstraintValidator;
@@ -13,6 +15,7 @@ import java.util.Set;
 
 public class RecommendationEngine {
 
+    private static final String TAG = "RecommendationEngine";
     private static final int MAX_RECOMMENDATIONS = 10;
 
     private final TakenLectureFilter takenLectureFilter;
@@ -43,15 +46,26 @@ public class RecommendationEngine {
         List<TimetableScoreTuple> results = new ArrayList<>();
 
         if (allLectures == null || allLectures.isEmpty() || request == null) {
+            Log.e(TAG, "Invalid input: allLectures="
+                    + (allLectures == null ? "null" : allLectures.size())
+                    + ", request="
+                    + (request == null ? "null" : "ok"));
             return results;
         }
+
+        Log.d(TAG, "Starting recommendation with " + allLectures.size() + " lectures");
 
         List<Lecture> filteredLectures = takenLectureFilter.filterCompletedLectures(
                 allLectures,
                 request.getCompletedCourseCodes()
         );
 
+        Log.d(TAG, "After filtering completed lectures: " + filteredLectures.size() + " lectures");
+
         List<Timetable> candidates = timetableGenerator.generateCandidates(filteredLectures, request);
+
+        Log.d(TAG, "Generated " + candidates.size() + " candidate timetables");
+
         Set<String> seenTimetableSignatures = new HashSet<>();
 
         for (Timetable candidate : candidates) {
@@ -59,17 +73,21 @@ public class RecommendationEngine {
                     hardConstraintValidator.validate(candidate.getLecturesReadOnly(), request);
 
             if (!validationResult.isValid()) {
+                Log.d(TAG, "Candidate rejected: " + validationResult.getErrors());
                 continue;
             }
 
             String signature = buildTimetableSignature(candidate);
             if (!seenTimetableSignatures.add(signature)) {
+                Log.d(TAG, "Duplicate candidate skipped: " + signature);
                 continue;
             }
 
             int score = scoreCalculator.calculateScore(candidate, request);
             results.add(new TimetableScoreTuple(candidate, score));
         }
+
+        Log.d(TAG, "Valid recommendations after filtering: " + results.size());
 
         results.sort((first, second) -> {
             int scoreCompare = Integer.compare(second.getScore(), first.getScore());
@@ -84,9 +102,11 @@ public class RecommendationEngine {
         });
 
         if (results.size() > MAX_RECOMMENDATIONS) {
+            Log.d(TAG, "Returning top " + MAX_RECOMMENDATIONS + " recommendations");
             return new ArrayList<>(results.subList(0, MAX_RECOMMENDATIONS));
         }
 
+        Log.d(TAG, "Returning " + results.size() + " recommendations");
         return results;
     }
 

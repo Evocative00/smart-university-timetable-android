@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/smart_background">
+    android:background="@color/smart_background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,9 +15,9 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/smart_primary"
             app:cardCornerRadius="28dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/smart_primary">
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -28,7 +29,7 @@
                     android:id="@+id/tv_screen_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="추천 시간표"
+                    android:text="@string/recommendation_title"
                     android:textColor="@color/white"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -38,7 +39,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="조건을 만족한 후보를 정렬했습니다."
+                    android:text="@string/recommendation_subtitle"
                     android:textColor="@color/white"
                     android:textSize="14sp" />
 
@@ -55,9 +56,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -76,7 +77,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="1 / 1"
+                            android:text="@string/rank_default"
                             android:textColor="@color/smart_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -86,7 +87,7 @@
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="이전"
+                            android:text="@string/btn_prev"
                             app:cornerRadius="16dp" />
 
                         <com.google.android.material.button.MaterialButton
@@ -95,7 +96,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="다음"
+                            android:text="@string/btn_next"
                             app:cornerRadius="16dp" />
 
                     </LinearLayout>
@@ -110,9 +111,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            app:cardBackgroundColor="@color/smart_surface_alt"
                             app:cardCornerRadius="18dp"
-                            app:cardElevation="0dp"
-                            app:cardBackgroundColor="@color/smart_surface_alt">
+                            app:cardElevation="0dp">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -123,7 +124,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="점수"
+                                    android:text="@string/label_score"
                                     android:textColor="@color/smart_text_secondary"
                                     android:textSize="12sp" />
 
@@ -132,7 +133,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="6dp"
-                                    android:text="0"
+                                    android:text="@string/score_default"
                                     android:textColor="@color/smart_text_primary"
                                     android:textSize="22sp"
                                     android:textStyle="bold" />
@@ -144,9 +145,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:layout_weight="1"
+                            app:cardBackgroundColor="@color/smart_surface_alt"
                             app:cardCornerRadius="18dp"
-                            app:cardElevation="0dp"
-                            app:cardBackgroundColor="@color/smart_surface_alt">
+                            app:cardElevation="0dp">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -157,7 +158,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="학점"
+                                    android:text="@string/label_credits"
                                     android:textColor="@color/smart_text_secondary"
                                     android:textSize="12sp" />
 
@@ -166,7 +167,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="6dp"
-                                    android:text="0학점"
+                                    android:text="@string/credits_default"
                                     android:textColor="@color/smart_text_primary"
                                     android:textSize="22sp"
                                     android:textStyle="bold" />
@@ -180,8 +181,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="18dp"
-                        android:orientation="horizontal"
-                        android:gravity="start" />
+                        android:gravity="start"
+                        android:orientation="horizontal" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_regenerate"
@@ -189,8 +190,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="18dp"
-                        android:text="다시 생성"
+                        android:text="@string/btn_regenerate"
                         app:cornerRadius="18dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -198,9 +200,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -211,7 +213,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="시간표 미리보기"
+                        android:text="@string/timetable_preview_title"
                         android:textColor="@color/smart_text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -227,8 +229,8 @@
                             android:id="@+id/timetable_table"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:stretchColumns="*"
-                            android:shrinkColumns="*" />
+                            android:shrinkColumns="*"
+                            android:stretchColumns="*" />
                     </HorizontalScrollView>
 
                 </LinearLayout>
@@ -239,9 +241,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -252,7 +254,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="포함된 강의"
+                        android:text="@string/included_lectures_title"
                         android:textColor="@color/smart_text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -281,9 +283,9 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -295,7 +297,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="추천 결과 없음"
+                        android:text="@string/recommendation_empty_title"
                         android:textColor="@color/smart_text_primary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -305,7 +307,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:text="조건을 다시 조정해보세요."
+                        android:text="@string/recommendation_empty_message"
                         android:textColor="@color/smart_text_secondary"
                         android:textSize="14sp" />
 

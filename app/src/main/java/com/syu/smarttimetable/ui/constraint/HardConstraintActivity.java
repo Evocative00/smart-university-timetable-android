@@ -2,20 +2,27 @@ package com.syu.smarttimetable.ui.constraint;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.model.Lecture;
-import com.syu.smarttimetable.data.repository.LectureRepository;
+import com.syu.smarttimetable.data.model.LectureTime;
 import com.syu.smarttimetable.data.model.enums.CourseCategory;
+import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 
 import java.util.ArrayList;
@@ -37,6 +44,7 @@ public class HardConstraintActivity extends AppCompatActivity {
     private final List<String> selectedLectureDisplayTexts = new ArrayList<>();
 
     private String selectedCategory = "전공";
+    private int userGrade = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +54,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         bindViews();
 
         lectureRepository = new LectureRepository();
+        userGrade = getIntent().getIntExtra("userGrade", 0);
 
         List<Lecture> lectures = lectureRepository.getAllLectures();
 
@@ -115,29 +124,106 @@ public class HardConstraintActivity extends AppCompatActivity {
                 ? CourseCategory.MAJOR
                 : CourseCategory.GENERAL;
 
-        List<String> lectureDisplayList = new ArrayList<>();
-
         for (Lecture lecture : allLectures) {
             if (lecture != null && lecture.getCategory() == targetCategory) {
                 filteredLectures.add(lecture);
-                lectureDisplayList.add(buildLectureDisplayText(lecture));
             }
         }
 
-        ArrayAdapter<String> lectureAdapter = new ArrayAdapter<>(
+        autoLecture.setText("", false);
+        autoLecture.setFocusable(false);
+        autoLecture.setFocusableInTouchMode(false);
+        autoLecture.setOnClickListener(v -> showLectureSearchDialog());
+    }
+
+    private void showLectureSearchDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_lecture_search, null);
+
+        EditText etSearch = dialogView.findViewById(R.id.et_search);
+        ListView lvLectures = dialogView.findViewById(R.id.lv_lectures);
+
+        etSearch.setHint("강의명 / 교수명 / 과목코드로 검색");
+
+        List<String> allDisplayList = new ArrayList<>();
+        for (Lecture lecture : filteredLectures) {
+            allDisplayList.add(buildLectureDisplayText(lecture));
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_dropdown_item_1line,
-                lectureDisplayList
+                android.R.layout.simple_list_item_1,
+                new ArrayList<>(allDisplayList)
         );
 
-        autoLecture.setText("", false);
-        autoLecture.setAdapter(lectureAdapter);
-        autoLecture.setOnClickListener(v -> autoLecture.showDropDown());
+        lvLectures.setAdapter(adapter);
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle("고정 과목 검색")
+                .setView(dialogView)
+                .setNegativeButton("닫기", null)
+                .create();
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s == null ? "" : s.toString().toLowerCase().trim();
+
+                adapter.clear();
+
+                for (String item : allDisplayList) {
+                    if (item.toLowerCase().contains(query)) {
+                        adapter.add(item);
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        lvLectures.setOnItemClickListener((parent, view, position, id) -> {
+            String selected = (String) parent.getItemAtPosition(position);
+            autoLecture.setText(selected, false);
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void setupButtons() {
         btnAddLecture.setOnClickListener(v -> addFixedLecture());
         btnNext.setOnClickListener(v -> submitHardConstraint());
+
+        tvSelectedLectures.setOnClickListener(v -> showRemoveFixedLectureDialog());
+    }
+
+    private void showRemoveFixedLectureDialog() {
+        if (selectedLectureDisplayTexts.isEmpty()) {
+            Toast.makeText(this, "삭제할 고정 과목이 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] items = selectedLectureDisplayTexts.toArray(new String[0]);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("삭제할 고정 과목 선택")
+                .setItems(items, (dialog, which) -> {
+                    if (which >= 0 && which < selectedLectureDisplayTexts.size()) {
+                        selectedLectureDisplayTexts.remove(which);
+                        fixedLectureKeys.remove(which);
+                        updateSelectedLectureText();
+                        Toast.makeText(this, "고정 과목이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("닫기", null)
+                .show();
     }
 
     private void addFixedLecture() {
@@ -195,6 +281,7 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
+        intent.putExtra("userGrade", userGrade);
         startActivity(intent);
         finish();
     }
@@ -232,7 +319,75 @@ public class HardConstraintActivity extends AppCompatActivity {
                 + " / "
                 + lecture.getProfessor()
                 + " / "
+                + buildLectureTimeText(lecture)
+                + " / "
+                + lecture.getClassroom()
+                + " / "
                 + lecture.getCourseCode();
+    }
+
+    private String buildLectureTimeText(Lecture lecture) {
+        if (lecture == null || lecture.getTimes() == null || lecture.getTimes().isEmpty()) {
+            return "시간 미정";
+        }
+
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < lecture.getTimes().size(); i++) {
+            LectureTime time = lecture.getTimes().get(i);
+
+            if (time == null) {
+                continue;
+            }
+
+            if (builder.length() > 0) {
+                builder.append(", ");
+            }
+
+            builder.append(convertDayToKorean(time))
+                    .append(" ")
+                    .append(formatMinutes(time.getStartTime()))
+                    .append("~")
+                    .append(formatMinutes(time.getEndTime()));
+        }
+
+        if (builder.length() == 0) {
+            return "시간 미정";
+        }
+
+        return builder.toString();
+    }
+
+    private String convertDayToKorean(LectureTime time) {
+        if (time == null || time.getDay() == null) {
+            return "";
+        }
+
+        switch (time.getDay()) {
+            case MONDAY:
+                return "월";
+            case TUESDAY:
+                return "화";
+            case WEDNESDAY:
+                return "수";
+            case THURSDAY:
+                return "목";
+            case FRIDAY:
+                return "금";
+            case SATURDAY:
+                return "토";
+            case SUNDAY:
+                return "일";
+            default:
+                return "";
+        }
+    }
+
+    private String formatMinutes(int minutes) {
+        int hour = minutes / 60;
+        int minute = minutes % 60;
+
+        return String.format("%02d:%02d", hour, minute);
     }
 
     private String getText(TextView view) {

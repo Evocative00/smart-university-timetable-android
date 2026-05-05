@@ -10,21 +10,25 @@ import android.widget.RadioGroup;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.data.model.HardConstraint;
+import com.syu.smarttimetable.data.model.Lecture;
+import com.syu.smarttimetable.data.model.SoftConstraint;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.data.model.enums.FreeTimePreference;
-import com.syu.smarttimetable.data.model.HardConstraint;
-import com.syu.smarttimetable.data.model.SoftConstraint;
+import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
+import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 import com.syu.smarttimetable.ui.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class SoftConstraintActivity extends AppCompatActivity {
 
     private HardConstraint hardConstraint;
+    private int userGrade = 0;
+    private LectureRepository lectureRepository;
 
     private CheckBox checkboxMonday;
     private CheckBox checkboxTuesday;
@@ -45,6 +49,8 @@ public class SoftConstraintActivity extends AppCompatActivity {
         setContentView(R.layout.activity_soft_constraint);
 
         hardConstraint = (HardConstraint) getIntent().getSerializableExtra("hardConstraint");
+        userGrade = getIntent().getIntExtra("userGrade", 0);
+        lectureRepository = new LectureRepository();
 
         bindViews();
         setupButtons();
@@ -81,14 +87,29 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private SoftConstraint collectConstraintFromUi() {
         List<DayOfWeek> preferredDays = new ArrayList<>();
 
-        if (checkboxMonday.isChecked()) preferredDays.add(DayOfWeek.MONDAY);
-        if (checkboxTuesday.isChecked()) preferredDays.add(DayOfWeek.TUESDAY);
-        if (checkboxWednesday.isChecked()) preferredDays.add(DayOfWeek.WEDNESDAY);
-        if (checkboxThursday.isChecked()) preferredDays.add(DayOfWeek.THURSDAY);
-        if (checkboxFriday.isChecked()) preferredDays.add(DayOfWeek.FRIDAY);
+        if (checkboxMonday.isChecked()) {
+            preferredDays.add(DayOfWeek.MONDAY);
+        }
+
+        if (checkboxTuesday.isChecked()) {
+            preferredDays.add(DayOfWeek.TUESDAY);
+        }
+
+        if (checkboxWednesday.isChecked()) {
+            preferredDays.add(DayOfWeek.WEDNESDAY);
+        }
+
+        if (checkboxThursday.isChecked()) {
+            preferredDays.add(DayOfWeek.THURSDAY);
+        }
+
+        if (checkboxFriday.isChecked()) {
+            preferredDays.add(DayOfWeek.FRIDAY);
+        }
 
         FreeTimePreference freeTimePreference;
         int checkedId = radioGroupFreeTime.getCheckedRadioButtonId();
+
         if (checkedId == R.id.radioMorning) {
             freeTimePreference = FreeTimePreference.MORNING;
         } else if (checkedId == R.id.radioAfternoon) {
@@ -118,8 +139,10 @@ public class SoftConstraintActivity extends AppCompatActivity {
         }
 
         String[] split = input.split(",");
+
         for (String name : split) {
             String trimmed = name.trim();
+
             if (!trimmed.isEmpty()) {
                 result.add(trimmed);
             }
@@ -130,14 +153,20 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
     private void navigateToMain(SoftConstraint softConstraint) {
         int targetCredits = hardConstraint != null ? hardConstraint.getTargetCredits() : 0;
+        int minCredits = Math.max(0, targetCredits - 1);
+        int maxCredits = targetCredits + 1;
 
-        Set<String> fixedLectureKeySet = new HashSet<>();
+        HashSet<String> fixedLectureKeySet = new HashSet<>();
+
         if (hardConstraint != null && hardConstraint.getFixedLectureKeys() != null) {
             fixedLectureKeySet.addAll(hardConstraint.getFixedLectureKeys());
         }
 
+        addRequiredChapelIfNeeded(fixedLectureKeySet);
+
         RecommendationRequest recommendationRequest = new RecommendationRequest(
-                targetCredits,
+                minCredits,
+                maxCredits,
                 fixedLectureKeySet,
                 new HashSet<>(),
                 softConstraint
@@ -147,7 +176,40 @@ public class SoftConstraintActivity extends AppCompatActivity {
         intent.putExtra("hardConstraint", hardConstraint);
         intent.putExtra("softConstraint", softConstraint);
         intent.putExtra("recommendationRequest", recommendationRequest);
+        intent.putExtra("userGrade", userGrade);
         startActivity(intent);
         finish();
+    }
+
+    private void addRequiredChapelIfNeeded(HashSet<String> fixedLectureKeySet) {
+        if (fixedLectureKeySet == null || userGrade <= 0 || lectureRepository == null) {
+            return;
+        }
+
+        List<Lecture> lectures = lectureRepository.getAllLectures();
+
+        if (lectures == null || lectures.isEmpty()) {
+            return;
+        }
+
+        for (Lecture lecture : lectures) {
+            if (lecture == null) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName();
+
+            if (courseName == null) {
+                continue;
+            }
+
+            boolean isChapel = courseName.equals("채플")
+                    || courseName.startsWith("채플(");
+
+            if (isChapel && lecture.getGrade() == userGrade) {
+                fixedLectureKeySet.add(RequiredLectureConstraint.buildLectureKey(lecture));
+                return;
+            }
+        }
     }
 }

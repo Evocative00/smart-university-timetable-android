@@ -50,11 +50,41 @@ public class LoginActivity extends AppCompatActivity {
 
         userRepository.login(email, password)
                 .addOnSuccessListener(authResult -> {
-                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
+                    if (userRepository.getCurrentFirebaseUser() == null) {
+                        Toast.makeText(this, "로그인 정보를 확인할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                    Intent intent = new Intent(this, UserInfoActivity.class);
-                    startActivity(intent);
-                    finish();
+                    String uid = userRepository.getCurrentFirebaseUser().getUid();
+
+                    userRepository.getUser(uid)
+                            .addOnSuccessListener(documentSnapshot -> {
+                                boolean hasUserInfo = documentSnapshot.exists()
+                                        && documentSnapshot.getString("department") != null
+                                        && documentSnapshot.getString("majorType") != null
+                                        && documentSnapshot.getLong("grade") != null
+                                        && documentSnapshot.getString("studentId") != null;
+
+                                Intent intent;
+
+                                if (hasUserInfo) {
+                                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
+                                    intent = new Intent(this, MainActivity.class);
+                                } else {
+                                    Toast.makeText(this, "기본정보를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                                    intent = new Intent(this, UserInfoActivity.class);
+                                }
+
+                                startActivity(intent);
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "기본정보 확인 실패. 다시 입력해주세요.", Toast.LENGTH_SHORT).show();
+
+                                Intent intent = new Intent(this, UserInfoActivity.class);
+                                startActivity(intent);
+                                finish();
+                            });
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "로그인 실패: " + e.getMessage(), Toast.LENGTH_LONG).show()
