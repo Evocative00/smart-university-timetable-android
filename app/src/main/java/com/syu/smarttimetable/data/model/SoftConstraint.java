@@ -37,7 +37,7 @@ public class SoftConstraint implements Serializable {
                           List<String> preferredProfessors,
                           boolean considerTravelTime) {
         this(skipped, preferredFreeDays, freeTimePreference, keepLunch12To13Free,
-             avoidGapOver3Hours, preferredProfessors, considerTravelTime, new ArrayList<>());
+                avoidGapOver3Hours, preferredProfessors, considerTravelTime, new ArrayList<>());
     }
 
     public SoftConstraint(boolean skipped,

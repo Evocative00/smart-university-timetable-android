@@ -14,4 +14,6 @@
     <color name="smart_grid_side">#F3F4F6</color>
     <color name="smart_grid_empty">#FFFFFF</color>
     <color name="smart_grid_fill">#6366F1</color>
+    <color name="smart_surface">#F8FAFC</color>
+    <color name="smart_border">#E2E8F0</color>
 </resources>

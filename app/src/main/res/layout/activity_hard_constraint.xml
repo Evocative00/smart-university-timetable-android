@@ -58,50 +58,62 @@
                 android:padding="20dp">
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:labelFor="@id/auto_credits"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_credits"
-                    app:boxBackgroundMode="outline">
+                    app:boxBackgroundMode="outline"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    <AutoCompleteTextView
                         android:id="@+id/auto_credits"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:contentDescription="@string/hint_credits"
                         android:hint="@string/hint_credits"
-                        android:inputType="none" />
+                        android:inputType="none"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:labelFor="@id/auto_category"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:hint="@string/hint_category"
-                    app:boxBackgroundMode="outline">
+                    app:boxBackgroundMode="outline"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    <AutoCompleteTextView
                         android:id="@+id/auto_category"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:contentDescription="@string/hint_category"
                         android:hint="@string/hint_category"
-                        android:inputType="none" />
+                        android:inputType="none"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:labelFor="@id/auto_lecture"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:hint="@string/hint_lecture"
-                    app:boxBackgroundMode="outline">
+                    app:boxBackgroundMode="outline"
+                    app:endIconMode="none">
 
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    <AutoCompleteTextView
                         android:id="@+id/auto_lecture"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:contentDescription="@string/hint_lecture"
                         android:hint="@string/hint_lecture"
-                        android:inputType="none" />
+                        android:inputType="none"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -112,38 +124,24 @@
                     android:text="@string/btn_add_fixed_lecture"
                     app:cornerRadius="18dp" />
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tv_selected_title"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
                     android:text="@string/selected_fixed_lectures_title"
                     android:textColor="@color/smart_text_primary"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_selected_lectures"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/smart_surface_alt"
-                    android:padding="16dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_selected_box"
+                    android:minHeight="72dp"
+                    android:padding="14dp"
                     android:text="@string/selected_fixed_lectures_empty"
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="14sp" />
@@ -152,7 +150,7 @@
                     android:id="@+id/btn_next"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
+                    android:layout_marginTop="22dp"
                     android:text="@string/btn_next"
                     app:cornerRadius="18dp" />
 

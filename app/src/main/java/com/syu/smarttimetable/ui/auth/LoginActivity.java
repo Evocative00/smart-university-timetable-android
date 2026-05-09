@@ -11,11 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.repository.UserRepository;
+import com.syu.smarttimetable.ui.main.MainActivity;
 import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
+    private Button btnLogin, btnMoveSignup;
     private UserRepository userRepository;
 
     @Override
@@ -27,8 +29,8 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-        Button btnLogin = findViewById(R.id.btnLogin);
-        Button btnMoveSignup = findViewById(R.id.btnMoveSignup);
+        btnLogin = findViewById(R.id.btnLogin);
+        btnMoveSignup = findViewById(R.id.btnMoveSignup);
 
         btnLogin.setOnClickListener(v -> login());
         btnMoveSignup.setOnClickListener(v -> {
@@ -48,20 +50,37 @@ public class LoginActivity extends AppCompatActivity {
 
         userRepository.login(email, password)
                 .addOnSuccessListener(authResult -> {
+                    if (userRepository.getCurrentFirebaseUser() == null) {
+                        Toast.makeText(this, "로그인 정보를 확인할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     String uid = userRepository.getCurrentFirebaseUser().getUid();
+
                     userRepository.getUser(uid)
-                            .addOnSuccessListener(doc -> {
-                                String name = doc.getString("name");
-                                String msg = (name != null && !name.isEmpty())
-                                        ? name + "님 환영합니다!"
-                                        : "환영합니다!";
-                                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(this, UserInfoActivity.class);
+                            .addOnSuccessListener(documentSnapshot -> {
+                                boolean hasUserInfo = documentSnapshot.exists()
+                                        && documentSnapshot.getString("department") != null
+                                        && documentSnapshot.getString("majorType") != null
+                                        && documentSnapshot.getLong("grade") != null
+                                        && documentSnapshot.getString("studentId") != null;
+
+                                Intent intent;
+
+                                if (hasUserInfo) {
+                                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
+                                    intent = new Intent(this, MainActivity.class);
+                                } else {
+                                    Toast.makeText(this, "기본정보를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                                    intent = new Intent(this, UserInfoActivity.class);
+                                }
+
                                 startActivity(intent);
                                 finish();
                             })
                             .addOnFailureListener(e -> {
-                                Toast.makeText(this, "환영합니다!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "기본정보 확인 실패. 다시 입력해주세요.", Toast.LENGTH_SHORT).show();
+
                                 Intent intent = new Intent(this, UserInfoActivity.class);
                                 startActivity(intent);
                                 finish();

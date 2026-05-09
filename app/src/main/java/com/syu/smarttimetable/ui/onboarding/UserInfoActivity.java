@@ -40,7 +40,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private UserRepository userRepository;
 
-    interface SelectionCallback {
+    private interface SelectionCallback {
         void onSelected(String item);
     }
 
@@ -72,16 +72,23 @@ public class UserInfoActivity extends AppCompatActivity {
         autoDepartment.setText("", false);
         autoDepartment.setFocusable(false);
         autoDepartment.setFocusableInTouchMode(false);
+
         autoDepartment.setOnClickListener(v ->
-                showSearchDialog("학과 검색", "학과명을 입력해주세요  ex) 컴퓨터공학부", departments, selected -> {
-                    autoDepartment.setText(selected, false);
-                    updateMajorDetailUI(selected);
-                })
+                showSearchDialog(
+                        "학과 검색",
+                        "학과명을 입력해주세요",
+                        departments,
+                        selectedDepartment -> {
+                            autoDepartment.setText(selectedDepartment, false);
+                            updateMajorDetailUI(selectedDepartment);
+                        }
+                )
         );
     }
 
     private void setupGradeDropdown() {
         String[] grades = getResources().getStringArray(R.array.grade_array);
+
         ArrayAdapter<String> gradeAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -101,9 +108,14 @@ public class UserInfoActivity extends AppCompatActivity {
             autoMajorDetail.setText("", false);
             autoMajorDetail.setFocusable(false);
             autoMajorDetail.setFocusableInTouchMode(false);
+
             autoMajorDetail.setOnClickListener(v ->
-                    showSearchDialog("세부전공 검색", "세부전공명을 입력해주세요  ex) 소프트웨어전공", majorDetails, selected ->
-                            autoMajorDetail.setText(selected, false))
+                    showSearchDialog(
+                            "세부전공 검색",
+                            "세부전공명을 입력해주세요",
+                            majorDetails,
+                            selectedMajor -> autoMajorDetail.setText(selectedMajor, false)
+                    )
             );
         } else {
             layoutMajorDetail.setVisibility(View.GONE);
@@ -111,15 +123,25 @@ public class UserInfoActivity extends AppCompatActivity {
         }
     }
 
-    private void showSearchDialog(String title, String hint, String[] items, SelectionCallback callback) {
+    private void showSearchDialog(String title,
+                                  String hint,
+                                  String[] items,
+                                  SelectionCallback callback) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_lecture_search, null);
+
         EditText etSearch = dialogView.findViewById(R.id.et_search);
-        etSearch.setHint(hint);
         ListView lvItems = dialogView.findViewById(R.id.lv_lectures);
 
-        List<String> allList = new ArrayList<>(Arrays.asList(items));
+        etSearch.setHint(hint);
+
+        List<String> allItems = new ArrayList<>(Arrays.asList(items));
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_list_item_1, new ArrayList<>(allList));
+                this,
+                android.R.layout.simple_list_item_1,
+                new ArrayList<>(allItems)
+        );
+
         lvItems.setAdapter(adapter);
 
         AlertDialog dialog = new MaterialAlertDialogBuilder(this)
@@ -129,25 +151,39 @@ public class UserInfoActivity extends AppCompatActivity {
                 .create();
 
         etSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void afterTextChanged(Editable s) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // 사용 안 함
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString().toLowerCase().trim();
+                String query = s == null ? "" : s.toString().toLowerCase().trim();
+
                 adapter.clear();
-                for (String item : allList) {
-                    if (item.toLowerCase().contains(query)) {
+
+                for (String item : allItems) {
+                    if (item != null && item.toLowerCase().contains(query)) {
                         adapter.add(item);
                     }
                 }
+
                 adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // 사용 안 함
             }
         });
 
         lvItems.setOnItemClickListener((parent, view, position, id) -> {
             String selected = (String) parent.getItemAtPosition(position);
-            callback.onSelected(selected);
+
+            if (callback != null) {
+                callback.onSelected(selected);
+            }
+
             dialog.dismiss();
         });
 
@@ -192,6 +228,7 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         int grade = parseGrade(gradeText);
+
         if (grade <= 0) {
             Toast.makeText(this, "학년 값이 올바르지 않습니다.", Toast.LENGTH_SHORT).show();
             return;

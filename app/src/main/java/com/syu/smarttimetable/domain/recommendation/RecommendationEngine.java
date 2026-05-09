@@ -46,8 +46,10 @@ public class RecommendationEngine {
         List<TimetableScoreTuple> results = new ArrayList<>();
 
         if (allLectures == null || allLectures.isEmpty() || request == null) {
-            Log.e(TAG, "Invalid input: allLectures=" + (allLectures == null ? "null" : allLectures.size()) +
-                    ", request=" + (request == null ? "null" : "ok"));
+            Log.e(TAG, "Invalid input: allLectures="
+                    + (allLectures == null ? "null" : allLectures.size())
+                    + ", request="
+                    + (request == null ? "null" : "ok"));
             return results;
         }
 
@@ -58,9 +60,10 @@ public class RecommendationEngine {
                 request.getCompletedCourseCodes()
         );
 
-        Log.d(TAG, "After filtering: " + filteredLectures.size() + " lectures");
+        Log.d(TAG, "After filtering completed lectures: " + filteredLectures.size() + " lectures");
 
         List<Timetable> candidates = timetableGenerator.generateCandidates(filteredLectures, request);
+
         Log.d(TAG, "Generated " + candidates.size() + " candidate timetables");
 
         Set<String> seenTimetableSignatures = new HashSet<>();
@@ -76,6 +79,7 @@ public class RecommendationEngine {
 
             String signature = buildTimetableSignature(candidate);
             if (!seenTimetableSignatures.add(signature)) {
+                Log.d(TAG, "Duplicate candidate skipped: " + signature);
                 continue;
             }
 
@@ -98,9 +102,11 @@ public class RecommendationEngine {
         });
 
         if (results.size() > MAX_RECOMMENDATIONS) {
+            Log.d(TAG, "Returning top " + MAX_RECOMMENDATIONS + " recommendations");
             return new ArrayList<>(results.subList(0, MAX_RECOMMENDATIONS));
         }
 
+        Log.d(TAG, "Returning " + results.size() + " recommendations");
         return results;
     }
 
