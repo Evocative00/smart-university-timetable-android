@@ -1,5 +1,6 @@
 package com.syu.smarttimetable;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.media.AudioManager;
@@ -40,6 +41,7 @@ public class SmartTimetableApp extends Application {
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void applyClickSound(View view) {
         if (view.isClickable() && !Boolean.TRUE.equals(view.getTag(R.id.tag_sound_applied))) {
             view.setTag(R.id.tag_sound_applied, Boolean.TRUE);
