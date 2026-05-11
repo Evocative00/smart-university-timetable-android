@@ -14,25 +14,27 @@ public class RecommendationRequest implements Serializable {
     private final Set<String> fixedLectureKeys;
     private final Set<String> completedCourseCodes;
     private final SoftConstraint softConstraint;
+    private final int userGrade;
+    private final String studentId;
 
     public RecommendationRequest(int desiredCredits,
                                  Set<String> fixedLectureKeys,
                                  Set<String> completedCourseCodes) {
-        this(desiredCredits, desiredCredits, fixedLectureKeys, completedCourseCodes, new SoftConstraint());
+        this(desiredCredits, desiredCredits, fixedLectureKeys, completedCourseCodes, new SoftConstraint(), 0, "");
     }
 
     public RecommendationRequest(int desiredCredits,
                                  Set<String> fixedLectureKeys,
                                  Set<String> completedCourseCodes,
                                  SoftConstraint softConstraint) {
-        this(desiredCredits, desiredCredits, fixedLectureKeys, completedCourseCodes, softConstraint);
+        this(desiredCredits, desiredCredits, fixedLectureKeys, completedCourseCodes, softConstraint, 0, "");
     }
 
     public RecommendationRequest(int minCredits,
                                  int maxCredits,
                                  Set<String> fixedLectureKeys,
                                  Set<String> completedCourseCodes) {
-        this(minCredits, maxCredits, fixedLectureKeys, completedCourseCodes, new SoftConstraint());
+        this(minCredits, maxCredits, fixedLectureKeys, completedCourseCodes, new SoftConstraint(), 0, "");
     }
 
     public RecommendationRequest(int minCredits,
@@ -40,6 +42,25 @@ public class RecommendationRequest implements Serializable {
                                  Set<String> fixedLectureKeys,
                                  Set<String> completedCourseCodes,
                                  SoftConstraint softConstraint) {
+        this(minCredits, maxCredits, fixedLectureKeys, completedCourseCodes, softConstraint, 0, "");
+    }
+
+    public RecommendationRequest(int minCredits,
+                                 int maxCredits,
+                                 Set<String> fixedLectureKeys,
+                                 Set<String> completedCourseCodes,
+                                 SoftConstraint softConstraint,
+                                 int userGrade) {
+        this(minCredits, maxCredits, fixedLectureKeys, completedCourseCodes, softConstraint, userGrade, "");
+    }
+
+    public RecommendationRequest(int minCredits,
+                                 int maxCredits,
+                                 Set<String> fixedLectureKeys,
+                                 Set<String> completedCourseCodes,
+                                 SoftConstraint softConstraint,
+                                 int userGrade,
+                                 String studentId) {
         this.minCredits = minCredits;
         this.maxCredits = maxCredits;
         this.fixedLectureKeys = fixedLectureKeys != null
@@ -49,6 +70,8 @@ public class RecommendationRequest implements Serializable {
                 ? new HashSet<>(completedCourseCodes)
                 : new HashSet<>();
         this.softConstraint = softConstraint != null ? softConstraint : new SoftConstraint();
+        this.userGrade = userGrade;
+        this.studentId = studentId != null ? studentId : "";
     }
 
     public int getMinCredits() {
@@ -69,5 +92,13 @@ public class RecommendationRequest implements Serializable {
 
     public SoftConstraint getSoftConstraint() {
         return softConstraint;
+    }
+
+    public int getUserGrade() {
+        return userGrade;
+    }
+
+    public String getStudentId() {
+        return studentId;
     }
 }

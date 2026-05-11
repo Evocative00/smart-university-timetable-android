@@ -255,6 +255,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
                                 Intent intent = new Intent(this, HardConstraintActivity.class);
                                 intent.putExtra("userGrade", grade);
+                                intent.putExtra("studentId", studentId);
                                 startActivity(intent);
                                 finish();
                             })

@@ -6,6 +6,7 @@ import com.syu.smarttimetable.domain.recommendation.rules.CompactScheduleRule;
 import com.syu.smarttimetable.domain.recommendation.rules.ConsiderTravelTimeRule;
 import com.syu.smarttimetable.domain.recommendation.rules.LunchBreakRule;
 import com.syu.smarttimetable.domain.recommendation.rules.PreferFreeDayRule;
+import com.syu.smarttimetable.domain.recommendation.rules.PreferGradeMatchedMajorRule;
 import com.syu.smarttimetable.domain.recommendation.rules.PreferMorningRule;
 import com.syu.smarttimetable.domain.recommendation.rules.PreferProfessorRule;
 import com.syu.smarttimetable.domain.recommendation.rules.RecommendationRule;
@@ -19,6 +20,7 @@ public class ScoreCalculator {
 
     public ScoreCalculator() {
         this.rules = new ArrayList<>();
+        this.rules.add(new PreferGradeMatchedMajorRule());  // 학년 맞춤 전공 과목 우선
         this.rules.add(new PreferFreeDayRule());
         this.rules.add(new PreferMorningRule());
         this.rules.add(new AvoidEveningRule());

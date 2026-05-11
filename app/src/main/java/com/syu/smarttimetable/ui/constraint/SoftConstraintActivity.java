@@ -28,6 +28,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
     private HardConstraint hardConstraint;
     private int userGrade = 0;
+    private String studentId = "";
     private LectureRepository lectureRepository;
 
     private CheckBox checkboxMonday;
@@ -50,6 +51,10 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         hardConstraint = (HardConstraint) getIntent().getSerializableExtra("hardConstraint");
         userGrade = getIntent().getIntExtra("userGrade", 0);
+        studentId = getIntent().getStringExtra("studentId");
+        if (studentId == null) {
+            studentId = "";
+        }
         lectureRepository = new LectureRepository();
 
         bindViews();
@@ -169,7 +174,9 @@ public class SoftConstraintActivity extends AppCompatActivity {
                 maxCredits,
                 fixedLectureKeySet,
                 new HashSet<>(),
-                softConstraint
+                softConstraint,
+                userGrade,
+                studentId
         );
 
         Intent intent = new Intent(this, MainActivity.class);
@@ -203,13 +210,21 @@ public class SoftConstraintActivity extends AppCompatActivity {
                 continue;
             }
 
-            boolean isChapel = courseName.equals("채플")
-                    || courseName.startsWith("채플(");
+            boolean isChapel = isChapelCourse(courseName);
 
             if (isChapel && lecture.getGrade() == userGrade) {
                 fixedLectureKeySet.add(RequiredLectureConstraint.buildLectureKey(lecture));
                 return;
             }
         }
+    }
+
+    private boolean isChapelCourse(String courseName) {
+        if (courseName == null) {
+            return false;
+        }
+
+        String normalized = courseName.trim().toLowerCase();
+        return normalized.startsWith("채플") || normalized.contains("chapel");
     }
 }

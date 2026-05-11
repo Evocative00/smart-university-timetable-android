@@ -45,6 +45,7 @@ public class HardConstraintActivity extends AppCompatActivity {
 
     private String selectedCategory = "전공";
     private int userGrade = 0;
+    private String studentId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,10 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         lectureRepository = new LectureRepository();
         userGrade = getIntent().getIntExtra("userGrade", 0);
+        studentId = getIntent().getStringExtra("studentId");
+        if (studentId == null) {
+            studentId = "";
+        }
 
         List<Lecture> lectures = lectureRepository.getAllLectures();
 
@@ -282,6 +287,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
         intent.putExtra("userGrade", userGrade);
+        intent.putExtra("studentId", studentId);
         startActivity(intent);
         finish();
     }
