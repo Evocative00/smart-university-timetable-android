@@ -17,6 +17,7 @@ import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
+import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,6 +114,26 @@ public class RecommendationActivity extends AppCompatActivity {
         Log.d(TAG, "  Fixed Lectures: " + recommendationRequest.getFixedLectureKeys().size());
         Log.d(TAG, "  Completed Courses: " + recommendationRequest.getCompletedCourseCodes().size());
 
+        String cacheKey =
+                TimetableCacheManager.generateCacheKey(recommendationRequest);
+
+        List<RecommendationEngine.TimetableScoreTuple> cachedResults =
+                TimetableCacheManager.getFromCache(cacheKey);
+
+        if (cachedResults != null) {
+            Log.d(TAG, "Using cached recommendation results");
+
+            recommendationResults.clear();
+            recommendationResults.addAll(cachedResults);
+            currentIndex = 0;
+
+            contentContainer.setVisibility(View.VISIBLE);
+            emptyStateContainer.setVisibility(View.GONE);
+
+            renderCurrentRecommendation();
+            return;
+        }
+
         showLoadingState();
 
         new Thread(() -> {
@@ -133,6 +154,8 @@ public class RecommendationActivity extends AppCompatActivity {
                 RecommendationEngine engine = new RecommendationEngine();
                 List<RecommendationEngine.TimetableScoreTuple> results =
                         engine.recommend(allLectures, recommendationRequest);
+
+                TimetableCacheManager.addToCache(cacheKey, results);
 
                 Log.d(TAG, "Recommendation complete. Results: " + (results == null ? 0 : results.size()));
 
