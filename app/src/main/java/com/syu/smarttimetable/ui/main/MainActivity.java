@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RecommendationRequest recommendationRequest;
     private int userGrade = 0;
+    private String studentId = "";
     private UserRepository userRepository;
 
     private TextView tvMainTitle;
@@ -33,6 +34,16 @@ public class MainActivity extends AppCompatActivity {
 
         recommendationRequest = (RecommendationRequest) getIntent().getSerializableExtra("recommendationRequest");
         userGrade = getIntent().getIntExtra("userGrade", 0);
+        studentId = getIntent().getStringExtra("studentId");
+
+        if (studentId == null) {
+            studentId = "";
+        }
+
+        if (recommendationRequest != null && studentId.isEmpty()) {
+            studentId = recommendationRequest.getStudentId();
+        }
+
         userRepository = new UserRepository();
 
         bindViews();
@@ -113,13 +124,20 @@ public class MainActivity extends AppCompatActivity {
                     if (gradeValue != null) {
                         userGrade = gradeValue.intValue();
                     }
+
+                    String studentIdValue = documentSnapshot.getString("studentId");
+
+                    if (studentIdValue != null) {
+                        studentId = studentIdValue;
+                    }
                 });
     }
 
     private void navigateToHardConstraintWithGrade() {
-        if (userGrade > 0) {
+        if (userGrade > 0 && studentId != null && !studentId.trim().isEmpty()) {
             Intent intent = new Intent(this, HardConstraintActivity.class);
             intent.putExtra("userGrade", userGrade);
+            intent.putExtra("studentId", studentId);
             startActivity(intent);
             return;
         }
@@ -128,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (firebaseUser == null) {
             Intent intent = new Intent(this, HardConstraintActivity.class);
+            intent.putExtra("userGrade", userGrade);
+            intent.putExtra("studentId", studentId);
             startActivity(intent);
             return;
         }
@@ -140,14 +160,23 @@ public class MainActivity extends AppCompatActivity {
                         if (gradeValue != null) {
                             userGrade = gradeValue.intValue();
                         }
+
+                        String studentIdValue = documentSnapshot.getString("studentId");
+
+                        if (studentIdValue != null) {
+                            studentId = studentIdValue;
+                        }
                     }
 
                     Intent intent = new Intent(this, HardConstraintActivity.class);
                     intent.putExtra("userGrade", userGrade);
+                    intent.putExtra("studentId", studentId);
                     startActivity(intent);
                 })
                 .addOnFailureListener(e -> {
                     Intent intent = new Intent(this, HardConstraintActivity.class);
+                    intent.putExtra("userGrade", userGrade);
+                    intent.putExtra("studentId", studentId);
                     startActivity(intent);
                 });
     }

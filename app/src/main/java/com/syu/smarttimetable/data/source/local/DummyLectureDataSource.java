@@ -998,6 +998,7 @@ public class DummyLectureDataSource {
                                 java.util.Arrays.asList()                       // 시간 자체가 없음
                         ),
 
+                        /*
                         new Lecture(
                                 "732",                          // 과목 코드
                                 "종합시험",                    // 과목명
@@ -1013,6 +1014,7 @@ public class DummyLectureDataSource {
                                 GeneralArea.NONE,               // 교양이면 영역선택, 아니면 NONE
                                 java.util.Arrays.asList()                       // 시간 자체가 없음
                         ),
+                        */
 
                         new Lecture(
                                 "735",                          // 과목 코드

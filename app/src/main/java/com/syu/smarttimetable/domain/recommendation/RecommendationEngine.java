@@ -3,7 +3,11 @@ package com.syu.smarttimetable.domain.recommendation;
 import android.util.Log;
 
 import com.syu.smarttimetable.data.model.Lecture;
+import com.syu.smarttimetable.data.model.LectureTime;
+import com.syu.smarttimetable.data.model.SoftConstraint;
 import com.syu.smarttimetable.data.model.Timetable;
+import com.syu.smarttimetable.data.model.enums.CourseCategory;
+import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.constraints.HardConstraintValidator;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 import com.syu.smarttimetable.domain.timetable.TimetableGenerator;
@@ -69,6 +73,10 @@ public class RecommendationEngine {
         Set<String> seenTimetableSignatures = new HashSet<>();
 
         for (Timetable candidate : candidates) {
+            if (candidate == null) {
+                continue;
+            }
+
             HardConstraintValidator.ValidationResult validationResult =
                     hardConstraintValidator.validate(candidate.getLecturesReadOnly(), request);
 
@@ -78,6 +86,7 @@ public class RecommendationEngine {
             }
 
             String signature = buildTimetableSignature(candidate);
+
             if (!seenTimetableSignatures.add(signature)) {
                 Log.d(TAG, "Duplicate candidate skipped: " + signature);
                 continue;
@@ -90,6 +99,14 @@ public class RecommendationEngine {
         Log.d(TAG, "Valid recommendations after filtering: " + results.size());
 
         results.sort((first, second) -> {
+            int firstGradeMajorCount = countGradeMatchedMajors(first.getTimetable(), request);
+            int secondGradeMajorCount = countGradeMatchedMajors(second.getTimetable(), request);
+
+            int gradeMajorCompare = Integer.compare(secondGradeMajorCount, firstGradeMajorCount);
+            if (gradeMajorCompare != 0) {
+                return gradeMajorCompare;
+            }
+
             int scoreCompare = Integer.compare(second.getScore(), first.getScore());
             if (scoreCompare != 0) {
                 return scoreCompare;
@@ -101,6 +118,8 @@ public class RecommendationEngine {
             );
         });
 
+        results = prioritizeFreeDayPreferences(results, request);
+
         if (results.size() > MAX_RECOMMENDATIONS) {
             Log.d(TAG, "Returning top " + MAX_RECOMMENDATIONS + " recommendations");
             return new ArrayList<>(results.subList(0, MAX_RECOMMENDATIONS));
@@ -108,6 +127,86 @@ public class RecommendationEngine {
 
         Log.d(TAG, "Returning " + results.size() + " recommendations");
         return results;
+    }
+
+    private List<TimetableScoreTuple> prioritizeFreeDayPreferences(List<TimetableScoreTuple> results,
+                                                                   RecommendationRequest request) {
+        if (results == null || results.isEmpty() || request == null) {
+            return results;
+        }
+
+        SoftConstraint softConstraint = request.getSoftConstraint();
+
+        if (softConstraint == null
+                || softConstraint.isSkipped()
+                || softConstraint.getPreferredFreeDays() == null
+                || softConstraint.getPreferredFreeDays().isEmpty()) {
+            return results;
+        }
+
+        List<TimetableScoreTuple> freeDaySatisfied = new ArrayList<>();
+        List<TimetableScoreTuple> freeDayViolated = new ArrayList<>();
+
+        for (TimetableScoreTuple tuple : results) {
+            if (tuple == null || tuple.getTimetable() == null) {
+                continue;
+            }
+
+            if (containsAnyPreferredFreeDayLecture(tuple.getTimetable(), softConstraint.getPreferredFreeDays())) {
+                freeDayViolated.add(tuple);
+            } else {
+                freeDaySatisfied.add(tuple);
+            }
+        }
+
+        List<TimetableScoreTuple> prioritized = new ArrayList<>(results.size());
+        prioritized.addAll(freeDaySatisfied);
+        prioritized.addAll(freeDayViolated);
+
+        return prioritized;
+    }
+
+    private boolean containsAnyPreferredFreeDayLecture(Timetable timetable, List<DayOfWeek> preferredFreeDays) {
+        if (timetable == null || preferredFreeDays == null || preferredFreeDays.isEmpty()) {
+            return false;
+        }
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null || lecture.getTimes() == null) {
+                continue;
+            }
+
+            for (LectureTime time : lecture.getTimes()) {
+                if (time != null
+                        && time.getDay() != null
+                        && preferredFreeDays.contains(time.getDay())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private int countGradeMatchedMajors(Timetable timetable, RecommendationRequest request) {
+        if (timetable == null || request == null || request.getUserGrade() <= 0) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null) {
+                continue;
+            }
+
+            if (lecture.getCategory() == CourseCategory.MAJOR
+                    && lecture.getGrade() == request.getUserGrade()) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private String buildTimetableSignature(Timetable timetable) {

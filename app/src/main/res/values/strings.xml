@@ -57,8 +57,8 @@
     <string name="main_flow_desc">1. 하드제약 입력\n2. 소프트제약 입력\n3. 하드제약 통과 후보 생성\n4. 소프트제약 점수 기반 정렬</string>
     <string name="btn_start_recommendation">추천 시작하기</string>
     <string name="btn_view_result">추천 결과 보기</string>
-
     <string name="btn_edit_conditions">입력 조건 수정</string>
+
     <string name="recommendation_title">추천 시간표</string>
     <string name="recommendation_subtitle">조건을 만족한 후보를 정렬했습니다.</string>
     <string name="rank_default">1 / 1</string>

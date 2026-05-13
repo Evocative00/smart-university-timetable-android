@@ -13,13 +13,15 @@ public class AvoidEveningRule implements RecommendationRule {
 
     @Override
     public int calculateScore(Timetable timetable, RecommendationRequest request) {
-        if (request == null
+        if (timetable == null
+                || request == null
                 || request.getSoftConstraint() == null
                 || request.getSoftConstraint().isSkipped()) {
             return 0;
         }
 
         int score = 0;
+        FreeTimePreference preference = request.getSoftConstraint().getFreeTimePreference();
 
         for (Lecture lecture : timetable.getLecturesReadOnly()) {
             if (lecture == null || lecture.getTimes() == null) {
@@ -31,16 +33,22 @@ public class AvoidEveningRule implements RecommendationRule {
                     continue;
                 }
 
-                if (request.getSoftConstraint().getFreeTimePreference() == FreeTimePreference.MORNING) {
+                if (preference != FreeTimePreference.NONE && time.getEndTime() > EVENING) {
+                    score -= 15;
+                }
+
+                if (preference == FreeTimePreference.MORNING) {
                     if (time.getStartTime() >= NOON && time.getStartTime() < EVENING) {
                         score += 12;
                     } else if (time.getStartTime() < NOON) {
                         score -= 10;
                     }
-                }
-
-                if (time.getEndTime() > EVENING) {
-                    score -= 15;
+                } else if (preference == FreeTimePreference.AFTERNOON) {
+                    if (time.getStartTime() < NOON) {
+                        score += 12;
+                    } else if (time.getStartTime() >= NOON && time.getStartTime() < EVENING) {
+                        score -= 10;
+                    }
                 }
             }
         }

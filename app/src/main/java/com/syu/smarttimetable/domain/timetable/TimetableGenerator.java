@@ -4,12 +4,16 @@ import android.util.Log;
 
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.Timetable;
+import com.syu.smarttimetable.data.model.enums.ClassParity;
+import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class TimetableGenerator {
@@ -21,13 +25,20 @@ public class TimetableGenerator {
         List<Timetable> results = new ArrayList<>();
 
         if (lecturePool == null || lecturePool.isEmpty() || request == null) {
-            Log.w(TAG, "Invalid input: lecturePool=" + (lecturePool == null ? "null" : lecturePool.size()) +
-                    ", request=" + (request == null ? "null" : "ok"));
+            Log.w(TAG, "Invalid input: lecturePool="
+                    + (lecturePool == null ? "null" : lecturePool.size())
+                    + ", request="
+                    + (request == null ? "null" : "ok"));
             return results;
         }
 
-        Log.d(TAG, "Starting with " + lecturePool.size() + " lectures, need " +
-                request.getMinCredits() + "~" + request.getMaxCredits() + " credits");
+        Log.d(TAG, "Starting with " + lecturePool.size()
+                + " lectures, need "
+                + request.getMinCredits()
+                + "~"
+                + request.getMaxCredits()
+                + " credits");
+
         Log.d(TAG, "Fixed lectures required: " + request.getFixedLectureKeys().size());
 
         Timetable baseTimetable = new Timetable();
@@ -35,31 +46,29 @@ public class TimetableGenerator {
         Set<String> usedCourseNames = new HashSet<>();
         Set<String> unresolvedFixedKeys = new HashSet<>(request.getFixedLectureKeys());
 
-        // 고정 강의 추가
         for (Lecture lecture : lecturePool) {
             if (lecture == null) {
                 continue;
             }
 
             String lectureKey = RequiredLectureConstraint.buildLectureKey(lecture);
+
             if (!request.getFixedLectureKeys().contains(lectureKey)) {
                 continue;
             }
 
-            // 고정 강의 추가 가능 여부 확인
             if (baseTimetable.hasConflict(lecture)) {
                 Log.w(TAG, "Fixed lecture has time conflict: " + lectureKey);
-                // 고정 강의가 충돌하면 추천 불가 - 빈 리스트 반환
                 return results;
             }
 
             if (usedCourseCodes.contains(lecture.getCourseCode())) {
                 Log.w(TAG, "Fixed lecture already added: " + lecture.getCourseCode());
-                // 같은 과목을 여러 번 추가하려는 시도 - 빈 리스트 반환
                 return results;
             }
 
             String normalizedCourseName = normalizeCourseName(lecture.getCourseName());
+
             if (!normalizedCourseName.isEmpty() && usedCourseNames.contains(normalizedCourseName)) {
                 Log.w(TAG, "Skipping duplicate fixed course name: " + normalizedCourseName);
                 unresolvedFixedKeys.remove(lectureKey);
@@ -67,21 +76,27 @@ public class TimetableGenerator {
             }
 
             if (baseTimetable.getTotalCredits() + lecture.getCredits() > request.getMaxCredits()) {
-                Log.w(TAG, "Fixed lectures exceed max credits: " + (baseTimetable.getTotalCredits() + lecture.getCredits()) + " > " + request.getMaxCredits());
-                // 고정 강의만으로도 학점 초과 - 빈 리스트 반환
+                Log.w(TAG, "Fixed lectures exceed max credits: "
+                        + (baseTimetable.getTotalCredits() + lecture.getCredits())
+                        + " > "
+                        + request.getMaxCredits());
                 return results;
             }
 
             baseTimetable.addLecture(lecture);
             usedCourseCodes.add(lecture.getCourseCode());
+
             if (!normalizedCourseName.isEmpty()) {
                 usedCourseNames.add(normalizedCourseName);
             }
+
             unresolvedFixedKeys.remove(lectureKey);
-            Log.d(TAG, "Added fixed lecture: " + lectureKey + ", current credits: " + baseTimetable.getTotalCredits());
+
+            Log.d(TAG, "Added fixed lecture: " + lectureKey
+                    + ", current credits: "
+                    + baseTimetable.getTotalCredits());
         }
 
-        // 모든 고정 강의를 찾지 못한 경우 - 요청된 고정 강의가 있으면 반환, 없으면 계속 진행
         if (!request.getFixedLectureKeys().isEmpty() && !unresolvedFixedKeys.isEmpty()) {
             Log.w(TAG, "Could not find some fixed lectures: " + unresolvedFixedKeys);
             return results;
@@ -90,7 +105,6 @@ public class TimetableGenerator {
         int baseCredits = baseTimetable.getTotalCredits();
         Log.d(TAG, "Base credits: " + baseCredits);
 
-        // 남은 강의들로 조합 생성
         List<Lecture> remainingLectures = new ArrayList<>();
 
         for (Lecture lecture : lecturePool) {
@@ -109,12 +123,19 @@ public class TimetableGenerator {
             }
 
             String normalizedCourseName = normalizeCourseName(lecture.getCourseName());
+
             if (!normalizedCourseName.isEmpty() && usedCourseNames.contains(normalizedCourseName)) {
+                continue;
+            }
+
+            if (!isValidByStudentIdParity(lecture, request.getStudentId())) {
                 continue;
             }
 
             remainingLectures.add(lecture);
         }
+
+        sortLecturesByGradeAndCategory(remainingLectures, request);
 
         Log.d(TAG, "Backtracking with " + remainingLectures.size() + " remaining lectures");
 
@@ -128,7 +149,6 @@ public class TimetableGenerator {
                 results
         );
 
-        // 고정 강의만으로도 학점 조건 만족하면 그것도 포함
         if (baseCredits >= request.getMinCredits() && baseCredits <= request.getMaxCredits()) {
             if (results.isEmpty()) {
                 results.add(new Timetable(baseTimetable.getLecturesReadOnly()));
@@ -165,7 +185,6 @@ public class TimetableGenerator {
             return;
         }
 
-        int failedToAddCount = 0;
         for (int i = startIndex; i < lecturePool.size(); i++) {
             Lecture nextLecture = lecturePool.get(i);
 
@@ -174,28 +193,26 @@ public class TimetableGenerator {
             }
 
             if (usedCourseCodes.contains(nextLecture.getCourseCode())) {
-                failedToAddCount++;
                 continue;
             }
 
             String normalizedCourseName = normalizeCourseName(nextLecture.getCourseName());
+
             if (!normalizedCourseName.isEmpty() && usedCourseNames.contains(normalizedCourseName)) {
-                failedToAddCount++;
                 continue;
             }
 
             if (current.hasConflict(nextLecture)) {
-                failedToAddCount++;
                 continue;
             }
 
             if (currentCredits + nextLecture.getCredits() > request.getMaxCredits()) {
-                failedToAddCount++;
                 continue;
             }
 
             current.addLecture(nextLecture);
             usedCourseCodes.add(nextLecture.getCourseCode());
+
             if (!normalizedCourseName.isEmpty()) {
                 usedCourseNames.add(normalizedCourseName);
             }
@@ -212,13 +229,10 @@ public class TimetableGenerator {
 
             current.removeLecture(nextLecture);
             usedCourseCodes.remove(nextLecture.getCourseCode());
+
             if (!normalizedCourseName.isEmpty()) {
                 usedCourseNames.remove(normalizedCourseName);
             }
-        }
-
-        if (failedToAddCount == lecturePool.size() - startIndex) {
-            Log.d(TAG, "No more lectures can be added at depth with " + currentCredits + " credits");
         }
     }
 
@@ -227,6 +241,109 @@ public class TimetableGenerator {
             return "";
         }
 
-        return courseName.trim().replaceAll("\\s+", " ");
+        String normalized = courseName.trim().replaceAll("\\s+", " ");
+        String lowerCase = normalized.toLowerCase();
+
+        if (lowerCase.startsWith("채플") || lowerCase.contains("chapel")) {
+            return "채플";
+        }
+
+        return normalized;
+    }
+
+    private void sortLecturesByGradeAndCategory(List<Lecture> lectures, RecommendationRequest request) {
+        if (lectures == null || request == null || request.getUserGrade() <= 0) {
+            return;
+        }
+
+        int userGrade = request.getUserGrade();
+
+        List<Lecture> gradeMatchedMajors = new ArrayList<>();
+        List<Lecture> otherMajors = new ArrayList<>();
+        List<Lecture> generals = new ArrayList<>();
+        List<Lecture> others = new ArrayList<>();
+
+        for (Lecture lecture : lectures) {
+            if (lecture == null) {
+                continue;
+            }
+
+            if (lecture.getCategory() == CourseCategory.MAJOR) {
+                if (lecture.getGrade() == userGrade) {
+                    gradeMatchedMajors.add(lecture);
+                } else {
+                    otherMajors.add(lecture);
+                }
+            } else if (lecture.getCategory() == CourseCategory.GENERAL) {
+                generals.add(lecture);
+            } else {
+                others.add(lecture);
+            }
+        }
+
+        gradeMatchedMajors.sort((first, second) ->
+                Integer.compare(second.getCredits(), first.getCredits()));
+
+        otherMajors.sort((first, second) ->
+                Integer.compare(second.getCredits(), first.getCredits()));
+
+        Collections.shuffle(generals, new Random());
+
+        lectures.clear();
+        lectures.addAll(gradeMatchedMajors);
+        lectures.addAll(otherMajors);
+        lectures.addAll(generals);
+        lectures.addAll(others);
+    }
+
+    private boolean isValidByStudentIdParity(Lecture lecture, String studentId) {
+        if (lecture == null) {
+            return false;
+        }
+
+        ClassParity classParity = lecture.getClassParity();
+
+        if (classParity == null || classParity == ClassParity.ALL) {
+            return true;
+        }
+
+        Boolean isStudentEven = isStudentIdEven(studentId);
+
+        if (isStudentEven == null) {
+            return true;
+        }
+
+        if (classParity == ClassParity.EVEN) {
+            return isStudentEven;
+        }
+
+        if (classParity == ClassParity.ODD) {
+            return !isStudentEven;
+        }
+
+        return true;
+    }
+
+    private Boolean isStudentIdEven(String studentId) {
+        if (studentId == null) {
+            return null;
+        }
+
+        String trimmed = studentId.trim();
+
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        for (int i = trimmed.length() - 1; i >= 0; i--) {
+            char ch = trimmed.charAt(i);
+
+            if (Character.isDigit(ch)) {
+                int digit = ch - '0';
+                return digit % 2 == 0;
+            }
+        }
+
+        return null;
     }
 }
