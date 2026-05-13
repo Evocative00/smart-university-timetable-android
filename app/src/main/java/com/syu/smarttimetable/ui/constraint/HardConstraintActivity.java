@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +78,9 @@ public class HardConstraintActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> finish());
+
         autoCredits = findViewById(R.id.auto_credits);
         autoCategory = findViewById(R.id.auto_category);
         autoLecture = findViewById(R.id.auto_lecture);
@@ -283,7 +287,6 @@ public class HardConstraintActivity extends AppCompatActivity {
         intent.putExtra("hardConstraint", hardConstraint);
         intent.putExtra("userGrade", userGrade);
         startActivity(intent);
-        finish();
     }
 
     private void updateSelectedLectureText() {

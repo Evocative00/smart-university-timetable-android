@@ -37,10 +37,9 @@ public class AvoidEveningRule implements RecommendationRule {
                     } else if (time.getStartTime() < NOON) {
                         score -= 10;
                     }
-                }
-
-                if (time.getEndTime() > EVENING) {
-                    score -= 15;
+                    if (time.getEndTime() > EVENING) {
+                        score -= 15;
+                    }
                 }
             }
         }

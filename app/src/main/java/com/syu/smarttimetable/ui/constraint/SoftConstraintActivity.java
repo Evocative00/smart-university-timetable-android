@@ -4,7 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
+import com.google.android.material.textfield.TextInputEditText;
+import android.widget.ImageButton;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,7 +39,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private RadioGroup radioGroupFreeTime;
     private CheckBox checkboxLunch;
     private CheckBox checkboxAvoidLongGap;
-    private EditText editPreferredProfessors;
+    private TextInputEditText editPreferredProfessors;
     private CheckBox checkboxTravelTime;
     private Button buttonSkip;
     private Button buttonRecommend;
@@ -57,6 +58,9 @@ public class SoftConstraintActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> finish());
+
         checkboxMonday = findViewById(R.id.checkboxMonday);
         checkboxTuesday = findViewById(R.id.checkboxTuesday);
         checkboxWednesday = findViewById(R.id.checkboxWednesday);
@@ -177,6 +181,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
         intent.putExtra("softConstraint", softConstraint);
         intent.putExtra("recommendationRequest", recommendationRequest);
         intent.putExtra("userGrade", userGrade);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
     }

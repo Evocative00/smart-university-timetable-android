@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -55,6 +56,9 @@ public class RecommendationActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> finish());
+
         tvScreenTitle = findViewById(R.id.tv_screen_title);
         tvScreenSubtitle = findViewById(R.id.tv_screen_subtitle);
         tvRank = findViewById(R.id.tv_rank);

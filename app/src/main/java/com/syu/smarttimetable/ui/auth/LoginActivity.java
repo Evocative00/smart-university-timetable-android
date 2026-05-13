@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.ui.main.MainActivity;
@@ -86,8 +87,12 @@ public class LoginActivity extends AppCompatActivity {
                                 finish();
                             });
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "로그인 실패: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
+                .addOnFailureListener(e -> {
+                    if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                        Toast.makeText(this, "비밀번호가 틀렸습니다.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "로그인 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }

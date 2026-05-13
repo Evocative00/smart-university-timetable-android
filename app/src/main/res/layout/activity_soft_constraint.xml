@@ -25,6 +25,15 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="뒤로가기"
+                    android:src="@drawable/ic_arrow_back" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -165,19 +174,19 @@
                     android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="@string/hint_professors"
-                    app:boxBackgroundMode="outline">
+                    android:hint="@string/hint_professors">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editPreferredProfessors"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
-                        android:hint="@string/hint_professors"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:textColorHint="@color/smart_text_secondary" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox

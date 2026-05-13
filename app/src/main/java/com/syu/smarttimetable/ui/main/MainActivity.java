@@ -2,18 +2,24 @@ package com.syu.smarttimetable.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Build;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
+import com.syu.smarttimetable.ui.constraint.SoftConstraintActivity;
 import com.syu.smarttimetable.ui.recommendation.RecommendationActivity;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +45,20 @@ public class MainActivity extends AppCompatActivity {
         setupUi();
         setupButtons();
         loadUserGradeIfNeeded();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            recommendationRequest = intent.getSerializableExtra("recommendationRequest", RecommendationRequest.class);
+        } else {
+            recommendationRequest = (RecommendationRequest) intent.getSerializableExtra("recommendationRequest");
+        }
+        int newGrade = intent.getIntExtra("userGrade", 0);
+        if (newGrade > 0) userGrade = newGrade;
+        setupUi();
     }
 
     private void bindViews() {
@@ -85,10 +105,7 @@ public class MainActivity extends AppCompatActivity {
             navigateToHardConstraintWithGrade();
         });
 
-        btnViewResult.setOnClickListener(v -> {
-            // 아래 버튼은 "입력 조건 수정" 역할
-            navigateToHardConstraintWithGrade();
-        });
+        btnViewResult.setOnClickListener(v -> showEditConditionsDialog());
     }
 
     private void loadUserGradeIfNeeded() {
@@ -114,6 +131,30 @@ public class MainActivity extends AppCompatActivity {
                         userGrade = gradeValue.intValue();
                     }
                 });
+    }
+
+    private void showEditConditionsDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("입력 조건 수정")
+                .setItems(new String[]{"하드제약 수정", "소프트제약 수정"}, (dialog, which) -> {
+                    if (which == 0) {
+                        navigateToHardConstraintWithGrade();
+                    } else {
+                        navigateToSoftConstraint();
+                    }
+                })
+                .show();
+    }
+
+    private void navigateToSoftConstraint() {
+        HardConstraint hardConstraint = new HardConstraint(
+                recommendationRequest.getMinCredits(),
+                new ArrayList<>(recommendationRequest.getFixedLectureKeys())
+        );
+        Intent intent = new Intent(this, SoftConstraintActivity.class);
+        intent.putExtra("hardConstraint", hardConstraint);
+        intent.putExtra("userGrade", userGrade);
+        startActivity(intent);
     }
 
     private void navigateToHardConstraintWithGrade() {
