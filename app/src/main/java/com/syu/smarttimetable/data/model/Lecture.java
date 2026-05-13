@@ -76,7 +76,9 @@ public class Lecture implements Serializable {   // 강의 하나를 나타내�
     public ClassParity getClassParity() { return classParity; }
     public String getClassroom() { return classroom; }
     public CourseCategory getCategory() { return category; }
-    public RequirementType getRequirement() { return requirement; }
+    public RequirementType getRequirementType() {
+        return requirement;
+    }
     public GeneralArea getGeneralArea() { return generalArea; }
     public List<LectureTime> getTimes() { return times; }
 }

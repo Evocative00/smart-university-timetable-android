@@ -171,11 +171,17 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         addRequiredChapelIfNeeded(fixedLectureKeySet);
 
+        HashSet<String> completedCourseCodes = new HashSet<>();
+
+        if (hardConstraint != null && hardConstraint.getCompletedCourseCodes() != null) {
+            completedCourseCodes.addAll(hardConstraint.getCompletedCourseCodes());
+        }
+
         RecommendationRequest recommendationRequest = new RecommendationRequest(
                 minCredits,
                 maxCredits,
                 fixedLectureKeySet,
-                new HashSet<>(),
+                completedCourseCodes,
                 softConstraint,
                 userGrade,
                 studentId

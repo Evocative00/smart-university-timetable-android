@@ -10,12 +10,14 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.HardConstraint;
@@ -25,8 +27,14 @@ import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 
+import com.syu.smarttimetable.data.model.enums.GeneralArea;
+import com.syu.smarttimetable.data.model.enums.RequirementType;
+
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HardConstraintActivity extends AppCompatActivity {
 
@@ -37,15 +45,52 @@ public class HardConstraintActivity extends AppCompatActivity {
     private Button btnNext;
     private TextView tvSelectedLectures;
 
+    private MaterialButton btnExcludedGrade1;
+    private MaterialButton btnExcludedGrade2;
+    private MaterialButton btnExcludedGrade3;
+    private MaterialButton btnExcludedGrade4;
+    private LinearLayout layoutExcludedMajorChips;
+    private TextView tvSelectedExcludedLectures;
+
+    private MaterialButton btnExcludedRequiredGeneral;
+    private MaterialButton btnExcludedHumanitiesArt;
+    private MaterialButton btnExcludedNaturalScience;
+    private MaterialButton btnExcludedSocialScience;
+    private MaterialButton btnExcludedDigitalLiteracy;
+    private MaterialButton btnExcludedCharacter;
+    private MaterialButton btnExcludedOptional;
+    private MaterialButton btnSelectAllCurrentCategory;
+
+    private ExcludedTabType currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_1;
+
+    private enum ExcludedTabType {
+        MAJOR_GRADE_1,
+        MAJOR_GRADE_2,
+        MAJOR_GRADE_3,
+        MAJOR_GRADE_4,
+        REQUIRED_GENERAL,
+        HUMANITIES_ART,
+        NATURAL_SCIENCE,
+        SOCIAL_SCIENCE,
+        DIGITAL_LITERACY,
+        CHARACTER_EDUCATION,
+        OPTIONAL
+    }
+
     private LectureRepository lectureRepository;
     private final List<Lecture> allLectures = new ArrayList<>();
     private final List<Lecture> filteredLectures = new ArrayList<>();
+
     private final List<String> fixedLectureKeys = new ArrayList<>();
     private final List<String> selectedLectureDisplayTexts = new ArrayList<>();
+
+    private final Set<String> excludedCourseNames = new LinkedHashSet<>();
+    private final List<String> selectedExcludedDisplayTexts = new ArrayList<>();
 
     private String selectedCategory = "전공";
     private int userGrade = 0;
     private String studentId = "";
+    private int selectedExcludedGrade = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +124,10 @@ public class HardConstraintActivity extends AppCompatActivity {
         setupCategoryDropdown();
         setupLectureDropdown(selectedCategory);
         setupButtons();
+        setupExcludedCourseUi();
+
         updateSelectedLectureText();
+        updateSelectedExcludedText();
     }
 
     private void bindViews() {
@@ -89,6 +137,22 @@ public class HardConstraintActivity extends AppCompatActivity {
         btnAddLecture = findViewById(R.id.btn_add_lecture);
         btnNext = findViewById(R.id.btn_next);
         tvSelectedLectures = findViewById(R.id.tv_selected_lectures);
+
+        btnExcludedGrade1 = findViewById(R.id.btn_excluded_grade_1);
+        btnExcludedGrade2 = findViewById(R.id.btn_excluded_grade_2);
+        btnExcludedGrade3 = findViewById(R.id.btn_excluded_grade_3);
+        btnExcludedGrade4 = findViewById(R.id.btn_excluded_grade_4);
+        layoutExcludedMajorChips = findViewById(R.id.layout_excluded_major_chips);
+        tvSelectedExcludedLectures = findViewById(R.id.tv_selected_excluded_lectures);
+
+        btnExcludedRequiredGeneral = findViewById(R.id.btn_excluded_required_general);
+        btnExcludedHumanitiesArt = findViewById(R.id.btn_excluded_humanities_art);
+        btnExcludedNaturalScience = findViewById(R.id.btn_excluded_natural_science);
+        btnExcludedSocialScience = findViewById(R.id.btn_excluded_social_science);
+        btnExcludedDigitalLiteracy = findViewById(R.id.btn_excluded_digital_literacy);
+        btnExcludedCharacter = findViewById(R.id.btn_excluded_character);
+        btnExcludedOptional = findViewById(R.id.btn_excluded_optional);
+        btnSelectAllCurrentCategory = findViewById(R.id.btn_select_all_current_category);
     }
 
     private void setupCreditDropdown() {
@@ -208,6 +272,353 @@ public class HardConstraintActivity extends AppCompatActivity {
         btnNext.setOnClickListener(v -> submitHardConstraint());
 
         tvSelectedLectures.setOnClickListener(v -> showRemoveFixedLectureDialog());
+        tvSelectedExcludedLectures.setOnClickListener(v -> showRemoveExcludedCourseDialog());
+        btnSelectAllCurrentCategory.setOnClickListener(v -> selectAllCurrentExcludedCategory());
+    }
+
+    private void setupExcludedCourseUi() {
+        btnExcludedGrade1.setOnClickListener(v -> showExcludedMajorChips(1));
+        btnExcludedGrade2.setOnClickListener(v -> showExcludedMajorChips(2));
+        btnExcludedGrade3.setOnClickListener(v -> showExcludedMajorChips(3));
+        btnExcludedGrade4.setOnClickListener(v -> showExcludedMajorChips(4));
+
+        btnExcludedRequiredGeneral.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.REQUIRED_GENERAL));
+        btnExcludedHumanitiesArt.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.HUMANITIES_ART));
+        btnExcludedNaturalScience.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.NATURAL_SCIENCE));
+        btnExcludedSocialScience.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.SOCIAL_SCIENCE));
+        btnExcludedDigitalLiteracy.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.DIGITAL_LITERACY));
+        btnExcludedCharacter.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.CHARACTER_EDUCATION));
+        btnExcludedOptional.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.OPTIONAL));
+
+        int initialGrade = userGrade > 0 ? userGrade : 1;
+        showExcludedMajorChips(initialGrade);
+    }
+
+    private void showExcludedMajorChips(int grade) {
+        selectedExcludedGrade = grade;
+
+        if (grade == 1) {
+            currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_1;
+        } else if (grade == 2) {
+            currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_2;
+        } else if (grade == 3) {
+            currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_3;
+        } else {
+            currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_4;
+        }
+
+        layoutExcludedMajorChips.removeAllViews();
+
+        List<String> uniqueCourseNames = new ArrayList<>();
+        Set<String> seenNames = new HashSet<>();
+
+        for (Lecture lecture : allLectures) {
+            if (lecture == null) {
+                continue;
+            }
+
+            if (lecture.getCategory() != CourseCategory.MAJOR) {
+                continue;
+            }
+
+            if (lecture.getGrade() != grade) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName();
+
+            if (TextUtils.isEmpty(courseName)) {
+                continue;
+            }
+
+            String normalizedName = normalizeCourseName(courseName);
+
+            if (seenNames.add(normalizedName)) {
+                uniqueCourseNames.add(courseName.trim());
+            }
+        }
+
+        if (uniqueCourseNames.isEmpty()) {
+            TextView emptyText = new TextView(this);
+            emptyText.setText(grade + "학년 전공 과목이 없습니다.");
+            emptyText.setTextSize(14);
+            emptyText.setPadding(0, 8, 0, 8);
+            layoutExcludedMajorChips.addView(emptyText);
+            return;
+        }
+
+        for (String courseName : uniqueCourseNames) {
+            MaterialButton chipButton = new MaterialButton(this);
+            chipButton.setAllCaps(false);
+
+            String normalizedName = normalizeCourseName(courseName);
+            boolean selected = excludedCourseNames.contains(normalizedName);
+
+            chipButton.setText(selected ? "✓ " + courseName : courseName);
+            chipButton.setMinHeight(dpToPx(42));
+            chipButton.setTextSize(13);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 0, 0, dpToPx(8));
+            chipButton.setLayoutParams(params);
+
+            chipButton.setOnClickListener(v -> {
+                toggleExcludedCourse(courseName);
+                showExcludedMajorChips(selectedExcludedGrade);
+            });
+
+            layoutExcludedMajorChips.addView(chipButton);
+        }
+    }
+
+    private void showExcludedGeneralChips(ExcludedTabType tabType) {
+        currentExcludedTabType = tabType;
+        layoutExcludedMajorChips.removeAllViews();
+
+        List<String> uniqueCourseNames = new ArrayList<>();
+        Set<String> seenNames = new HashSet<>();
+
+        for (Lecture lecture : allLectures) {
+            if (!isLectureInGeneralTab(lecture, tabType)) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName();
+
+            if (TextUtils.isEmpty(courseName)) {
+                continue;
+            }
+
+            String normalizedName = normalizeCourseName(courseName);
+
+            if (seenNames.add(normalizedName)) {
+                uniqueCourseNames.add(courseName.trim());
+            }
+        }
+
+        if (uniqueCourseNames.isEmpty()) {
+            TextView emptyText = new TextView(this);
+            emptyText.setText(getExcludedTabLabel(tabType) + " 과목이 없습니다.");
+            emptyText.setTextSize(14);
+            emptyText.setPadding(0, 8, 0, 8);
+            layoutExcludedMajorChips.addView(emptyText);
+            return;
+        }
+
+        for (String courseName : uniqueCourseNames) {
+            MaterialButton chipButton = new MaterialButton(this);
+            chipButton.setAllCaps(false);
+
+            String normalizedName = normalizeCourseName(courseName);
+            boolean selected = excludedCourseNames.contains(normalizedName);
+
+            chipButton.setText(selected ? "✓ " + courseName : courseName);
+            chipButton.setMinHeight(dpToPx(42));
+            chipButton.setTextSize(13);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 0, 0, dpToPx(8));
+            chipButton.setLayoutParams(params);
+
+            chipButton.setOnClickListener(v -> {
+                toggleExcludedCourse(courseName);
+                showExcludedGeneralChips(currentExcludedTabType);
+            });
+
+            layoutExcludedMajorChips.addView(chipButton);
+        }
+    }
+
+    private boolean isLectureInGeneralTab(Lecture lecture, ExcludedTabType tabType) {
+        if (lecture == null || lecture.getCategory() != CourseCategory.GENERAL) {
+            return false;
+        }
+
+        switch (tabType) {
+            case REQUIRED_GENERAL:
+                return lecture.getRequirementType() == RequirementType.REQUIRED;
+
+            case HUMANITIES_ART:
+                return lecture.getGeneralArea() == GeneralArea.HUMANITIES_ART;
+
+            case NATURAL_SCIENCE:
+                return lecture.getGeneralArea() == GeneralArea.NATURAL_SCIENCE;
+
+            case SOCIAL_SCIENCE:
+                return lecture.getGeneralArea() == GeneralArea.SOCIAL_SCIENCE;
+
+            case DIGITAL_LITERACY:
+                return lecture.getGeneralArea() == GeneralArea.DIGITAL_LITERACY;
+
+            case CHARACTER_EDUCATION:
+                return lecture.getGeneralArea() == GeneralArea.CHARACTER_EDUCATION;
+
+            case OPTIONAL:
+                return lecture.getRequirementType() == RequirementType.OPTIONAL
+                        && lecture.getGeneralArea() == GeneralArea.NONE;
+
+            default:
+                return false;
+        }
+    }
+
+    private void selectAllCurrentExcludedCategory() {
+        int addedCount = 0;
+
+        for (Lecture lecture : allLectures) {
+            if (lecture == null) {
+                continue;
+            }
+
+            boolean matched;
+
+            switch (currentExcludedTabType) {
+                case MAJOR_GRADE_1:
+                    matched = lecture.getCategory() == CourseCategory.MAJOR && lecture.getGrade() == 1;
+                    break;
+
+                case MAJOR_GRADE_2:
+                    matched = lecture.getCategory() == CourseCategory.MAJOR && lecture.getGrade() == 2;
+                    break;
+
+                case MAJOR_GRADE_3:
+                    matched = lecture.getCategory() == CourseCategory.MAJOR && lecture.getGrade() == 3;
+                    break;
+
+                case MAJOR_GRADE_4:
+                    matched = lecture.getCategory() == CourseCategory.MAJOR && lecture.getGrade() == 4;
+                    break;
+
+                default:
+                    matched = isLectureInGeneralTab(lecture, currentExcludedTabType);
+                    break;
+            }
+
+            if (!matched) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName();
+
+            if (TextUtils.isEmpty(courseName)) {
+                continue;
+            }
+
+            if (addExcludedCourseByName(courseName)) {
+                addedCount++;
+            }
+        }
+
+        updateSelectedExcludedText();
+        refreshCurrentExcludedChipList();
+
+        if (addedCount > 0) {
+            Toast.makeText(this, "현재 카테고리 과목을 전체 선택했습니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "이미 모두 선택되어 있습니다.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void refreshCurrentExcludedChipList() {
+        switch (currentExcludedTabType) {
+            case MAJOR_GRADE_1:
+                showExcludedMajorChips(1);
+                break;
+
+            case MAJOR_GRADE_2:
+                showExcludedMajorChips(2);
+                break;
+
+            case MAJOR_GRADE_3:
+                showExcludedMajorChips(3);
+                break;
+
+            case MAJOR_GRADE_4:
+                showExcludedMajorChips(4);
+                break;
+
+            default:
+                showExcludedGeneralChips(currentExcludedTabType);
+                break;
+        }
+    }
+    private String getExcludedTabLabel(ExcludedTabType tabType) {
+        switch (tabType) {
+            case MAJOR_GRADE_1:
+                return "1학년 전공";
+
+            case MAJOR_GRADE_2:
+                return "2학년 전공";
+
+            case MAJOR_GRADE_3:
+                return "3학년 전공";
+
+            case MAJOR_GRADE_4:
+                return "4학년 전공";
+
+            case REQUIRED_GENERAL:
+                return "필수교양";
+
+            case HUMANITIES_ART:
+                return "인문예술영역";
+
+            case NATURAL_SCIENCE:
+                return "자연과학영역";
+
+            case SOCIAL_SCIENCE:
+                return "사회과학영역";
+
+            case DIGITAL_LITERACY:
+                return "디지털리터러시영역";
+
+            case CHARACTER_EDUCATION:
+                return "인성교육영역";
+
+            case OPTIONAL:
+                return "일반선택영역";
+
+            default:
+                return "카테고리";
+        }
+    }
+
+    private boolean addExcludedCourseByName(String courseName) {
+        if (TextUtils.isEmpty(courseName)) {
+            return false;
+        }
+
+        String normalizedName = normalizeCourseName(courseName);
+
+        if (excludedCourseNames.contains(normalizedName)) {
+            return false;
+        }
+
+        excludedCourseNames.add(normalizedName);
+        selectedExcludedDisplayTexts.add(courseName.trim());
+        return true;
+    }
+
+    private void toggleExcludedCourse(String courseName) {
+        if (TextUtils.isEmpty(courseName)) {
+            return;
+        }
+
+        String normalizedName = normalizeCourseName(courseName);
+
+        if (excludedCourseNames.contains(normalizedName)) {
+            excludedCourseNames.remove(normalizedName);
+            removeExcludedDisplayText(normalizedName);
+        } else {
+            addExcludedCourseByName(courseName);
+        }
+
+        updateSelectedExcludedText();
     }
 
     private void showRemoveFixedLectureDialog() {
@@ -232,6 +643,29 @@ public class HardConstraintActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void showRemoveExcludedCourseDialog() {
+        if (selectedExcludedDisplayTexts.isEmpty()) {
+            Toast.makeText(this, "삭제할 제외 과목이 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] items = selectedExcludedDisplayTexts.toArray(new String[0]);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("삭제할 이수/제외 과목 선택")
+                .setItems(items, (dialog, which) -> {
+                    if (which >= 0 && which < selectedExcludedDisplayTexts.size()) {
+                        String removedDisplayName = selectedExcludedDisplayTexts.remove(which);
+                        excludedCourseNames.remove(normalizeCourseName(removedDisplayName));
+                        updateSelectedExcludedText();
+                        showExcludedMajorChips(selectedExcludedGrade);
+                        Toast.makeText(this, "제외 과목이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("닫기", null)
+                .show();
+    }
+
     private void addFixedLecture() {
         String selectedLectureText = getText(autoLecture);
 
@@ -241,6 +675,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         }
 
         Lecture selectedLecture = findLectureByDisplayText(selectedLectureText);
+
         if (selectedLecture == null) {
             Toast.makeText(this, "선택한 과목 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
             return;
@@ -271,6 +706,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         }
 
         int targetCredits;
+
         try {
             targetCredits = Integer.parseInt(creditText);
         } catch (NumberFormatException e) {
@@ -278,9 +714,12 @@ public class HardConstraintActivity extends AppCompatActivity {
             return;
         }
 
+        List<String> completedCourseCodes = buildCompletedCourseCodes();
+
         HardConstraint hardConstraint = new HardConstraint(
                 targetCredits,
-                new ArrayList<>(fixedLectureKeys)
+                new ArrayList<>(fixedLectureKeys),
+                completedCourseCodes
         );
 
         Toast.makeText(this, "하드제약 저장 완료", Toast.LENGTH_SHORT).show();
@@ -291,6 +730,30 @@ public class HardConstraintActivity extends AppCompatActivity {
         intent.putExtra("studentId", studentId);
         startActivity(intent);
         finish();
+    }
+
+    private List<String> buildCompletedCourseCodes() {
+        Set<String> completedCodes = new LinkedHashSet<>();
+
+        for (Lecture lecture : allLectures) {
+            if (lecture == null) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName();
+
+            if (TextUtils.isEmpty(courseName)) {
+                continue;
+            }
+
+            String normalizedLectureName = normalizeCourseName(courseName);
+
+            if (excludedCourseNames.contains(normalizedLectureName)) {
+                completedCodes.add(lecture.getCourseCode());
+            }
+        }
+
+        return new ArrayList<>(completedCodes);
     }
 
     private void updateSelectedLectureText() {
@@ -312,12 +775,40 @@ public class HardConstraintActivity extends AppCompatActivity {
         tvSelectedLectures.setText(builder.toString().trim());
     }
 
+    private void updateSelectedExcludedText() {
+        if (selectedExcludedDisplayTexts.isEmpty()) {
+            tvSelectedExcludedLectures.setText("선택된 이수/제외 과목 없음");
+            return;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("선택된 이수/제외 과목\n");
+
+        for (int i = 0; i < selectedExcludedDisplayTexts.size(); i++) {
+            builder.append(i + 1)
+                    .append(". ")
+                    .append(selectedExcludedDisplayTexts.get(i))
+                    .append("\n");
+        }
+
+        tvSelectedExcludedLectures.setText(builder.toString().trim());
+    }
+
+    private void removeExcludedDisplayText(String normalizedName) {
+        for (int i = selectedExcludedDisplayTexts.size() - 1; i >= 0; i--) {
+            if (normalizeCourseName(selectedExcludedDisplayTexts.get(i)).equals(normalizedName)) {
+                selectedExcludedDisplayTexts.remove(i);
+            }
+        }
+    }
+
     private Lecture findLectureByDisplayText(String displayText) {
         for (Lecture lecture : filteredLectures) {
             if (buildLectureDisplayText(lecture).equals(displayText)) {
                 return lecture;
             }
         }
+
         return null;
     }
 
@@ -395,6 +886,18 @@ public class HardConstraintActivity extends AppCompatActivity {
         int minute = minutes % 60;
 
         return String.format("%02d:%02d", hour, minute);
+    }
+
+    private String normalizeCourseName(String courseName) {
+        if (courseName == null) {
+            return "";
+        }
+
+        return courseName.trim().replaceAll("\\s+", " ");
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
     private String getText(TextView view) {
