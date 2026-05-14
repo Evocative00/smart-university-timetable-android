@@ -7,9 +7,10 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.User;
 import com.syu.smarttimetable.data.repository.UserRepository;
+import com.syu.smarttimetable.ui.auth.LoginActivity;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
 
 import java.util.ArrayList;
@@ -31,9 +33,9 @@ import java.util.List;
 
 public class UserInfoActivity extends AppCompatActivity {
 
-    private AutoCompleteTextView autoDepartment;
-    private AutoCompleteTextView autoMajorDetail;
-    private AutoCompleteTextView autoGrade;
+    private MaterialAutoCompleteTextView autoDepartment;
+    private MaterialAutoCompleteTextView autoMajorDetail;
+    private MaterialAutoCompleteTextView autoGrade;
     private TextInputEditText etStudentId;
     private TextInputLayout layoutMajorDetail;
     private Button btnSave;
@@ -50,6 +52,15 @@ public class UserInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_info);
 
         userRepository = new UserRepository();
+
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> {
+            userRepository.logout();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        });
 
         bindViews();
         setupDepartmentDropdown();

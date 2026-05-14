@@ -25,6 +25,15 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="뒤로가기"
+                    android:src="@drawable/ic_arrow_back" />
+
                 <TextView
                     android:id="@+id/tv_screen_title"
                     android:layout_width="wrap_content"

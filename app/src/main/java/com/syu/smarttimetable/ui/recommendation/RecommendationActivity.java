@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
+import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,11 @@ public class RecommendationActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         tvScreenTitle = findViewById(R.id.tv_screen_title);
         tvScreenSubtitle = findViewById(R.id.tv_screen_subtitle);
         tvRank = findViewById(R.id.tv_rank);
@@ -93,7 +100,10 @@ public class RecommendationActivity extends AppCompatActivity {
             }
         });
 
-        btnRegenerate.setOnClickListener(v -> loadRecommendations());
+        btnRegenerate.setOnClickListener(v -> {
+            TimetableCacheManager.clear();
+            loadRecommendations();
+        });
     }
 
     private void loadRecommendations() {
@@ -108,6 +118,33 @@ public class RecommendationActivity extends AppCompatActivity {
         Log.d(TAG, "  Max Credits: " + recommendationRequest.getMaxCredits());
         Log.d(TAG, "  Fixed Lectures: " + recommendationRequest.getFixedLectureKeys().size());
         Log.d(TAG, "  Completed Courses: " + recommendationRequest.getCompletedCourseCodes().size());
+
+        String cacheKey = TimetableCacheManager.generateCacheKey(recommendationRequest);
+
+        List<RecommendationEngine.TimetableScoreTuple> cachedResults =
+                TimetableCacheManager.getFromCache(cacheKey);
+
+        if (cachedResults != null) {
+            Log.d(TAG, "Using cached recommendation results");
+
+            recommendationResults.clear();
+            recommendationResults.addAll(cachedResults);
+            currentIndex = 0;
+
+            if (recommendationResults.isEmpty()) {
+                showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.\n\n최소학점: "
+                        + recommendationRequest.getMinCredits()
+                        + "학점\n최대학점: "
+                        + recommendationRequest.getMaxCredits()
+                        + "학점");
+                return;
+            }
+
+            contentContainer.setVisibility(View.VISIBLE);
+            emptyStateContainer.setVisibility(View.GONE);
+            renderCurrentRecommendation();
+            return;
+        }
 
         showLoadingState();
 
@@ -130,19 +167,27 @@ public class RecommendationActivity extends AppCompatActivity {
                 List<RecommendationEngine.TimetableScoreTuple> results =
                         engine.recommend(allLectures, recommendationRequest);
 
+                TimetableCacheManager.addToCache(cacheKey, results);
+
                 Log.d(TAG, "Recommendation complete. Results: " + (results == null ? 0 : results.size()));
 
                 runOnUiThread(() -> {
                     try {
                         recommendationResults.clear();
-                        recommendationResults.addAll(results);
+
+                        if (results != null) {
+                            recommendationResults.addAll(results);
+                        }
+
                         currentIndex = 0;
 
                         if (recommendationResults.isEmpty()) {
                             Log.w(TAG, "No matching timetables found");
-                            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.\n\n최소학점: " +
-                                recommendationRequest.getMinCredits() + "학점\n최대학점: " +
-                                recommendationRequest.getMaxCredits() + "학점");
+                            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.\n\n최소학점: "
+                                    + recommendationRequest.getMinCredits()
+                                    + "학점\n최대학점: "
+                                    + recommendationRequest.getMaxCredits()
+                                    + "학점");
                             return;
                         }
 

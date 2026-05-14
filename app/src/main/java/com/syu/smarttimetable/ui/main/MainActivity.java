@@ -1,6 +1,7 @@
 package com.syu.smarttimetable.ui.main;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -8,12 +9,17 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
+import com.syu.smarttimetable.ui.constraint.SoftConstraintActivity;
 import com.syu.smarttimetable.ui.recommendation.RecommendationActivity;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,12 +50,51 @@ public class MainActivity extends AppCompatActivity {
             studentId = recommendationRequest.getStudentId();
         }
 
+        if (recommendationRequest != null && userGrade <= 0) {
+            userGrade = recommendationRequest.getUserGrade();
+        }
+
         userRepository = new UserRepository();
 
         bindViews();
         setupUi();
         setupButtons();
-        loadUserGradeIfNeeded();
+        loadUserInfoIfNeeded();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            recommendationRequest = intent.getSerializableExtra(
+                    "recommendationRequest",
+                    RecommendationRequest.class
+            );
+        } else {
+            recommendationRequest = (RecommendationRequest) intent.getSerializableExtra("recommendationRequest");
+        }
+
+        int newGrade = intent.getIntExtra("userGrade", 0);
+        if (newGrade > 0) {
+            userGrade = newGrade;
+        }
+
+        String newStudentId = intent.getStringExtra("studentId");
+        if (newStudentId != null) {
+            studentId = newStudentId;
+        }
+
+        if (recommendationRequest != null && studentId.isEmpty()) {
+            studentId = recommendationRequest.getStudentId();
+        }
+
+        if (recommendationRequest != null && userGrade <= 0) {
+            userGrade = recommendationRequest.getUserGrade();
+        }
+
+        setupUi();
     }
 
     private void bindViews() {
@@ -65,10 +110,8 @@ public class MainActivity extends AppCompatActivity {
         if (recommendationRequest != null) {
             tvMainSubtitle.setText("하드제약과 소프트제약 입력이 완료되었습니다. 추천 결과를 확인해보세요.");
 
-            // 위쪽 진한 버튼: 실제 추천 결과 화면으로 이동
             btnStartRecommendation.setText(getString(R.string.btn_view_result));
 
-            // 아래쪽 버튼: 조건 수정용
             btnViewResult.setVisibility(View.VISIBLE);
             btnViewResult.setEnabled(true);
             btnViewResult.setAlpha(1f);
@@ -76,10 +119,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tvMainSubtitle.setText("학점, 고정 과목, 선호 조건을 입력해서 자동 시간표 추천을 시작하세요.");
 
-            // 아직 추천 요청이 없으면 추천 시작만 보여줌
             btnStartRecommendation.setText(getString(R.string.btn_start_recommendation));
 
-            // 아래쪽 버튼은 숨김
             btnViewResult.setVisibility(View.GONE);
             btnViewResult.setEnabled(false);
             btnViewResult.setAlpha(0f);
@@ -93,17 +134,14 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            navigateToHardConstraintWithGrade();
+            navigateToHardConstraintWithUserInfo();
         });
 
-        btnViewResult.setOnClickListener(v -> {
-            // 아래 버튼은 "입력 조건 수정" 역할
-            navigateToHardConstraintWithGrade();
-        });
+        btnViewResult.setOnClickListener(v -> showEditConditionsDialog());
     }
 
-    private void loadUserGradeIfNeeded() {
-        if (userGrade > 0) {
+    private void loadUserInfoIfNeeded() {
+        if (userGrade > 0 && studentId != null && !studentId.trim().isEmpty()) {
             return;
         }
 
@@ -133,7 +171,53 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void navigateToHardConstraintWithGrade() {
+    private void showEditConditionsDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("입력 조건 수정")
+                .setItems(new String[]{"하드제약 수정", "소프트제약 수정"}, (dialog, which) -> {
+                    if (which == 0) {
+                        navigateToHardConstraintWithUserInfo();
+                    } else {
+                        navigateToSoftConstraint();
+                    }
+                })
+                .show();
+    }
+
+    private void navigateToSoftConstraint() {
+        if (recommendationRequest == null) {
+            navigateToHardConstraintWithUserInfo();
+            return;
+        }
+
+        int targetCredits = (recommendationRequest.getMinCredits()
+                + recommendationRequest.getMaxCredits()) / 2;
+
+        HardConstraint hardConstraint = new HardConstraint(
+                targetCredits,
+                new ArrayList<>(recommendationRequest.getFixedLectureKeys()),
+                new ArrayList<>(recommendationRequest.getCompletedCourseCodes())
+        );
+
+        int requestUserGrade = userGrade > 0
+                ? userGrade
+                : recommendationRequest.getUserGrade();
+
+        String requestStudentId = studentId;
+
+        if ((requestStudentId == null || requestStudentId.trim().isEmpty())
+                && recommendationRequest.getStudentId() != null) {
+            requestStudentId = recommendationRequest.getStudentId();
+        }
+
+        Intent intent = new Intent(this, SoftConstraintActivity.class);
+        intent.putExtra("hardConstraint", hardConstraint);
+        intent.putExtra("userGrade", requestUserGrade);
+        intent.putExtra("studentId", requestStudentId);
+        startActivity(intent);
+    }
+
+    private void navigateToHardConstraintWithUserInfo() {
         if (userGrade > 0 && studentId != null && !studentId.trim().isEmpty()) {
             Intent intent = new Intent(this, HardConstraintActivity.class);
             intent.putExtra("userGrade", userGrade);
