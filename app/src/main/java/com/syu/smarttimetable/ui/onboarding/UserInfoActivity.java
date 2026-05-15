@@ -33,6 +33,8 @@ import java.util.List;
 
 public class UserInfoActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CODE_HARD_CONSTRAINT = 1001;
+
     private MaterialAutoCompleteTextView autoDepartment;
     private MaterialAutoCompleteTextView autoMajorDetail;
     private MaterialAutoCompleteTextView autoGrade;
@@ -41,6 +43,8 @@ public class UserInfoActivity extends AppCompatActivity {
     private Button btnSave;
 
     private UserRepository userRepository;
+    private String mode = "new"; // "new" 또는 "edit"
+    private User existingUser = null;
 
     private interface SelectionCallback {
         void onSelected(String item);
@@ -53,19 +57,26 @@ public class UserInfoActivity extends AppCompatActivity {
 
         userRepository = new UserRepository();
 
+        // Intent에서 모드와 기존 정보 가져오기
+        mode = getIntent().getStringExtra("mode");
+        if (mode == null) mode = "new";
+        
+        if (getIntent().hasExtra("user")) {
+            existingUser = (User) getIntent().getSerializableExtra("user");
+        }
+
         ImageButton btnBack = findViewById(R.id.btn_back);
-        btnBack.setOnClickListener(v -> {
-            userRepository.logout();
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-            finish();
-        });
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         bindViews();
         setupDepartmentDropdown();
         setupGradeDropdown();
         setupSaveButton();
+        
+        // 기존 정보가 있으면 화면에 채우기 (모든 setup 이후에 호출)
+        if ("edit".equals(mode) && existingUser != null) {
+            loadExistingInfo();
+        }
     }
 
     private void bindViews() {
@@ -77,10 +88,33 @@ public class UserInfoActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btn_save);
     }
 
+    private void loadExistingInfo() {
+        if (existingUser != null) {
+            if (existingUser.getDepartment() != null) {
+                autoDepartment.setText(existingUser.getDepartment(), false);
+            }
+            if (existingUser.getGrade() > 0) {
+                autoGrade.setText(existingUser.getGrade() + "학년", false);
+            }
+            if (existingUser.getStudentId() != null) {
+                etStudentId.setText(existingUser.getStudentId());
+            }
+            
+            // 세부전공 설정 - 기존 값과 함께 전달
+            if (existingUser.getDepartment() != null) {
+                updateMajorDetailUI(existingUser.getDepartment(), existingUser.getMajorDetail());
+            }
+        }
+    }
+
     private void setupDepartmentDropdown() {
         String[] departments = getResources().getStringArray(R.array.department_array);
 
-        autoDepartment.setText("", false);
+        // 기존 값이 없을 때만 빈칸으로 설정
+        if (TextUtils.isEmpty(getText(autoDepartment))) {
+            autoDepartment.setText("", false);
+        }
+        
         autoDepartment.setFocusable(false);
         autoDepartment.setFocusableInTouchMode(false);
 
@@ -111,12 +145,20 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void updateMajorDetailUI(String department) {
+        updateMajorDetailUI(department, null);
+    }
+
+    private void updateMajorDetailUI(String department, String existingMajorDetail) {
         String[] majorDetails = DepartmentMajorMapper.getMajorDetails(department);
 
         if (majorDetails.length > 0) {
             layoutMajorDetail.setVisibility(View.VISIBLE);
 
-            autoMajorDetail.setText("", false);
+            // 기존 값이 없을 때만 빈칸으로 설정
+            if (TextUtils.isEmpty(getText(autoMajorDetail)) && TextUtils.isEmpty(existingMajorDetail)) {
+                autoMajorDetail.setText("", false);
+            }
+            
             autoMajorDetail.setFocusable(false);
             autoMajorDetail.setFocusableInTouchMode(false);
 
@@ -128,6 +170,11 @@ public class UserInfoActivity extends AppCompatActivity {
                             selectedMajor -> autoMajorDetail.setText(selectedMajor, false)
                     )
             );
+            
+            // 기존 세부전공이 있으면 설정
+            if (!TextUtils.isEmpty(existingMajorDetail)) {
+                autoMajorDetail.setText(existingMajorDetail, false);
+            }
         } else {
             layoutMajorDetail.setVisibility(View.GONE);
             autoMajorDetail.setText("", false);
@@ -267,7 +314,7 @@ public class UserInfoActivity extends AppCompatActivity {
                                 Intent intent = new Intent(this, HardConstraintActivity.class);
                                 intent.putExtra("userGrade", grade);
                                 intent.putExtra("studentId", studentId);
-                                startActivity(intent);
+                                startActivityForResult(intent, REQUEST_CODE_HARD_CONSTRAINT);
                                 finish();
                             })
                             .addOnFailureListener(e ->
@@ -288,6 +335,17 @@ public class UserInfoActivity extends AppCompatActivity {
             return Integer.parseInt(gradeText.replace("학년", "").trim());
         } catch (NumberFormatException e) {
             return -1;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_CODE_HARD_CONSTRAINT && resultCode == RESULT_OK && data != null) {
+            // HardConstraintActivity에서 돌아온 경우, 현재 화면의 입력값은 유지됨
+            // 사용자가 수정하고 싶으면 계속 수정할 수 있음
+            Toast.makeText(this, "이전 선택값이 유지되었습니다.", Toast.LENGTH_SHORT).show();
         }
     }
 }
