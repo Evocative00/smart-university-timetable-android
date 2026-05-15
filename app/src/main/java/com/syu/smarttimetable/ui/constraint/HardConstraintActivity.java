@@ -903,4 +903,15 @@ public class HardConstraintActivity extends AppCompatActivity {
     private String getText(TextView view) {
         return view.getText() == null ? "" : view.getText().toString().trim();
     }
+
+    @Override
+    public void onBackPressed() {
+        // 현재 선택된 상태를 반환하여 이전 Activity가 복원할 수 있게 함
+        Intent intent = new Intent();
+        intent.putStringArrayListExtra("fixedLectures", new ArrayList<>(fixedLectureKeys));
+        intent.putStringArrayListExtra("excludedCourses", new ArrayList<>(excludedCourseNames));
+        setResult(RESULT_OK, intent);
+        
+        super.onBackPressed();
+    }
 }

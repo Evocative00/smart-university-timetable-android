@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.ui.main.MainActivity;
+import com.syu.smarttimetable.ui.onboarding.PersonalInfoChoiceActivity;
 import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
 
 public class LoginActivity extends AppCompatActivity {
@@ -63,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
                             .addOnSuccessListener(documentSnapshot -> {
                                 boolean hasUserInfo = documentSnapshot.exists()
                                         && documentSnapshot.getString("department") != null
-                                        && documentSnapshot.getString("majorType") != null
                                         && documentSnapshot.getLong("grade") != null
                                         && documentSnapshot.getString("studentId") != null;
 
@@ -71,10 +71,11 @@ public class LoginActivity extends AppCompatActivity {
 
                                 if (hasUserInfo) {
                                     Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
-                                    intent = new Intent(this, MainActivity.class);
+                                    intent = new Intent(this, PersonalInfoChoiceActivity.class);
                                 } else {
                                     Toast.makeText(this, "기본정보를 입력해주세요.", Toast.LENGTH_SHORT).show();
                                     intent = new Intent(this, UserInfoActivity.class);
+                                    intent.putExtra("mode", "new");
                                 }
 
                                 startActivity(intent);
@@ -84,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(this, "기본정보 확인 실패. 다시 입력해주세요.", Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(this, UserInfoActivity.class);
+                                intent.putExtra("mode", "new");
                                 startActivity(intent);
                                 finish();
                             });
