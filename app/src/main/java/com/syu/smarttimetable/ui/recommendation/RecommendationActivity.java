@@ -19,6 +19,20 @@ import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.button.MaterialButton;
+import com.syu.smarttimetable.data.repository.ImageStorageRepository;
+import com.syu.smarttimetable.domain.timetable.TimetableImageExporter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +57,12 @@ public class RecommendationActivity extends AppCompatActivity {
     private RecommendationRequest recommendationRequest;
     private final List<RecommendationEngine.TimetableScoreTuple> recommendationResults = new ArrayList<>();
     private int currentIndex = 0;
+
+    private MaterialButton btnSaveImage;
+    private MaterialButton btnShareImage;
+    private View timetableCard;
+
+    private static final int REQUEST_WRITE_STORAGE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +95,9 @@ public class RecommendationActivity extends AppCompatActivity {
         btnPrev = findViewById(R.id.btn_prev);
         btnNext = findViewById(R.id.btn_next);
         btnRegenerate = findViewById(R.id.btn_regenerate);
+        btnSaveImage = findViewById(R.id.btn_save_image);
+        btnShareImage = findViewById(R.id.btn_share_image);
+        timetableCard = findViewById(R.id.timetable_card);
     }
 
     private void setupButtons() {
@@ -104,6 +127,9 @@ public class RecommendationActivity extends AppCompatActivity {
             TimetableCacheManager.clear();
             loadRecommendations();
         });
+
+        btnSaveImage.setOnClickListener(v -> saveCurrentTimetableImage());
+        btnShareImage.setOnClickListener(v -> shareCurrentTimetableImage());
     }
 
     private void loadRecommendations() {
@@ -287,5 +313,90 @@ public class RecommendationActivity extends AppCompatActivity {
         btnRegenerate.setAlpha(1f);
 
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void saveCurrentTimetableImage() {
+        if (timetableCard == null
+                || timetableCard.getWidth() == 0
+                || timetableCard.getHeight() == 0
+                || recommendationResults.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_timetable_not_ready), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_STORAGE
+            );
+            return;
+        }
+
+        Bitmap bitmap = TimetableImageExporter.captureView(timetableCard);
+
+        new Thread(() -> {
+            try {
+                ImageStorageRepository.savePng(this, bitmap);
+
+                runOnUiThread(() ->
+                        Toast.makeText(this, getString(R.string.toast_save_success), Toast.LENGTH_SHORT).show()
+                );
+            } catch (Exception e) {
+                Log.e(TAG, "Save failed", e);
+
+                runOnUiThread(() ->
+                        Toast.makeText(this, getString(R.string.toast_save_failed), Toast.LENGTH_SHORT).show()
+                );
+            }
+        }).start();
+    }
+
+    private void shareCurrentTimetableImage() {
+        if (timetableCard == null
+                || timetableCard.getWidth() == 0
+                || timetableCard.getHeight() == 0
+                || recommendationResults.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_timetable_not_ready), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bitmap bitmap = TimetableImageExporter.captureView(timetableCard);
+
+        new Thread(() -> {
+            try {
+                Uri shareUri = ImageStorageRepository.getShareableUri(this, bitmap);
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("image/png");
+                intent.putExtra(Intent.EXTRA_STREAM, shareUri);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                runOnUiThread(() ->
+                        startActivity(Intent.createChooser(intent, getString(R.string.share_title)))
+                );
+            } catch (Exception e) {
+                Log.e(TAG, "Share failed", e);
+
+                runOnUiThread(() ->
+                        Toast.makeText(this, getString(R.string.toast_share_failed), Toast.LENGTH_SHORT).show()
+                );
+            }
+        }).start();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_WRITE_STORAGE
+                && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            saveCurrentTimetableImage();
+        } else if (requestCode == REQUEST_WRITE_STORAGE) {
+            Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_SHORT).show();
+        }
     }
 }

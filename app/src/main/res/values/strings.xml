@@ -74,4 +74,13 @@
     <string name="included_lectures_title">포함된 강의</string>
     <string name="recommendation_empty_title">추천 결과 없음</string>
     <string name="recommendation_empty_message">조건을 다시 조정해보세요.</string>
+
+    <string name="btn_save_image">저장</string>
+    <string name="btn_share_image">공유</string>
+    <string name="toast_save_success">갤러리에 저장되었습니다.</string>
+    <string name="toast_save_failed">저장에 실패했습니다.</string>
+    <string name="toast_share_failed">공유에 실패했습니다.</string>
+    <string name="toast_timetable_not_ready">시간표를 먼저 불러와 주세요.</string>
+    <string name="toast_permission_denied">저장 권한이 필요합니다.</string>
+    <string name="share_title">시간표 공유</string>
 </resources>
