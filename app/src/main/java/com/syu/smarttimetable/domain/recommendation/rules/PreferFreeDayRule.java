@@ -11,6 +11,12 @@ import java.util.Set;
 
 public class PreferFreeDayRule implements RecommendationRule {
 
+    // 공강 선호는 다른 모든 소프트 제약을 압도하도록 극단적으로 높은 가중치를 설정한다.
+    // 공강 미만족: -10000점 (거의 탈락 수준)
+    // 공강 만족: +10000점 (다른 모든 이유를 압도)
+    private static final int PENALTY_PER_VIOLATED_DAY = 10000;
+    private static final int BONUS_PER_SATISFIED_DAY = 10000;
+
     @Override
     public int calculateScore(Timetable timetable, RecommendationRequest request) {
         if (request == null
@@ -29,7 +35,7 @@ public class PreferFreeDayRule implements RecommendationRule {
             }
 
             for (LectureTime time : lecture.getTimes()) {
-                if (time != null) {
+                if (time != null && time.getDay() != null) {
                     lectureDays.add(time.getDay());
                 }
             }
@@ -39,9 +45,11 @@ public class PreferFreeDayRule implements RecommendationRule {
 
         for (DayOfWeek preferredFreeDay : request.getSoftConstraint().getPreferredFreeDays()) {
             if (lectureDays.contains(preferredFreeDay)) {
-                score -= 30;
+                // Apply penalty if preferred free day has lectures
+                score -= PENALTY_PER_VIOLATED_DAY;
             } else {
-                score += 45;
+                // Apply bonus if preferred free day is actually free
+                score += BONUS_PER_SATISFIED_DAY;
             }
         }
 

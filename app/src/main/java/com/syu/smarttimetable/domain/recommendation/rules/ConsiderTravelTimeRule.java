@@ -14,6 +14,12 @@ import java.util.Map;
 
 public class ConsiderTravelTimeRule implements RecommendationRule {
 
+    // 이동 시간 고려 점수 (이동 거리 시뮬레이션)
+    private static final int SAME_CLASSROOM_BONUS = 4;     // 같은 강의실: +4점
+    private static final int SHORT_GAP_PENALTY = -8;       // 20분 미만 이동 불가: -8점
+    private static final int MODERATE_GAP_PENALTY = -3;    // 20-40분 이동: -3점
+    private static final int LONG_GAP_BONUS = 2;           // 40분 이상 이동 가능: +2점
+
     @Override
     public int calculateScore(Timetable timetable, RecommendationRequest request) {
         if (request == null
@@ -40,9 +46,11 @@ public class ConsiderTravelTimeRule implements RecommendationRule {
 
         int score = 0;
 
+        // 각 요일별 이동 시간 분석
         for (List<LectureScheduleItem> items : byDay.values()) {
             items.sort(Comparator.comparingInt(item -> item.time.getStartTime()));
 
+            // 연속 수업 간 이동 시간 평가 (개별 점수 누적)
             for (int i = 0; i < items.size() - 1; i++) {
                 LectureScheduleItem current = items.get(i);
                 LectureScheduleItem next = items.get(i + 1);
@@ -51,16 +59,16 @@ public class ConsiderTravelTimeRule implements RecommendationRule {
                 boolean sameClassroom = safeEquals(current.lecture.getClassroom(), next.lecture.getClassroom());
 
                 if (sameClassroom) {
-                    score += 6;
+                    score += SAME_CLASSROOM_BONUS;
                     continue;
                 }
 
                 if (gap < 20) {
-                    score -= 12;
+                    score += SHORT_GAP_PENALTY;
                 } else if (gap < 40) {
-                    score -= 4;
+                    score += MODERATE_GAP_PENALTY;
                 } else {
-                    score += 3;
+                    score += LONG_GAP_BONUS;
                 }
             }
         }

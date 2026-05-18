@@ -85,6 +85,15 @@ public class RecommendationEngine {
                     conflicts.add(preferred);
                 }
             }
+            // 충돌하는 요일이 발견되었을 때 (RecommendationEngine.java 87번째 줄 부근)
+            if (!conflicts.isEmpty()) {
+                Log.d(TAG, "Fixed lecture vs preferred free day conflict: " + conflicts + ". Removing conflicted days from preference.");
+
+                // 강제로 빈 리스트를 반환하지 않고, 충돌하는 요일만 선호 공강 리스트에서 제거 (양보)
+                request.getSoftConstraint().getPreferredFreeDays().removeAll(conflicts);
+
+                // 그대로 추천 프로세스 계속 진행
+            }
 
             if (!conflicts.isEmpty()) {
                 Log.d(TAG, "Recommendation aborted due to fixed lecture vs preferred free day conflict: " + conflicts);
@@ -104,6 +113,8 @@ public class RecommendationEngine {
         Log.d(TAG, "Generated " + candidates.size() + " candidate timetables");
 
         Set<String> seenTimetableSignatures = new HashSet<>();
+        int rejectedByHardConstraint = 0;
+        int rejectedByDuplicate = 0;
 
         for (Timetable candidate : candidates) {
             if (candidate == null) {
@@ -114,7 +125,8 @@ public class RecommendationEngine {
                     hardConstraintValidator.validate(candidate.getLecturesReadOnly(), request);
 
             if (!validationResult.isValid()) {
-                Log.d(TAG, "Candidate rejected: " + validationResult.getErrors());
+                rejectedByHardConstraint++;
+                Log.d(TAG, "Candidate rejected by hard constraint: " + validationResult.getErrors());
                 continue;
             }
 
@@ -124,22 +136,14 @@ public class RecommendationEngine {
                 continue;
             }
 
-            // Enforce preferred free days: if soft constraint requests free days, any timetable containing
-            // a lecture that has any timeslot on those days must be rejected entirely.
-            // reuse existing softConstraint variable from pre-check
-            if (softConstraint != null
-                    && !softConstraint.isSkipped()
-                    && softConstraint.getPreferredFreeDays() != null
-                    && !softConstraint.getPreferredFreeDays().isEmpty()) {
-                if (containsAnyPreferredFreeDayLecture(candidate, softConstraint.getPreferredFreeDays())) {
-                    Log.d(TAG, "Candidate rejected: contains lecture on preferred free day(s)");
-                    continue;
-                }
-            }
+            // Preferred free days is now handled as a soft constraint (score-based penalty)
+            // in PreferFreeDayRule, not as a hard constraint. This allows timetables with
+            // lectures on preferred free days to be generated if necessary, but with lower scores.
 
             String signature = buildTimetableSignature(candidate);
 
             if (!seenTimetableSignatures.add(signature)) {
+                rejectedByDuplicate++;
                 Log.d(TAG, "Duplicate candidate skipped: " + signature);
                 continue;
             }
@@ -149,8 +153,27 @@ public class RecommendationEngine {
         }
 
         Log.d(TAG, "Valid recommendations after filtering: " + results.size());
+        Log.d(TAG, "Rejected by hard constraint: " + rejectedByHardConstraint + ", by duplicate: " + rejectedByDuplicate);
 
         results.sort((first, second) -> {
+            int firstFreeDayViolations = countPreferredFreeDayViolations(first.getTimetable(), request);
+            int secondFreeDayViolations = countPreferredFreeDayViolations(second.getTimetable(), request);
+
+            // 1) 선호 공강 요일 만족도를 최우선으로 비교 (공강을 완벽히 만족하는 것이 최고 우선)
+            // 공강이 설정되지 않으면 이 값은 0이므로, 차이가 있을 때만 우선순위에 영향
+            int freeDayViolationCompare = Integer.compare(firstFreeDayViolations, secondFreeDayViolations);
+            if (freeDayViolationCompare != 0) {
+                Log.d(TAG, "Sorting by free day: first violations=" + firstFreeDayViolations
+                        + ", second violations=" + secondFreeDayViolations);
+                return freeDayViolationCompare;
+            }
+
+            // 공강이 같으면, 점수로 비교 (점수가 공강 만족 여부를 반영)
+            int scoreCompare = Integer.compare(second.getScore(), first.getScore());
+            if (scoreCompare != 0) {
+                return scoreCompare;
+            }
+
             int firstGradeMajorCount = countGradeMatchedMajors(first.getTimetable(), request);
             int secondGradeMajorCount = countGradeMatchedMajors(second.getTimetable(), request);
 
@@ -159,10 +182,6 @@ public class RecommendationEngine {
                 return gradeMajorCompare;
             }
 
-            int scoreCompare = Integer.compare(second.getScore(), first.getScore());
-            if (scoreCompare != 0) {
-                return scoreCompare;
-            }
 
             return Integer.compare(
                     second.getTimetable().getTotalCredits(),
@@ -170,7 +189,6 @@ public class RecommendationEngine {
             );
         });
 
-        results = prioritizeFreeDayPreferences(results, request);
 
         if (results.size() > MAX_RECOMMENDATIONS) {
             Log.d(TAG, "Returning top " + MAX_RECOMMENDATIONS + " recommendations");
@@ -242,65 +260,6 @@ public class RecommendationEngine {
         return false;
     }
 
-    private List<TimetableScoreTuple> prioritizeFreeDayPreferences(List<TimetableScoreTuple> results,
-                                                                   RecommendationRequest request) {
-        if (results == null || results.isEmpty() || request == null) {
-            return results;
-        }
-
-        SoftConstraint softConstraint = request.getSoftConstraint();
-
-        if (softConstraint == null
-                || softConstraint.isSkipped()
-                || softConstraint.getPreferredFreeDays() == null
-                || softConstraint.getPreferredFreeDays().isEmpty()) {
-            return results;
-        }
-
-        List<TimetableScoreTuple> freeDaySatisfied = new ArrayList<>();
-        List<TimetableScoreTuple> freeDayViolated = new ArrayList<>();
-
-        for (TimetableScoreTuple tuple : results) {
-            if (tuple == null || tuple.getTimetable() == null) {
-                continue;
-            }
-
-            if (containsAnyPreferredFreeDayLecture(tuple.getTimetable(), softConstraint.getPreferredFreeDays())) {
-                freeDayViolated.add(tuple);
-            } else {
-                freeDaySatisfied.add(tuple);
-            }
-        }
-
-        List<TimetableScoreTuple> prioritized = new ArrayList<>(results.size());
-        prioritized.addAll(freeDaySatisfied);
-        prioritized.addAll(freeDayViolated);
-
-        return prioritized;
-    }
-
-    private boolean containsAnyPreferredFreeDayLecture(Timetable timetable, List<DayOfWeek> preferredFreeDays) {
-        if (timetable == null || preferredFreeDays == null || preferredFreeDays.isEmpty()) {
-            return false;
-        }
-
-        for (Lecture lecture : timetable.getLecturesReadOnly()) {
-            if (lecture == null || lecture.getTimes() == null) {
-                continue;
-            }
-
-            for (LectureTime time : lecture.getTimes()) {
-                if (time != null
-                        && time.getDay() != null
-                        && preferredFreeDays.contains(time.getDay())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     private int countGradeMatchedMajors(Timetable timetable, RecommendationRequest request) {
         if (timetable == null || request == null || request.getUserGrade() <= 0) {
             return 0;
@@ -320,6 +279,40 @@ public class RecommendationEngine {
         }
 
         return count;
+    }
+
+    private int countPreferredFreeDayViolations(Timetable timetable, RecommendationRequest request) {
+        if (timetable == null
+                || request == null
+                || request.getSoftConstraint() == null
+                || request.getSoftConstraint().isSkipped()
+                || request.getSoftConstraint().getPreferredFreeDays() == null
+                || request.getSoftConstraint().getPreferredFreeDays().isEmpty()) {
+            return 0;
+        }
+
+        Set<DayOfWeek> lectureDays = new HashSet<>();
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null || lecture.getTimes() == null) {
+                continue;
+            }
+
+            for (LectureTime time : lecture.getTimes()) {
+                if (time != null && time.getDay() != null) {
+                    lectureDays.add(time.getDay());
+                }
+            }
+        }
+
+        int violations = 0;
+        for (DayOfWeek preferredFreeDay : request.getSoftConstraint().getPreferredFreeDays()) {
+            if (lectureDays.contains(preferredFreeDay)) {
+                violations++;
+            }
+        }
+
+        return violations;
     }
 
     private String buildTimetableSignature(Timetable timetable) {

@@ -5,6 +5,8 @@ import android.util.Log;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 
+import com.syu.smarttimetable.domain.recommendation.constraints.PreferredFreeDayConstraint;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,8 @@ public class HardConstraintValidator {
         constraints.add(new RequiredLectureConstraint());
         constraints.add(new NoTimeConflictConstraint());
         constraints.add(new BlockedTimeConstraint());
+        // 공강은 하드 제약이 아니라 소프트 제약으로 관리하여, 필수 과목과의 충돌 방지
+        // constraints.add(new PreferredFreeDayConstraint());
     }
 
     public ValidationResult validate(List<Lecture> timetable, RecommendationRequest request) {

@@ -16,6 +16,10 @@ public class LunchBreakRule implements RecommendationRule {
     private static final int LUNCH_START = 12 * 60;
     private static final int LUNCH_END = 13 * 60;
 
+    // 점심 시간 보장 점수 (요일별 중복 누적 방지)
+    private static final int LUNCH_FREE_PER_DAY = 8;        // 요일당 +8점
+    private static final int LUNCH_OCCUPIED_PER_DAY = -12;  // 요일당 -12점
+
     @Override
     public int calculateScore(Timetable timetable, RecommendationRequest request) {
         if (request == null
@@ -41,15 +45,16 @@ public class LunchBreakRule implements RecommendationRule {
 
         int score = 0;
 
+        // 각 요일별로 점심 시간 여부 평가 (중복 누적 방지)
         for (List<LectureTime> dayTimes : byDay.values()) {
             if (dayTimes.isEmpty()) {
                 continue;
             }
 
             if (isLunchFree(dayTimes)) {
-                score += 18;
+                score += LUNCH_FREE_PER_DAY;
             } else {
-                score -= 20;
+                score += LUNCH_OCCUPIED_PER_DAY;
             }
         }
 

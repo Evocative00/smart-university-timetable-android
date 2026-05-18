@@ -10,6 +10,11 @@ public class PreferMorningRule implements RecommendationRule {
 
     private static final int NOON = 12 * 60;
 
+    // 오전 수업 선호도 점수 (모든 수업이 오전에 끝나면 최대 점수, 중복 누적 방지)
+    private static final int MORNING_COMPLETE_BONUS = 40;      // 모든 수업이 정오 전에 끝남
+    private static final int MORNING_PARTIAL_BONUS = 25;       // 일부 오전 수업
+    private static final int AFTERNOON_PENALTY = -15;          // 오후 수업 있음
+
     @Override
     public int calculateScore(Timetable timetable, RecommendationRequest request) {
         if (request == null
@@ -19,8 +24,10 @@ public class PreferMorningRule implements RecommendationRule {
             return 0;
         }
 
-        int score = 0;
+        boolean hasAfternoon = false;
+        boolean hasAllMorning = true;
 
+        // 시간표 전체에서 오전/오후 비율을 평가 (중복 누적 방지)
         for (Lecture lecture : timetable.getLecturesReadOnly()) {
             if (lecture == null || lecture.getTimes() == null) {
                 continue;
@@ -31,16 +38,25 @@ public class PreferMorningRule implements RecommendationRule {
                     continue;
                 }
 
-                if (time.getEndTime() <= NOON) {
-                    score += 12;
-                } else if (time.getStartTime() < NOON) {
-                    score += 4;
-                } else {
-                    score -= 10;
+                if (time.getStartTime() >= NOON) {
+                    hasAfternoon = true;
+                    hasAllMorning = false;
+                    break;
                 }
+            }
+
+            if (hasAfternoon) {
+                break;
             }
         }
 
-        return score;
+        // 시간표 전체 단위로 점수 계산 (시간마다 누적하지 않음)
+        if (hasAllMorning) {
+            return MORNING_COMPLETE_BONUS;
+        } else if (hasAfternoon) {
+            return AFTERNOON_PENALTY;
+        }
+
+        return MORNING_PARTIAL_BONUS;
     }
 }
