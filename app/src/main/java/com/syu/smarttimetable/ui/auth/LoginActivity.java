@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 if (hasUserInfo) {
                                     Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show();
-                                    intent = new Intent(this, PersonalInfoChoiceActivity.class);
+                                    intent = new Intent(this, com.syu.smarttimetable.ui.main.MainNavigationActivity.class);
                                 } else {
                                     Toast.makeText(this, "기본정보를 입력해주세요.", Toast.LENGTH_SHORT).show();
                                     intent = new Intent(this, UserInfoActivity.class);

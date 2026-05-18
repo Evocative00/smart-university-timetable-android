@@ -67,9 +67,6 @@ public class UserInfoActivity extends AppCompatActivity {
         ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> {
             if ("edit".equals(mode)) {
-                Intent intent = new Intent(this, PersonalInfoChoiceActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
                 finish();
             } else {
                 userRepository.logout();
@@ -322,11 +319,14 @@ public class UserInfoActivity extends AppCompatActivity {
                             .addOnSuccessListener(unused -> {
                                 Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show();
 
-                                Intent intent = new Intent(this, HardConstraintActivity.class);
-                                intent.putExtra("userGrade", grade);
-                                intent.putExtra("studentId", studentId);
-                                startActivity(intent);
-                                finish();
+                                if ("edit".equals(mode)) {
+                                    finish();
+                                } else {
+                                    Intent intent = new Intent(this,
+                                            com.syu.smarttimetable.ui.main.MainNavigationActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             })
                             .addOnFailureListener(e ->
                                     Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_LONG).show()
