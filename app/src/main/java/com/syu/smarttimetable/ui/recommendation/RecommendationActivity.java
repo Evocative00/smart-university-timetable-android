@@ -16,6 +16,7 @@ import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
+import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
 
@@ -190,12 +191,50 @@ public class RecommendationActivity extends AppCompatActivity {
                 }
 
                 RecommendationEngine engine = new RecommendationEngine();
-                List<RecommendationEngine.TimetableScoreTuple> results =
+                RecommendationEngine.RecommendationResult engineResult =
                         engine.recommend(allLectures, recommendationRequest);
+
+                Log.d(TAG, "Recommendation complete.");
+
+                // If there are conflicts between fixed lectures and preferred free days, show dialog
+                if (engineResult != null && engineResult.getConflictDays() != null && !engineResult.getConflictDays().isEmpty()) {
+                    List<DayOfWeek> conflicts = engineResult.getConflictDays();
+                    Log.w(TAG, "Fixed lecture vs preferred free day conflict: " + conflicts);
+
+                    runOnUiThread(() -> {
+                        try {
+                            // Build a natural Korean list for days (e.g. "화요일", "화요일과 목요일", "화, 목, 금요일")
+                            String formattedDays = formatDayListKorean(conflicts);
+
+                            String message = formattedDays + "에 고정된 수업이 있어 해당 요일을 공강으로 한 시간표를 생성할 수 없습니다.";
+
+                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(RecommendationActivity.this)
+                                    .setTitle("제약 조건 충돌")
+                                    .setMessage(message)
+                                    .setPositiveButton("확인", (dialog, which) -> {
+                                        showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.\n\n최소학점: "
+                                                + recommendationRequest.getMinCredits()
+                                                + "학점\n최대학점: "
+                                                + recommendationRequest.getMaxCredits()
+                                                + "학점");
+                                    })
+                                    .show();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error showing conflict dialog", e);
+                            showEmptyState("조건에 맞는 시간표를 찾지 못했습니다.");
+                        }
+                    });
+
+                    // cache empty result to avoid re-calculating repeatedly
+                    TimetableCacheManager.addToCache(cacheKey, new ArrayList<>());
+                    return;
+                }
+
+                List<RecommendationEngine.TimetableScoreTuple> results = engineResult != null ? engineResult.getRecommendations() : new ArrayList<>();
 
                 TimetableCacheManager.addToCache(cacheKey, results);
 
-                Log.d(TAG, "Recommendation complete. Results: " + (results == null ? 0 : results.size()));
+                Log.d(TAG, "Results: " + (results == null ? 0 : results.size()));
 
                 runOnUiThread(() -> {
                     try {
@@ -313,6 +352,53 @@ public class RecommendationActivity extends AppCompatActivity {
         btnRegenerate.setAlpha(1f);
 
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private String dayOfWeekToKorean(DayOfWeek day) {
+        if (day == null) return "";
+
+        switch (day) {
+            case MONDAY:
+                return "월요일";
+            case TUESDAY:
+                return "화요일";
+            case WEDNESDAY:
+                return "수요일";
+            case THURSDAY:
+                return "목요일";
+            case FRIDAY:
+                return "금요일";
+            case SATURDAY:
+                return "토요일";
+            case SUNDAY:
+                return "일요일";
+            default:
+                return day.name();
+        }
+    }
+
+    private String formatDayListKorean(List<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) return "";
+
+        List<String> names = new ArrayList<>();
+        for (DayOfWeek d : days) {
+            names.add(dayOfWeekToKorean(d));
+        }
+
+        if (names.size() == 1) return names.get(0);
+
+        if (names.size() == 2) {
+            // A and B -> "A와 B" (use '와'/'과' choice simplified to '과' when ending with vowel? use '와' for readability)
+            return names.get(0) + "과 " + names.get(1);
+        }
+
+        // 3 or more: "A, B, C" but for Korean day names we can join with ", " and add " 등"
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < names.size(); i++) {
+            sb.append(names.get(i));
+            if (i < names.size() - 1) sb.append(", ");
+        }
+        return sb.toString();
     }
 
     private void saveCurrentTimetableImage() {
