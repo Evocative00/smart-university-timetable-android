@@ -187,12 +187,9 @@ public class SoftConstraintActivity extends AppCompatActivity {
                 studentId
         );
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("hardConstraint", hardConstraint);
-        intent.putExtra("softConstraint", softConstraint);
+        Intent intent = new Intent(this, com.syu.smarttimetable.ui.main.MainNavigationActivity.class);
         intent.putExtra("recommendationRequest", recommendationRequest);
-        intent.putExtra("userGrade", userGrade);
-        intent.putExtra("studentId", studentId);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
     }
