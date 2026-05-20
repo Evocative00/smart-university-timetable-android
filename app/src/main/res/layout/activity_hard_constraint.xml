@@ -250,12 +250,12 @@
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
+                <!-- 필수교양 버튼은 항상 보이도록, 영역별 교양 버튼과 같은 행에 배치합니다 -->
                 <LinearLayout
-                    android:id="@+id/layout_excluded_general_row_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_required_general"
@@ -268,66 +268,61 @@
                         app:cornerRadius="14dp" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_humanities_art"
+                        android:id="@+id/btn_excluded_general_group"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:text="인문예술"
-                        android:textSize="12sp"
+                        android:text="영역별 교양"
+                        android:textSize="14sp"
                         app:cornerRadius="14dp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_natural_science"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:text="자연과학"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/layout_excluded_general_row_2"
+                    android:id="@+id/layout_general_area_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:padding="8dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_social_science"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
+                    <CheckBox
+                        android:id="@+id/cb_excluded_humanities_art"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="사회과학"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:text="인문예술 영역 제외"
+                        android:textSize="14sp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_digital_literacy"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
+                    <CheckBox
+                        android:id="@+id/cb_excluded_natural_science"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:text="디지털"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:text="자연과학 영역 제외"
+                        android:textSize="14sp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_character"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
+                    <CheckBox
+                        android:id="@+id/cb_excluded_social_science"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:text="인성교육"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:text="사회과학 영역 제외"
+                        android:textSize="14sp" />
+
+                    <CheckBox
+                        android:id="@+id/cb_excluded_digital_literacy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="디지털 영역 제외"
+                        android:textSize="14sp" />
+
+                    <CheckBox
+                        android:id="@+id/cb_excluded_character"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="인성교육 영역 제외"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout

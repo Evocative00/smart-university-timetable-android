@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -53,13 +55,17 @@ public class HardConstraintActivity extends AppCompatActivity {
     private TextView tvSelectedExcludedLectures;
 
     private MaterialButton btnExcludedRequiredGeneral;
-    private MaterialButton btnExcludedHumanitiesArt;
-    private MaterialButton btnExcludedNaturalScience;
-    private MaterialButton btnExcludedSocialScience;
-    private MaterialButton btnExcludedDigitalLiteracy;
-    private MaterialButton btnExcludedCharacter;
     private MaterialButton btnExcludedOptional;
     private MaterialButton btnSelectAllCurrentCategory;
+
+    // Grouped general-area UI
+    private MaterialButton btnExcludedGeneralGroup;
+    private LinearLayout layoutGeneralAreaGroup;
+    private CheckBox cbExcludedHumanitiesArt;
+    private CheckBox cbExcludedNaturalScience;
+    private CheckBox cbExcludedSocialScience;
+    private CheckBox cbExcludedDigitalLiteracy;
+    private CheckBox cbExcludedCharacter;
 
     private ExcludedTabType currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_1;
 
@@ -146,13 +152,16 @@ public class HardConstraintActivity extends AppCompatActivity {
         tvSelectedExcludedLectures = findViewById(R.id.tv_selected_excluded_lectures);
 
         btnExcludedRequiredGeneral = findViewById(R.id.btn_excluded_required_general);
-        btnExcludedHumanitiesArt = findViewById(R.id.btn_excluded_humanities_art);
-        btnExcludedNaturalScience = findViewById(R.id.btn_excluded_natural_science);
-        btnExcludedSocialScience = findViewById(R.id.btn_excluded_social_science);
-        btnExcludedDigitalLiteracy = findViewById(R.id.btn_excluded_digital_literacy);
-        btnExcludedCharacter = findViewById(R.id.btn_excluded_character);
         btnExcludedOptional = findViewById(R.id.btn_excluded_optional);
         btnSelectAllCurrentCategory = findViewById(R.id.btn_select_all_current_category);
+
+        btnExcludedGeneralGroup = findViewById(R.id.btn_excluded_general_group);
+        layoutGeneralAreaGroup = findViewById(R.id.layout_general_area_group);
+        cbExcludedHumanitiesArt = findViewById(R.id.cb_excluded_humanities_art);
+        cbExcludedNaturalScience = findViewById(R.id.cb_excluded_natural_science);
+        cbExcludedSocialScience = findViewById(R.id.cb_excluded_social_science);
+        cbExcludedDigitalLiteracy = findViewById(R.id.cb_excluded_digital_literacy);
+        cbExcludedCharacter = findViewById(R.id.cb_excluded_character);
     }
 
     private void setupCreditDropdown() {
@@ -283,15 +292,79 @@ public class HardConstraintActivity extends AppCompatActivity {
         btnExcludedGrade4.setOnClickListener(v -> showExcludedMajorChips(4));
 
         btnExcludedRequiredGeneral.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.REQUIRED_GENERAL));
-        btnExcludedHumanitiesArt.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.HUMANITIES_ART));
-        btnExcludedNaturalScience.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.NATURAL_SCIENCE));
-        btnExcludedSocialScience.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.SOCIAL_SCIENCE));
-        btnExcludedDigitalLiteracy.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.DIGITAL_LITERACY));
-        btnExcludedCharacter.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.CHARACTER_EDUCATION));
         btnExcludedOptional.setOnClickListener(v -> showExcludedGeneralChips(ExcludedTabType.OPTIONAL));
+
+        // Toggle group visibility
+        btnExcludedGeneralGroup.setOnClickListener(v -> {
+            if (layoutGeneralAreaGroup.getVisibility() == View.VISIBLE) {
+                layoutGeneralAreaGroup.setVisibility(View.GONE);
+            } else {
+                layoutGeneralAreaGroup.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // Checkboxes: selecting an area will add all courses in that area to excluded list; unchecking removes them
+        cbExcludedHumanitiesArt.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) addAllFromGeneralArea(ExcludedTabType.HUMANITIES_ART);
+            else removeAllFromGeneralArea(ExcludedTabType.HUMANITIES_ART);
+            updateSelectedExcludedText();
+            refreshCurrentExcludedChipList();
+        });
+
+        cbExcludedNaturalScience.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) addAllFromGeneralArea(ExcludedTabType.NATURAL_SCIENCE);
+            else removeAllFromGeneralArea(ExcludedTabType.NATURAL_SCIENCE);
+            updateSelectedExcludedText();
+            refreshCurrentExcludedChipList();
+        });
+
+        cbExcludedSocialScience.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) addAllFromGeneralArea(ExcludedTabType.SOCIAL_SCIENCE);
+            else removeAllFromGeneralArea(ExcludedTabType.SOCIAL_SCIENCE);
+            updateSelectedExcludedText();
+            refreshCurrentExcludedChipList();
+        });
+
+        cbExcludedDigitalLiteracy.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) addAllFromGeneralArea(ExcludedTabType.DIGITAL_LITERACY);
+            else removeAllFromGeneralArea(ExcludedTabType.DIGITAL_LITERACY);
+            updateSelectedExcludedText();
+            refreshCurrentExcludedChipList();
+        });
+
+        cbExcludedCharacter.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) addAllFromGeneralArea(ExcludedTabType.CHARACTER_EDUCATION);
+            else removeAllFromGeneralArea(ExcludedTabType.CHARACTER_EDUCATION);
+            updateSelectedExcludedText();
+            refreshCurrentExcludedChipList();
+        });
 
         int initialGrade = userGrade > 0 ? userGrade : 1;
         showExcludedMajorChips(initialGrade);
+    }
+
+    private void addAllFromGeneralArea(ExcludedTabType tabType) {
+        for (Lecture lecture : allLectures) {
+            if (lecture == null) continue;
+            if (!isLectureInGeneralTab(lecture, tabType)) continue;
+            String courseName = lecture.getCourseName();
+            if (TextUtils.isEmpty(courseName)) continue;
+            addExcludedCourseByName(courseName);
+        }
+    }
+
+    private void removeAllFromGeneralArea(ExcludedTabType tabType) {
+        for (Lecture lecture : allLectures) {
+            if (lecture == null) continue;
+            if (!isLectureInGeneralTab(lecture, tabType)) continue;
+            String courseName = lecture.getCourseName();
+            if (TextUtils.isEmpty(courseName)) continue;
+            String normalized = normalizeCourseName(courseName);
+            if (excludedCourseNames.contains(normalized)) {
+                excludedCourseNames.remove(normalized);
+                removeExcludedDisplayText(normalized);
+            }
+        }
     }
 
     private void showExcludedMajorChips(int grade) {

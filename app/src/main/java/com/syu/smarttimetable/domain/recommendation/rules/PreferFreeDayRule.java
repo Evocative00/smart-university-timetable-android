@@ -11,9 +11,14 @@ import java.util.Set;
 
 public class PreferFreeDayRule implements RecommendationRule {
 
+    // 공강 요일은 중요한 선호 조건이지만, 전공/학년/학점 조건을 완전히 압도하지 않도록 제한한다.
+    private static final int BONUS_PER_SATISFIED_DAY = 60;
+    private static final int PENALTY_PER_VIOLATED_DAY = -80;
+
     @Override
     public int calculateScore(Timetable timetable, RecommendationRequest request) {
-        if (request == null
+        if (timetable == null
+                || request == null
                 || request.getSoftConstraint() == null
                 || request.getSoftConstraint().isSkipped()
                 || request.getSoftConstraint().getPreferredFreeDays() == null
@@ -29,7 +34,7 @@ public class PreferFreeDayRule implements RecommendationRule {
             }
 
             for (LectureTime time : lecture.getTimes()) {
-                if (time != null) {
+                if (time != null && time.getDay() != null) {
                     lectureDays.add(time.getDay());
                 }
             }
@@ -38,10 +43,14 @@ public class PreferFreeDayRule implements RecommendationRule {
         int score = 0;
 
         for (DayOfWeek preferredFreeDay : request.getSoftConstraint().getPreferredFreeDays()) {
+            if (preferredFreeDay == null) {
+                continue;
+            }
+
             if (lectureDays.contains(preferredFreeDay)) {
-                score -= 30;
+                score += PENALTY_PER_VIOLATED_DAY;
             } else {
-                score += 45;
+                score += BONUS_PER_SATISFIED_DAY;
             }
         }
 

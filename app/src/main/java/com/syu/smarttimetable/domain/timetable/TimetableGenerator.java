@@ -3,6 +3,7 @@ package com.syu.smarttimetable.domain.timetable;
 import android.util.Log;
 
 import com.syu.smarttimetable.data.model.Lecture;
+import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.data.model.Timetable;
 import com.syu.smarttimetable.data.model.enums.ClassParity;
 import com.syu.smarttimetable.data.model.enums.CourseCategory;
@@ -258,44 +259,72 @@ public class TimetableGenerator {
 
         int userGrade = request.getUserGrade();
 
-        List<Lecture> gradeMatchedMajors = new ArrayList<>();
-        List<Lecture> otherMajors = new ArrayList<>();
-        List<Lecture> generals = new ArrayList<>();
+        // 유저가 선호하는 공강 요일 가져오기
+        List<DayOfWeek> preferredFreeDays = new ArrayList<>();
+        if (request.getSoftConstraint() != null && !request.getSoftConstraint().isSkipped()
+                && request.getSoftConstraint().getPreferredFreeDays() != null) {
+            preferredFreeDays = new ArrayList<>(request.getSoftConstraint().getPreferredFreeDays());
+        }
+
+        List<Lecture> safeGradeMatchedMajors = new ArrayList<>(); // 공강을 지키는 학년 전공
+        List<Lecture> conflictGradeMatchedMajors = new ArrayList<>(); // 공강을 깨는 학년 전공
+        List<Lecture> safeOtherMajors = new ArrayList<>();
+        List<Lecture> conflictOtherMajors = new ArrayList<>();
+        List<Lecture> safeGenerals = new ArrayList<>();
+        List<Lecture> conflictGenerals = new ArrayList<>();
         List<Lecture> others = new ArrayList<>();
 
         for (Lecture lecture : lectures) {
-            if (lecture == null) {
-                continue;
+            if (lecture == null) continue;
+
+            // 이 과목이 선호 공강 요일을 침범하는지 확인
+            boolean violatesFreeDay = false;
+            if (lecture.getTimes() != null) {
+                for (com.syu.smarttimetable.data.model.LectureTime time : lecture.getTimes()) {
+                    if (time != null && preferredFreeDays.contains(time.getDay())) {
+                        violatesFreeDay = true;
+                        break;
+                    }
+                }
             }
 
             if (lecture.getCategory() == CourseCategory.MAJOR) {
                 if (lecture.getGrade() == userGrade) {
-                    gradeMatchedMajors.add(lecture);
+                    if (violatesFreeDay) conflictGradeMatchedMajors.add(lecture);
+                    else safeGradeMatchedMajors.add(lecture);
                 } else {
-                    otherMajors.add(lecture);
+                    if (violatesFreeDay) conflictOtherMajors.add(lecture);
+                    else safeOtherMajors.add(lecture);
                 }
             } else if (lecture.getCategory() == CourseCategory.GENERAL) {
-                generals.add(lecture);
+                if (violatesFreeDay) conflictGenerals.add(lecture);
+                else safeGenerals.add(lecture);
             } else {
                 others.add(lecture);
             }
         }
 
-        gradeMatchedMajors.sort((first, second) ->
-                Integer.compare(second.getCredits(), first.getCredits()));
-
-        otherMajors.sort((first, second) ->
-                Integer.compare(second.getCredits(), first.getCredits()));
-
-        Collections.shuffle(generals, new Random());
+        // 각각 학점 순 정렬 등 기존 로직 유지 (교양은 셔플)
+        safeGradeMatchedMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
+        conflictGradeMatchedMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
+        safeOtherMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
+        conflictOtherMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
+        Collections.shuffle(safeGenerals, new Random());
+        Collections.shuffle(conflictGenerals, new Random());
 
         lectures.clear();
-        lectures.addAll(gradeMatchedMajors);
-        lectures.addAll(otherMajors);
-        lectures.addAll(generals);
+
+        // 핵심 포인트: "안전한(Safe)" 과목들을 무조건 먼저 탐색하도록 풀의 앞쪽에 배치
+        lectures.addAll(safeGradeMatchedMajors);
+        lectures.addAll(safeOtherMajors);
+        lectures.addAll(safeGenerals);
+
+        // 만약 안전한 과목들만으로 목표 학점을 못 채우면, 그제서야 공강을 깨는 과목들 탐색 시작
+        lectures.addAll(conflictGradeMatchedMajors);
+        lectures.addAll(conflictOtherMajors);
+        lectures.addAll(conflictGenerals);
         lectures.addAll(others);
     }
-
     private boolean isValidByStudentIdParity(Lecture lecture, String studentId) {
         if (lecture == null) {
             return false;

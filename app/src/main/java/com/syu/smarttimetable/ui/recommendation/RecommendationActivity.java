@@ -16,6 +16,7 @@ import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
+import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
 
@@ -190,12 +191,26 @@ public class RecommendationActivity extends AppCompatActivity {
                 }
 
                 RecommendationEngine engine = new RecommendationEngine();
-                List<RecommendationEngine.TimetableScoreTuple> results =
+                RecommendationEngine.RecommendationResult engineResult =
                         engine.recommend(allLectures, recommendationRequest);
+
+                Log.d(TAG, "Recommendation complete.");
+
+                List<DayOfWeek> conflictDays = engineResult != null
+                        ? engineResult.getConflictDays()
+                        : new ArrayList<>();
+
+                if (conflictDays != null && !conflictDays.isEmpty()) {
+                    Log.w(TAG, "Fixed lecture vs preferred free day conflict: " + conflictDays);
+                }
+
+                List<RecommendationEngine.TimetableScoreTuple> results = engineResult != null
+                        ? engineResult.getRecommendations()
+                        : new ArrayList<>();
 
                 TimetableCacheManager.addToCache(cacheKey, results);
 
-                Log.d(TAG, "Recommendation complete. Results: " + (results == null ? 0 : results.size()));
+                Log.d(TAG, "Results: " + (results == null ? 0 : results.size()));
 
                 runOnUiThread(() -> {
                     try {
@@ -220,6 +235,10 @@ public class RecommendationActivity extends AppCompatActivity {
                         contentContainer.setVisibility(View.VISIBLE);
                         emptyStateContainer.setVisibility(View.GONE);
                         renderCurrentRecommendation();
+
+                        if (conflictDays != null && !conflictDays.isEmpty()) {
+                            showFreeDayConflictNotice(conflictDays);
+                        }
                     } catch (Exception e) {
                         Log.e(TAG, "Error in UI update", e);
                         showEmptyState("시간표를 표시하는 중 오류가 발생했습니다.");
@@ -230,6 +249,22 @@ public class RecommendationActivity extends AppCompatActivity {
                 runOnUiThread(() -> showEmptyState("추천 결과를 불러오는 중 오류가 발생했습니다."));
             }
         }).start();
+    }
+
+    private void showFreeDayConflictNotice(List<DayOfWeek> conflictDays) {
+        if (conflictDays == null || conflictDays.isEmpty()) {
+            return;
+        }
+
+        String formattedDays = formatDayListKorean(conflictDays);
+        String message = formattedDays
+                + "에는 고정된 수업이 있어서 해당 요일은 공강 선호에서 제외하고 추천했습니다.";
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("공강 선호 일부 제외")
+                .setMessage(message)
+                .setPositiveButton("확인", null)
+                .show();
     }
 
     private void showLoadingState() {
@@ -313,6 +348,53 @@ public class RecommendationActivity extends AppCompatActivity {
         btnRegenerate.setAlpha(1f);
 
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private String dayOfWeekToKorean(DayOfWeek day) {
+        if (day == null) return "";
+
+        switch (day) {
+            case MONDAY:
+                return "월요일";
+            case TUESDAY:
+                return "화요일";
+            case WEDNESDAY:
+                return "수요일";
+            case THURSDAY:
+                return "목요일";
+            case FRIDAY:
+                return "금요일";
+            case SATURDAY:
+                return "토요일";
+            case SUNDAY:
+                return "일요일";
+            default:
+                return day.name();
+        }
+    }
+
+    private String formatDayListKorean(List<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) return "";
+
+        List<String> names = new ArrayList<>();
+        for (DayOfWeek d : days) {
+            names.add(dayOfWeekToKorean(d));
+        }
+
+        if (names.size() == 1) return names.get(0);
+
+        if (names.size() == 2) {
+            // A and B -> "A와 B" (use '와'/'과' choice simplified to '과' when ending with vowel? use '와' for readability)
+            return names.get(0) + "과 " + names.get(1);
+        }
+
+        // 3 or more: "A, B, C" but for Korean day names we can join with ", " and add " 등"
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < names.size(); i++) {
+            sb.append(names.get(i));
+            if (i < names.size() - 1) sb.append(", ");
+        }
+        return sb.toString();
     }
 
     private void saveCurrentTimetableImage() {

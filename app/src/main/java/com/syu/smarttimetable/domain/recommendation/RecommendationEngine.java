@@ -46,7 +46,7 @@ public class RecommendationEngine {
         this.scoreCalculator = scoreCalculator;
     }
 
-    public List<TimetableScoreTuple> recommend(List<Lecture> allLectures, RecommendationRequest request) {
+    public RecommendationResult recommend(List<Lecture> allLectures, RecommendationRequest request) {
         List<TimetableScoreTuple> results = new ArrayList<>();
 
         if (allLectures == null || allLectures.isEmpty() || request == null) {
@@ -54,23 +54,34 @@ public class RecommendationEngine {
                     + (allLectures == null ? "null" : allLectures.size())
                     + ", request="
                     + (request == null ? "null" : "ok"));
-            return results;
+            return new RecommendationResult(results, new ArrayList<>());
         }
 
         Log.d(TAG, "Starting recommendation with " + allLectures.size() + " lectures");
 
+        List<DayOfWeek> conflictDays = findFixedLectureFreeDayConflicts(allLectures, request);
+        RecommendationRequest effectiveRequest = createRequestWithoutConflictedFreeDays(request, conflictDays);
+
+        if (!conflictDays.isEmpty()) {
+            Log.d(TAG, "Fixed lecture conflicts with preferred free days: "
+                    + conflictDays
+                    + ". The conflicted days will be ignored for recommendation scoring/generation.");
+        }
+
         List<Lecture> filteredLectures = takenLectureFilter.filterCompletedLectures(
                 allLectures,
-                request.getCompletedCourseCodes()
+                effectiveRequest.getCompletedCourseCodes()
         );
 
         Log.d(TAG, "After filtering completed lectures: " + filteredLectures.size() + " lectures");
 
-        List<Timetable> candidates = timetableGenerator.generateCandidates(filteredLectures, request);
+        List<Timetable> candidates = timetableGenerator.generateCandidates(filteredLectures, effectiveRequest);
 
         Log.d(TAG, "Generated " + candidates.size() + " candidate timetables");
 
         Set<String> seenTimetableSignatures = new HashSet<>();
+        int rejectedByHardConstraint = 0;
+        int rejectedByDuplicate = 0;
 
         for (Timetable candidate : candidates) {
             if (candidate == null) {
@@ -78,38 +89,55 @@ public class RecommendationEngine {
             }
 
             HardConstraintValidator.ValidationResult validationResult =
-                    hardConstraintValidator.validate(candidate.getLecturesReadOnly(), request);
+                    hardConstraintValidator.validate(candidate.getLecturesReadOnly(), effectiveRequest);
 
             if (!validationResult.isValid()) {
-                Log.d(TAG, "Candidate rejected: " + validationResult.getErrors());
+                rejectedByHardConstraint++;
+                Log.d(TAG, "Candidate rejected by hard constraint: " + validationResult.getErrors());
+                continue;
+            }
+
+            // 삼육대 교양 영역 특성 반영: 인문예술/자연과학/사회과학/디지털/인성교육은 영역별 1개까지만 추천한다.
+            if (hasExcessGeneralAreaLectures(candidate)) {
+                Log.d(TAG, "Candidate rejected: exceeds per-area general lecture limit");
                 continue;
             }
 
             String signature = buildTimetableSignature(candidate);
 
             if (!seenTimetableSignatures.add(signature)) {
+                rejectedByDuplicate++;
                 Log.d(TAG, "Duplicate candidate skipped: " + signature);
                 continue;
             }
 
-            int score = scoreCalculator.calculateScore(candidate, request);
+            int score = scoreCalculator.calculateScore(candidate, effectiveRequest);
             results.add(new TimetableScoreTuple(candidate, score));
         }
 
         Log.d(TAG, "Valid recommendations after filtering: " + results.size());
+        Log.d(TAG, "Rejected by hard constraint: " + rejectedByHardConstraint + ", by duplicate: " + rejectedByDuplicate);
 
         results.sort((first, second) -> {
-            int firstGradeMajorCount = countGradeMatchedMajors(first.getTimetable(), request);
-            int secondGradeMajorCount = countGradeMatchedMajors(second.getTimetable(), request);
+            int firstFreeDayViolations = countPreferredFreeDayViolations(first.getTimetable(), effectiveRequest);
+            int secondFreeDayViolations = countPreferredFreeDayViolations(second.getTimetable(), effectiveRequest);
 
-            int gradeMajorCompare = Integer.compare(secondGradeMajorCount, firstGradeMajorCount);
-            if (gradeMajorCompare != 0) {
-                return gradeMajorCompare;
+            int freeDayViolationCompare = Integer.compare(firstFreeDayViolations, secondFreeDayViolations);
+            if (freeDayViolationCompare != 0) {
+                return freeDayViolationCompare;
             }
 
             int scoreCompare = Integer.compare(second.getScore(), first.getScore());
             if (scoreCompare != 0) {
                 return scoreCompare;
+            }
+
+            int firstGradeMajorCount = countGradeMatchedMajors(first.getTimetable(), effectiveRequest);
+            int secondGradeMajorCount = countGradeMatchedMajors(second.getTimetable(), effectiveRequest);
+
+            int gradeMajorCompare = Integer.compare(secondGradeMajorCount, firstGradeMajorCount);
+            if (gradeMajorCompare != 0) {
+                return gradeMajorCompare;
             }
 
             return Integer.compare(
@@ -118,70 +146,166 @@ public class RecommendationEngine {
             );
         });
 
-        results = prioritizeFreeDayPreferences(results, request);
-
+        List<TimetableScoreTuple> limitedResults = results;
         if (results.size() > MAX_RECOMMENDATIONS) {
             Log.d(TAG, "Returning top " + MAX_RECOMMENDATIONS + " recommendations");
-            return new ArrayList<>(results.subList(0, MAX_RECOMMENDATIONS));
+            limitedResults = new ArrayList<>(results.subList(0, MAX_RECOMMENDATIONS));
+        } else {
+            Log.d(TAG, "Returning " + results.size() + " recommendations");
         }
 
-        Log.d(TAG, "Returning " + results.size() + " recommendations");
-        return results;
+        return new RecommendationResult(limitedResults, conflictDays);
     }
 
-    private List<TimetableScoreTuple> prioritizeFreeDayPreferences(List<TimetableScoreTuple> results,
-                                                                   RecommendationRequest request) {
-        if (results == null || results.isEmpty() || request == null) {
-            return results;
+    private List<DayOfWeek> findFixedLectureFreeDayConflicts(List<Lecture> allLectures,
+                                                             RecommendationRequest request) {
+        List<DayOfWeek> conflicts = new ArrayList<>();
+
+        if (allLectures == null
+                || request == null
+                || request.getSoftConstraint() == null
+                || request.getSoftConstraint().isSkipped()
+                || request.getSoftConstraint().getPreferredFreeDays() == null
+                || request.getSoftConstraint().getPreferredFreeDays().isEmpty()
+                || request.getFixedLectureKeys() == null
+                || request.getFixedLectureKeys().isEmpty()) {
+            return conflicts;
         }
 
-        SoftConstraint softConstraint = request.getSoftConstraint();
+        Set<DayOfWeek> fixedLectureDays = new HashSet<>();
 
-        if (softConstraint == null
-                || softConstraint.isSkipped()
-                || softConstraint.getPreferredFreeDays() == null
-                || softConstraint.getPreferredFreeDays().isEmpty()) {
-            return results;
-        }
-
-        List<TimetableScoreTuple> freeDaySatisfied = new ArrayList<>();
-        List<TimetableScoreTuple> freeDayViolated = new ArrayList<>();
-
-        for (TimetableScoreTuple tuple : results) {
-            if (tuple == null || tuple.getTimetable() == null) {
+        for (Lecture lecture : allLectures) {
+            if (lecture == null) {
                 continue;
             }
 
-            if (containsAnyPreferredFreeDayLecture(tuple.getTimetable(), softConstraint.getPreferredFreeDays())) {
-                freeDayViolated.add(tuple);
-            } else {
-                freeDaySatisfied.add(tuple);
+            String key = RequiredLectureConstraint.buildLectureKey(lecture);
+            if (!request.getFixedLectureKeys().contains(key)) {
+                continue;
             }
-        }
 
-        List<TimetableScoreTuple> prioritized = new ArrayList<>(results.size());
-        prioritized.addAll(freeDaySatisfied);
-        prioritized.addAll(freeDayViolated);
-
-        return prioritized;
-    }
-
-    private boolean containsAnyPreferredFreeDayLecture(Timetable timetable, List<DayOfWeek> preferredFreeDays) {
-        if (timetable == null || preferredFreeDays == null || preferredFreeDays.isEmpty()) {
-            return false;
-        }
-
-        for (Lecture lecture : timetable.getLecturesReadOnly()) {
-            if (lecture == null || lecture.getTimes() == null) {
+            if (lecture.getTimes() == null) {
                 continue;
             }
 
             for (LectureTime time : lecture.getTimes()) {
-                if (time != null
-                        && time.getDay() != null
-                        && preferredFreeDays.contains(time.getDay())) {
-                    return true;
+                if (time != null && time.getDay() != null) {
+                    fixedLectureDays.add(time.getDay());
                 }
+            }
+        }
+
+        for (DayOfWeek preferred : request.getSoftConstraint().getPreferredFreeDays()) {
+            if (preferred != null && fixedLectureDays.contains(preferred) && !conflicts.contains(preferred)) {
+                conflicts.add(preferred);
+            }
+        }
+
+        return conflicts;
+    }
+
+    private RecommendationRequest createRequestWithoutConflictedFreeDays(RecommendationRequest original,
+                                                                        List<DayOfWeek> conflictDays) {
+        if (original == null || conflictDays == null || conflictDays.isEmpty()) {
+            return original;
+        }
+
+        SoftConstraint originalSoft = original.getSoftConstraint();
+        if (originalSoft == null) {
+            return original;
+        }
+
+        List<DayOfWeek> adjustedFreeDays = new ArrayList<>();
+        if (originalSoft.getPreferredFreeDays() != null) {
+            for (DayOfWeek day : originalSoft.getPreferredFreeDays()) {
+                if (day != null && !conflictDays.contains(day)) {
+                    adjustedFreeDays.add(day);
+                }
+            }
+        }
+
+        SoftConstraint adjustedSoft = new SoftConstraint(
+                originalSoft.isSkipped(),
+                adjustedFreeDays,
+                originalSoft.getFreeTimePreference(),
+                originalSoft.isKeepLunch12To13Free(),
+                originalSoft.isAvoidGapOver3Hours(),
+                originalSoft.getPreferredProfessors() == null
+                        ? new ArrayList<>()
+                        : new ArrayList<>(originalSoft.getPreferredProfessors()),
+                originalSoft.isConsiderTravelTime(),
+                originalSoft.getBlockedTimes() == null
+                        ? new ArrayList<>()
+                        : new ArrayList<>(originalSoft.getBlockedTimes())
+        );
+
+        return new RecommendationRequest(
+                original.getMinCredits(),
+                original.getMaxCredits(),
+                original.getFixedLectureKeys(),
+                original.getCompletedCourseCodes(),
+                adjustedSoft,
+                original.getUserGrade(),
+                original.getStudentId()
+        );
+    }
+
+    public static class RecommendationResult {
+        private final List<TimetableScoreTuple> recommendations;
+        private final List<DayOfWeek> conflictDays;
+
+        public RecommendationResult(List<TimetableScoreTuple> recommendations, List<DayOfWeek> conflictDays) {
+            this.recommendations = recommendations != null ? recommendations : new ArrayList<>();
+            this.conflictDays = conflictDays != null ? conflictDays : new ArrayList<>();
+        }
+
+        public List<TimetableScoreTuple> getRecommendations() {
+            return recommendations;
+        }
+
+        public List<DayOfWeek> getConflictDays() {
+            return conflictDays;
+        }
+    }
+
+    private boolean hasExcessGeneralAreaLectures(Timetable timetable) {
+        if (timetable == null || timetable.getLecturesReadOnly() == null) {
+            return false;
+        }
+
+        int humanities = 0;
+        int natural = 0;
+        int social = 0;
+        int digital = 0;
+        int character = 0;
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null) continue;
+            if (lecture.getCategory() != CourseCategory.GENERAL) continue;
+            if (lecture.getGeneralArea() == null) continue;
+
+            switch (lecture.getGeneralArea()) {
+                case HUMANITIES_ART:
+                    humanities++;
+                    break;
+                case NATURAL_SCIENCE:
+                    natural++;
+                    break;
+                case SOCIAL_SCIENCE:
+                    social++;
+                    break;
+                case DIGITAL_LITERACY:
+                    digital++;
+                    break;
+                case CHARACTER_EDUCATION:
+                    character++;
+                    break;
+                default:
+                    break;
+            }
+
+            if (humanities > 1 || natural > 1 || social > 1 || digital > 1 || character > 1) {
+                return true;
             }
         }
 
@@ -207,6 +331,40 @@ public class RecommendationEngine {
         }
 
         return count;
+    }
+
+    private int countPreferredFreeDayViolations(Timetable timetable, RecommendationRequest request) {
+        if (timetable == null
+                || request == null
+                || request.getSoftConstraint() == null
+                || request.getSoftConstraint().isSkipped()
+                || request.getSoftConstraint().getPreferredFreeDays() == null
+                || request.getSoftConstraint().getPreferredFreeDays().isEmpty()) {
+            return 0;
+        }
+
+        Set<DayOfWeek> lectureDays = new HashSet<>();
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null || lecture.getTimes() == null) {
+                continue;
+            }
+
+            for (LectureTime time : lecture.getTimes()) {
+                if (time != null && time.getDay() != null) {
+                    lectureDays.add(time.getDay());
+                }
+            }
+        }
+
+        int violations = 0;
+        for (DayOfWeek preferredFreeDay : request.getSoftConstraint().getPreferredFreeDays()) {
+            if (preferredFreeDay != null && lectureDays.contains(preferredFreeDay)) {
+                violations++;
+            }
+        }
+
+        return violations;
     }
 
     private String buildTimetableSignature(Timetable timetable) {
