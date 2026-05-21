@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureC
 
 import com.syu.smarttimetable.data.model.enums.GeneralArea;
 import com.syu.smarttimetable.data.model.enums.RequirementType;
+import com.syu.smarttimetable.common.utils.ConstraintStateManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -104,6 +106,9 @@ public class HardConstraintActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hard_constraint);
 
         bindViews();
+        
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         lectureRepository = new LectureRepository();
         userGrade = getIntent().getIntExtra("userGrade", 0);
@@ -134,35 +139,97 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         updateSelectedLectureText();
         updateSelectedExcludedText();
+        
+        // 저장된 상태 복원
+        restoreSavedState();
+
+        Button btnReset = findViewById(R.id.btn_reset);
+
+        btnReset.setOnClickListener(v -> {
+
+            ConstraintStateManager.clearHardConstraintState(HardConstraintActivity.this);
+
+            Toast.makeText(HardConstraintActivity.this,
+                    "하드제약 초기화 완료",
+                    Toast.LENGTH_SHORT).show();
+
+            recreate();
+        });
+    }
+
+    // 이전에 저장된 선택값들을 복원
+    private void restoreSavedState() {
+        // 저장된 학점 복원
+        String savedCredits = ConstraintStateManager.getSavedTargetCredits(this);
+        if (!savedCredits.isEmpty()) {
+            autoCredits.setText(savedCredits, false);
+        }
+
+        // 저장된 고정 강의 복원
+        List<String> savedFixedLectures = ConstraintStateManager.getSavedFixedLectures(this);
+        if (savedFixedLectures != null && !savedFixedLectures.isEmpty()) {
+            fixedLectureKeys.addAll(savedFixedLectures);
+            // Display text 복원은 어려우므로 강의 정보에서 다시 생성
+            for (String lectureKey : savedFixedLectures) {
+                for (Lecture lecture : allLectures) {
+                    if (lecture != null &&
+                        RequiredLectureConstraint.buildLectureKey(lecture).equals(lectureKey)) {
+                        selectedLectureDisplayTexts.add(buildLectureDisplayText(lecture));
+                        break;
+                    }
+                }
+            }
+            updateSelectedLectureText();
+        }
+
+        // 저장된 제외 강의 복원
+        Set<String> savedExcludedCourses = ConstraintStateManager.getSavedExcludedCourses(this);
+        if (savedExcludedCourses != null && !savedExcludedCourses.isEmpty()) {
+            excludedCourseNames.addAll(savedExcludedCourses);
+            // Display text 복원
+            for (String excludedCourseName : savedExcludedCourses) {
+                for (Lecture lecture : allLectures) {
+                    if (lecture != null) {
+                        String normalized = normalizeCourseName(lecture.getCourseName());
+                        if (normalized.equals(excludedCourseName)) {
+                            selectedExcludedDisplayTexts.add(lecture.getCourseName());
+                            break;
+                        }
+                    }
+                }
+            }
+            updateSelectedExcludedText();
+        }
+
     }
 
     private void bindViews() {
-        autoCredits = findViewById(R.id.auto_credits);
-        autoCategory = findViewById(R.id.auto_category);
-        autoLecture = findViewById(R.id.auto_lecture);
-        btnAddLecture = findViewById(R.id.btn_add_lecture);
-        btnNext = findViewById(R.id.btn_next);
-        tvSelectedLectures = findViewById(R.id.tv_selected_lectures);
+            autoCredits = findViewById(R.id.auto_credits);
+            autoCategory = findViewById(R.id.auto_category);
+            autoLecture = findViewById(R.id.auto_lecture);
+            btnAddLecture = findViewById(R.id.btn_add_lecture);
+            btnNext = findViewById(R.id.btn_next);
+            tvSelectedLectures = findViewById(R.id.tv_selected_lectures);
 
-        btnExcludedGrade1 = findViewById(R.id.btn_excluded_grade_1);
-        btnExcludedGrade2 = findViewById(R.id.btn_excluded_grade_2);
-        btnExcludedGrade3 = findViewById(R.id.btn_excluded_grade_3);
-        btnExcludedGrade4 = findViewById(R.id.btn_excluded_grade_4);
-        layoutExcludedMajorChips = findViewById(R.id.layout_excluded_major_chips);
-        tvSelectedExcludedLectures = findViewById(R.id.tv_selected_excluded_lectures);
+            btnExcludedGrade1 = findViewById(R.id.btn_excluded_grade_1);
+            btnExcludedGrade2 = findViewById(R.id.btn_excluded_grade_2);
+            btnExcludedGrade3 = findViewById(R.id.btn_excluded_grade_3);
+            btnExcludedGrade4 = findViewById(R.id.btn_excluded_grade_4);
+            layoutExcludedMajorChips = findViewById(R.id.layout_excluded_major_chips);
+            tvSelectedExcludedLectures = findViewById(R.id.tv_selected_excluded_lectures);
 
-        btnExcludedRequiredGeneral = findViewById(R.id.btn_excluded_required_general);
-        btnExcludedOptional = findViewById(R.id.btn_excluded_optional);
-        btnSelectAllCurrentCategory = findViewById(R.id.btn_select_all_current_category);
+            btnExcludedRequiredGeneral = findViewById(R.id.btn_excluded_required_general);
+            btnExcludedOptional = findViewById(R.id.btn_excluded_optional);
+            btnSelectAllCurrentCategory = findViewById(R.id.btn_select_all_current_category);
 
-        btnExcludedGeneralGroup = findViewById(R.id.btn_excluded_general_group);
-        layoutGeneralAreaGroup = findViewById(R.id.layout_general_area_group);
-        cbExcludedHumanitiesArt = findViewById(R.id.cb_excluded_humanities_art);
-        cbExcludedNaturalScience = findViewById(R.id.cb_excluded_natural_science);
-        cbExcludedSocialScience = findViewById(R.id.cb_excluded_social_science);
-        cbExcludedDigitalLiteracy = findViewById(R.id.cb_excluded_digital_literacy);
-        cbExcludedCharacter = findViewById(R.id.cb_excluded_character);
-    }
+            btnExcludedGeneralGroup = findViewById(R.id.btn_excluded_general_group);
+            layoutGeneralAreaGroup = findViewById(R.id.layout_general_area_group);
+            cbExcludedHumanitiesArt = findViewById(R.id.cb_excluded_humanities_art);
+            cbExcludedNaturalScience = findViewById(R.id.cb_excluded_natural_science);
+            cbExcludedSocialScience = findViewById(R.id.cb_excluded_social_science);
+            cbExcludedDigitalLiteracy = findViewById(R.id.cb_excluded_digital_literacy);
+            cbExcludedCharacter = findViewById(R.id.cb_excluded_character);
+        }
 
     private void setupCreditDropdown() {
         String[] creditOptions = {"15", "16", "17", "18", "19", "20", "21"};
@@ -795,6 +862,10 @@ public class HardConstraintActivity extends AppCompatActivity {
                 completedCourseCodes
         );
 
+        // 상태 저장
+        ConstraintStateManager.saveHardConstraintState(this, creditText, 
+                new ArrayList<>(fixedLectureKeys), excludedCourseNames);
+
         Toast.makeText(this, "하드제약 저장 완료", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(this, SoftConstraintActivity.class);
@@ -802,7 +873,18 @@ public class HardConstraintActivity extends AppCompatActivity {
         intent.putExtra("userGrade", userGrade);
         intent.putExtra("studentId", studentId);
         startActivity(intent);
-        finish();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        // 뒤로가기 시 현재 상태 저장
+        String creditText = getText(autoCredits);
+        if (!TextUtils.isEmpty(creditText)) {
+            ConstraintStateManager.saveHardConstraintState(this, creditText,
+                    new ArrayList<>(fixedLectureKeys), excludedCourseNames);
+        }
+        super.onBackPressed();
     }
 
     private List<String> buildCompletedCourseCodes() {

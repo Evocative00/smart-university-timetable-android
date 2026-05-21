@@ -5,11 +5,14 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.ConstraintStateManager;
 import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.SoftConstraint;
@@ -43,6 +46,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private CheckBox checkboxTravelTime;
     private Button buttonSkip;
     private Button buttonRecommend;
+    private ImageButton btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +64,25 @@ public class SoftConstraintActivity extends AppCompatActivity {
         lectureRepository = new LectureRepository();
 
         bindViews();
+        setupBack();
         setupButtons();
+        // 저장된 상태 복원
+        restoreSavedState();
+
+        Button btnResetSoft = findViewById(R.id.btn_reset_soft);
+
+        btnResetSoft.setOnClickListener(v -> {
+
+            ConstraintStateManager.clearSoftConstraintState(SoftConstraintActivity.this);
+
+            Toast.makeText(SoftConstraintActivity.this,
+                    "초기화 실행됨",
+                    Toast.LENGTH_LONG).show();
+
+            finish();
+
+            startActivity(getIntent());
+        });
     }
 
     private void bindViews() {
@@ -76,17 +98,24 @@ public class SoftConstraintActivity extends AppCompatActivity {
         checkboxTravelTime = findViewById(R.id.checkboxTravelTime);
         buttonSkip = findViewById(R.id.buttonSkip);
         buttonRecommend = findViewById(R.id.buttonRecommend);
+        btnBack = findViewById(R.id.btn_back);
+    }
+
+    private void setupBack() {
+        btnBack.setOnClickListener(v -> onBackPressed());
     }
 
     private void setupButtons() {
         buttonSkip.setOnClickListener(v -> {
             SoftConstraint softConstraint = new SoftConstraint();
             softConstraint.setSkipped(true);
+            saveSoftConstraintState(softConstraint);
             navigateToMain(softConstraint);
         });
 
         buttonRecommend.setOnClickListener(v -> {
             SoftConstraint softConstraint = collectConstraintFromUi();
+            saveSoftConstraintState(softConstraint);
             navigateToMain(softConstraint);
         });
     }
@@ -192,6 +221,102 @@ public class SoftConstraintActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
+    }
+
+    // 소프트 제약 상태 저장
+
+    private void saveSoftConstraintState(SoftConstraint softConstraint) {
+        if (softConstraint == null) {
+            return;
+        }
+        
+        // 선호 요일을 String List로 변환
+        List<String> preferredDaysStr = new ArrayList<>();
+        if (softConstraint.getPreferredFreeDays() != null) {
+            for (DayOfWeek day : softConstraint.getPreferredFreeDays()) {
+                preferredDaysStr.add(day.name());
+            }
+        }
+        
+        // FreeTimePreference를 String으로 변환
+        String freeTimeStr = softConstraint.getFreeTimePreference() != null ? 
+                softConstraint.getFreeTimePreference().name() : "";
+        
+        // 교수명들을 쉼표로 구분된 문자열로 변환
+        String professorsStr = "";
+        if (softConstraint.getPreferredProfessors() != null && !softConstraint.getPreferredProfessors().isEmpty()) {
+            professorsStr = String.join(",", softConstraint.getPreferredProfessors());
+        }
+        
+        ConstraintStateManager.saveSoftConstraintState(
+                this,
+                preferredDaysStr,
+                freeTimeStr,
+                softConstraint.isKeepLunch12To13Free(),
+                softConstraint.isAvoidGapOver3Hours(),
+                professorsStr,
+                softConstraint.isConsiderTravelTime()
+        );
+    }
+
+    // 저장된 소프트 제약 상태 복원
+
+    private void restoreSavedState() {
+
+        // 기본 상태 초기화 (이거 없으면 초기화 안 됨)
+        checkboxMonday.setChecked(false);
+        checkboxTuesday.setChecked(false);
+        checkboxWednesday.setChecked(false);
+        checkboxThursday.setChecked(false);
+        checkboxFriday.setChecked(false);
+        radioGroupFreeTime.check(R.id.radioNone);
+        checkboxLunch.setChecked(false);
+        checkboxAvoidLongGap.setChecked(false);
+        editPreferredProfessors.setText("");
+        checkboxTravelTime.setChecked(false);
+
+        // 선호 요일 복원
+        List<String> savedDays = ConstraintStateManager.getSavedPreferredDays(this);
+        if (savedDays != null && !savedDays.isEmpty()) {
+            if (savedDays.contains(DayOfWeek.MONDAY.name())) checkboxMonday.setChecked(true);
+            if (savedDays.contains(DayOfWeek.TUESDAY.name())) checkboxTuesday.setChecked(true);
+            if (savedDays.contains(DayOfWeek.WEDNESDAY.name())) checkboxWednesday.setChecked(true);
+            if (savedDays.contains(DayOfWeek.THURSDAY.name())) checkboxThursday.setChecked(true);
+            if (savedDays.contains(DayOfWeek.FRIDAY.name())) checkboxFriday.setChecked(true);
+        }
+        
+        // 자유시간 선호도 복원
+        String savedFreeTime = ConstraintStateManager.getSavedFreeTime(this);
+        if (!savedFreeTime.isEmpty()) {
+            if (savedFreeTime.equals(FreeTimePreference.MORNING.name())) {
+                radioGroupFreeTime.check(R.id.radioMorning);
+            } else if (savedFreeTime.equals(FreeTimePreference.AFTERNOON.name())) {
+                radioGroupFreeTime.check(R.id.radioAfternoon);
+            }
+        }
+        
+        // 점심 시간 복원
+        checkboxLunch.setChecked(ConstraintStateManager.getSavedLunch(this));
+        
+        // 긴 공강 피하기 복원
+        checkboxAvoidLongGap.setChecked(ConstraintStateManager.getSavedAvoidGap(this));
+        
+        // 교수명 복원
+        String savedProfessors = ConstraintStateManager.getSavedProfessors(this);
+        if (!savedProfessors.isEmpty()) {
+            editPreferredProfessors.setText(savedProfessors);
+        }
+        
+        // 통학시간 고려 복원
+        checkboxTravelTime.setChecked(ConstraintStateManager.getSavedTravelTime(this));
+    }
+
+    @Override
+    public void onBackPressed() {
+        // 뒤로가기 시 현재 상태 저장
+        SoftConstraint softConstraint = collectConstraintFromUi();
+        saveSoftConstraintState(softConstraint);
+        super.onBackPressed();
     }
 
     private void addRequiredChapelIfNeeded(HashSet<String> fixedLectureKeySet) {
