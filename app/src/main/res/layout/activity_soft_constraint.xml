@@ -25,6 +25,15 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="뒤로가기"
+                    android:src="@drawable/ic_arrow_back" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -188,10 +197,18 @@
                     android:minHeight="48dp"
                     android:text="@string/soft_travel_title" />
 
+
+                <Button
+                    android:id="@+id/btn_reset_soft"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="22dp"
+                    android:text="소프트 제약 초기화"/>
+ㅁ
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="22dp"
+                    android:layout_marginTop="5dp"
                     android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton

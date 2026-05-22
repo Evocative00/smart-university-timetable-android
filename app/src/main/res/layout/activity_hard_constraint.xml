@@ -25,6 +25,15 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="뒤로가기"
+                    android:src="@drawable/ic_arrow_back" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -351,6 +360,13 @@
                     android:text="현재 카테고리 전체 선택"
                     app:cornerRadius="18dp" />
 
+                <Button
+                    android:id="@+id/btn_reset"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="15dp"
+                    android:text="하드 제약 초기화"/>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_next"
                     android:layout_width="match_parent"
@@ -358,6 +374,8 @@
                     android:layout_marginTop="22dp"
                     android:text="@string/btn_next"
                     app:cornerRadius="18dp" />
+
+
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
