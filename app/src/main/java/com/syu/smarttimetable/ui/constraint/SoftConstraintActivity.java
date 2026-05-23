@@ -4,8 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
-import com.google.android.material.textfield.TextInputEditText;
-import android.widget.ImageButton;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +28,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
     private HardConstraint hardConstraint;
     private int userGrade = 0;
+    private String studentId = "";
     private LectureRepository lectureRepository;
 
     private CheckBox checkboxMonday;
@@ -39,7 +39,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private RadioGroup radioGroupFreeTime;
     private CheckBox checkboxLunch;
     private CheckBox checkboxAvoidLongGap;
-    private TextInputEditText editPreferredProfessors;
+    private EditText editPreferredProfessors;
     private CheckBox checkboxTravelTime;
     private Button buttonSkip;
     private Button buttonRecommend;
@@ -51,6 +51,12 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         hardConstraint = (HardConstraint) getIntent().getSerializableExtra("hardConstraint");
         userGrade = getIntent().getIntExtra("userGrade", 0);
+        studentId = getIntent().getStringExtra("studentId");
+
+        if (studentId == null) {
+            studentId = "";
+        }
+
         lectureRepository = new LectureRepository();
 
         bindViews();
@@ -58,9 +64,6 @@ public class SoftConstraintActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
-        ImageButton btnBack = findViewById(R.id.btn_back);
-        btnBack.setOnClickListener(v -> finish());
-
         checkboxMonday = findViewById(R.id.checkboxMonday);
         checkboxTuesday = findViewById(R.id.checkboxTuesday);
         checkboxWednesday = findViewById(R.id.checkboxWednesday);
@@ -168,19 +171,24 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         addRequiredChapelIfNeeded(fixedLectureKeySet);
 
+        HashSet<String> completedCourseCodes = new HashSet<>();
+
+        if (hardConstraint != null && hardConstraint.getCompletedCourseCodes() != null) {
+            completedCourseCodes.addAll(hardConstraint.getCompletedCourseCodes());
+        }
+
         RecommendationRequest recommendationRequest = new RecommendationRequest(
                 minCredits,
                 maxCredits,
                 fixedLectureKeySet,
-                new HashSet<>(),
-                softConstraint
+                completedCourseCodes,
+                softConstraint,
+                userGrade,
+                studentId
         );
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("hardConstraint", hardConstraint);
-        intent.putExtra("softConstraint", softConstraint);
+        Intent intent = new Intent(this, com.syu.smarttimetable.ui.main.MainNavigationActivity.class);
         intent.putExtra("recommendationRequest", recommendationRequest);
-        intent.putExtra("userGrade", userGrade);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
@@ -208,8 +216,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
                 continue;
             }
 
-            boolean isChapel = courseName.equals("채플")
-                    || courseName.startsWith("채플(");
+            boolean isChapel = isChapelCourse(courseName);
 
             if (isChapel && lecture.getGrade() == userGrade) {
                 fixedLectureKeySet.add(RequiredLectureConstraint.buildLectureKey(lecture));
@@ -217,4 +224,14 @@ public class SoftConstraintActivity extends AppCompatActivity {
             }
         }
     }
+
+    private boolean isChapelCourse(String courseName) {
+        if (courseName == null) {
+            return false;
+        }
+
+        String normalized = courseName.trim().toLowerCase();
+        return normalized.startsWith("채플") || normalized.contains("chapel");
+    }
+
 }

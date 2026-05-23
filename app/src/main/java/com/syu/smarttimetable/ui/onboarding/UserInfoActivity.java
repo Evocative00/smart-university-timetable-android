@@ -24,7 +24,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.User;
 import com.syu.smarttimetable.data.repository.UserRepository;
-import com.syu.smarttimetable.ui.main.MainActivity;
+import com.syu.smarttimetable.ui.auth.LoginActivity;
+import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,8 @@ public class UserInfoActivity extends AppCompatActivity {
     private Button btnSave;
 
     private UserRepository userRepository;
+    private String mode = "new";
+    private User existingUser = null;
 
     private interface SelectionCallback {
         void onSelected(String item);
@@ -52,19 +55,36 @@ public class UserInfoActivity extends AppCompatActivity {
 
         userRepository = new UserRepository();
 
+        mode = getIntent().getStringExtra("mode");
+        if (mode == null) {
+            mode = "new";
+        }
+
+        if (getIntent().hasExtra("user")) {
+            existingUser = (User) getIntent().getSerializableExtra("user");
+        }
+
         ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> {
-            userRepository.logout();
-            Intent intent = new Intent(this, com.syu.smarttimetable.ui.auth.LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-            finish();
+            if ("edit".equals(mode)) {
+                finish();
+            } else {
+                userRepository.logout();
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            }
         });
 
         bindViews();
         setupDepartmentDropdown();
         setupGradeDropdown();
         setupSaveButton();
+
+        if ("edit".equals(mode) && existingUser != null) {
+            loadExistingInfo();
+        }
     }
 
     private void bindViews() {
@@ -76,10 +96,35 @@ public class UserInfoActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btn_save);
     }
 
+    private void loadExistingInfo() {
+        if (existingUser == null) {
+            return;
+        }
+
+        if (existingUser.getDepartment() != null) {
+            autoDepartment.setText(existingUser.getDepartment(), false);
+        }
+
+        if (existingUser.getGrade() > 0) {
+            autoGrade.setText(existingUser.getGrade() + "학년", false);
+        }
+
+        if (existingUser.getStudentId() != null) {
+            etStudentId.setText(existingUser.getStudentId());
+        }
+
+        if (existingUser.getDepartment() != null) {
+            updateMajorDetailUI(existingUser.getDepartment(), existingUser.getMajorDetail());
+        }
+    }
+
     private void setupDepartmentDropdown() {
         String[] departments = getResources().getStringArray(R.array.department_array);
 
-        autoDepartment.setText("", false);
+        if (TextUtils.isEmpty(getText(autoDepartment))) {
+            autoDepartment.setText("", false);
+        }
+
         autoDepartment.setFocusable(false);
         autoDepartment.setFocusableInTouchMode(false);
 
@@ -110,12 +155,19 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void updateMajorDetailUI(String department) {
+        updateMajorDetailUI(department, null);
+    }
+
+    private void updateMajorDetailUI(String department, String existingMajorDetail) {
         String[] majorDetails = DepartmentMajorMapper.getMajorDetails(department);
 
         if (majorDetails.length > 0) {
             layoutMajorDetail.setVisibility(View.VISIBLE);
 
-            autoMajorDetail.setText("", false);
+            if (TextUtils.isEmpty(getText(autoMajorDetail)) && TextUtils.isEmpty(existingMajorDetail)) {
+                autoMajorDetail.setText("", false);
+            }
+
             autoMajorDetail.setFocusable(false);
             autoMajorDetail.setFocusableInTouchMode(false);
 
@@ -127,6 +179,10 @@ public class UserInfoActivity extends AppCompatActivity {
                             selectedMajor -> autoMajorDetail.setText(selectedMajor, false)
                     )
             );
+
+            if (!TextUtils.isEmpty(existingMajorDetail)) {
+                autoMajorDetail.setText(existingMajorDetail, false);
+            }
         } else {
             layoutMajorDetail.setVisibility(View.GONE);
             autoMajorDetail.setText("", false);
@@ -263,11 +319,14 @@ public class UserInfoActivity extends AppCompatActivity {
                             .addOnSuccessListener(unused -> {
                                 Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show();
 
-                                Intent intent = new Intent(this, MainActivity.class);
-                                intent.putExtra("userGrade", grade);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                                finish();
+                                if ("edit".equals(mode)) {
+                                    finish();
+                                } else {
+                                    Intent intent = new Intent(this,
+                                            com.syu.smarttimetable.ui.main.MainNavigationActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             })
                             .addOnFailureListener(e ->
                                     Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_LONG).show()

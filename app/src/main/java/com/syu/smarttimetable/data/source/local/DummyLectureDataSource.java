@@ -982,7 +982,7 @@ public class DummyLectureDataSource {
                                 )
                         ),
 
-                        new Lecture(
+                        /* new Lecture(
                                 "1872",                          // 과목 코드
                                 "인턴십 III",                    // 과목명
                                 "취업정보",                        // 교수
@@ -996,9 +996,10 @@ public class DummyLectureDataSource {
                                 RequirementType.OPTIONAL,       // 필수, 선택
                                 GeneralArea.NONE,               // 교양이면 영역선택, 아니면 NONE
                                 java.util.Arrays.asList()                       // 시간 자체가 없음
-                        ),
+                        ), */
 
-                        new Lecture(
+
+                        /* new Lecture(
                                 "732",                          // 과목 코드
                                 "종합시험",                    // 과목명
                                 "김병국",                        // 교수
@@ -1012,7 +1013,8 @@ public class DummyLectureDataSource {
                                 RequirementType.OPTIONAL,       // 필수, 선택
                                 GeneralArea.NONE,               // 교양이면 영역선택, 아니면 NONE
                                 java.util.Arrays.asList()                       // 시간 자체가 없음
-                        ),
+                        ), */
+
 
                         new Lecture(
                                 "735",                          // 과목 코드
@@ -1066,7 +1068,7 @@ public class DummyLectureDataSource {
                                 )
                         ),
 
-                        new Lecture(
+                        /* new Lecture(
                                 "744",                          // 과목 코드
                                 "ICT인턴십Ⅰ",                    // 과목명
                                 "김병국",                        // 교수
@@ -1128,7 +1130,7 @@ public class DummyLectureDataSource {
                                 RequirementType.OPTIONAL,       // 필수, 선택
                                 GeneralArea.NONE,               // 교양이면 영역선택, 아니면 NONE
                                 java.util.Arrays.asList()                       // 시간 자체가 없음
-                        ),
+                        ), */
 
                         // 컴퓨터공학부 시간표 끝!!
                         //교양 시작
@@ -4936,7 +4938,7 @@ public class DummyLectureDataSource {
                                 )
                         ),
 
-                        new Lecture(
+                        /* new Lecture(
                                 "850",                          // 과목 코드
                                 "채플셀(Chapel Cell)",      // 과목명
                                 "교목처",                   // 교수
@@ -4950,7 +4952,7 @@ public class DummyLectureDataSource {
                                 RequirementType.REQUIRED,   // 필수, 선택
                                 GeneralArea.NONE,           // 교양 영역
                                 java.util.Arrays.asList()   // 시간 리스트
-                        ),
+                        ), */
 
                         new Lecture(
                                 "908",                          // 과목 코드
