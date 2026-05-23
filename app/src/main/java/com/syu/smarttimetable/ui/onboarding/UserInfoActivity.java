@@ -36,6 +36,7 @@ public class UserInfoActivity extends AppCompatActivity {
     private MaterialAutoCompleteTextView autoDepartment;
     private MaterialAutoCompleteTextView autoMajorDetail;
     private MaterialAutoCompleteTextView autoGrade;
+    private TextInputEditText etName;
     private TextInputEditText etStudentId;
     private TextInputLayout layoutMajorDetail;
     private Button btnSave;
@@ -88,6 +89,7 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
+        etName = findViewById(R.id.et_name);
         autoDepartment = findViewById(R.id.auto_department);
         autoMajorDetail = findViewById(R.id.auto_major_detail);
         autoGrade = findViewById(R.id.auto_grade);
@@ -99,6 +101,10 @@ public class UserInfoActivity extends AppCompatActivity {
     private void loadExistingInfo() {
         if (existingUser == null) {
             return;
+        }
+
+        if (existingUser.getName() != null) {
+            etName.setText(existingUser.getName());
         }
 
         if (existingUser.getDepartment() != null) {
@@ -268,10 +274,16 @@ public class UserInfoActivity extends AppCompatActivity {
             return;
         }
 
+        String name = getText(etName);
         String department = getText(autoDepartment);
         String majorDetail = getText(autoMajorDetail);
         String gradeText = getText(autoGrade);
         String studentId = getText(etStudentId);
+
+        if (TextUtils.isEmpty(name)) {
+            Toast.makeText(this, "이름을 입력해주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (TextUtils.isEmpty(department)) {
             Toast.makeText(this, "학과를 선택해주세요.", Toast.LENGTH_SHORT).show();
@@ -310,6 +322,7 @@ public class UserInfoActivity extends AppCompatActivity {
                         user.setEmail(firebaseUser.getEmail());
                     }
 
+                    user.setName(name);
                     user.setDepartment(department);
                     user.setMajorDetail(majorDetail);
                     user.setGrade(grade);

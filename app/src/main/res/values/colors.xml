@@ -3,17 +3,29 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="smart_background">#F5F7FB</color>
+    <color name="smart_background">#F4F7FF</color>
+    <color name="smart_background_alt">#EAF0FF</color>
     <color name="smart_primary">#4F46E5</color>
     <color name="smart_primary_dark">#3730A3</color>
+    <color name="smart_primary_container">#E0E7FF</color>
+    <color name="smart_on_primary">#FFFFFFFF</color>
+    <color name="smart_on_primary_container">#1E1B4B</color>
+    <color name="smart_secondary">#0EA5E9</color>
+    <color name="smart_accent">#7C3AED</color>
+    <color name="smart_surface">#F8FAFC</color>
+    <color name="smart_surface_card">#FFFFFF</color>
     <color name="smart_surface_alt">#EEF2FF</color>
+    <color name="smart_surface_variant">#E2E8F0</color>
     <color name="smart_chip_bg">#E0E7FF</color>
-    <color name="smart_text_primary">#111827</color>
-    <color name="smart_text_secondary">#6B7280</color>
-    <color name="smart_grid_header">#E5E7EB</color>
-    <color name="smart_grid_side">#F3F4F6</color>
+    <color name="smart_chip_text">#4338CA</color>
+    <color name="smart_text_primary">#0F172A</color>
+    <color name="smart_text_secondary">#64748B</color>
+    <color name="smart_border">#D8E0F0</color>
+    <color name="smart_grid_header">#E2E8F0</color>
+    <color name="smart_grid_side">#F8FAFC</color>
     <color name="smart_grid_empty">#FFFFFF</color>
     <color name="smart_grid_fill">#6366F1</color>
-    <color name="smart_surface">#F8FAFC</color>
-    <color name="smart_border">#E2E8F0</color>
+    <color name="smart_success">#10B981</color>
+    <color name="smart_warning">#F59E0B</color>
+    <color name="smart_error">#EF4444</color>
 </resources>

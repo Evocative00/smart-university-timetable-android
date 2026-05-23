@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.SmartTimetable" parent="Base.Theme.SmartTimetable">
-        <item name="android:windowSplashScreenBackground">@color/smart_background</item>
+        <item name="android:windowSplashScreenBackground">@color/smart_background_alt</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_characters</item>
     </style>
 </resources>
