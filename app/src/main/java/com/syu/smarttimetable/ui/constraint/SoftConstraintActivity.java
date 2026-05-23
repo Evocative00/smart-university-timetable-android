@@ -5,11 +5,14 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.ConstraintStateManager;
 import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.SoftConstraint;
@@ -18,8 +21,6 @@ import com.syu.smarttimetable.data.model.enums.FreeTimePreference;
 import com.syu.smarttimetable.data.repository.LectureRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
-import com.syu.smarttimetable.ui.main.MainActivity;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,8 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private CheckBox checkboxTravelTime;
     private Button buttonSkip;
     private Button buttonRecommend;
+    private Button buttonResetSoft;
+    private ImageButton btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +64,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         bindViews();
         setupButtons();
+        restoreSavedState();
     }
 
     private void bindViews() {
@@ -76,19 +80,68 @@ public class SoftConstraintActivity extends AppCompatActivity {
         checkboxTravelTime = findViewById(R.id.checkboxTravelTime);
         buttonSkip = findViewById(R.id.buttonSkip);
         buttonRecommend = findViewById(R.id.buttonRecommend);
+        buttonResetSoft = findViewById(R.id.btn_reset_soft);
+        btnBack = findViewById(R.id.btn_back);
     }
 
     private void setupButtons() {
+        btnBack.setOnClickListener(v -> onBackPressed());
+        buttonResetSoft.setOnClickListener(v -> resetSoftConstraintState());
+
         buttonSkip.setOnClickListener(v -> {
             SoftConstraint softConstraint = new SoftConstraint();
             softConstraint.setSkipped(true);
+            saveSoftConstraintState(softConstraint);
             navigateToMain(softConstraint);
         });
 
         buttonRecommend.setOnClickListener(v -> {
             SoftConstraint softConstraint = collectConstraintFromUi();
+            saveSoftConstraintState(softConstraint);
             navigateToMain(softConstraint);
         });
+    }
+
+    private void resetSoftConstraintState() {
+        ConstraintStateManager.clearSoftConstraintState(this);
+        resetSoftConstraintUi();
+        Toast.makeText(this, "소프트 제약이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void resetSoftConstraintUi() {
+        checkboxMonday.setChecked(false);
+        checkboxTuesday.setChecked(false);
+        checkboxWednesday.setChecked(false);
+        checkboxThursday.setChecked(false);
+        checkboxFriday.setChecked(false);
+        radioGroupFreeTime.check(R.id.radioNone);
+        checkboxLunch.setChecked(false);
+        checkboxAvoidLongGap.setChecked(false);
+        editPreferredProfessors.setText("");
+        checkboxTravelTime.setChecked(false);
+    }
+
+    private void restoreSavedState() {
+        resetSoftConstraintUi();
+
+        List<String> savedDays = ConstraintStateManager.getSavedPreferredDays(this);
+        checkboxMonday.setChecked(savedDays.contains(DayOfWeek.MONDAY.name()));
+        checkboxTuesday.setChecked(savedDays.contains(DayOfWeek.TUESDAY.name()));
+        checkboxWednesday.setChecked(savedDays.contains(DayOfWeek.WEDNESDAY.name()));
+        checkboxThursday.setChecked(savedDays.contains(DayOfWeek.THURSDAY.name()));
+        checkboxFriday.setChecked(savedDays.contains(DayOfWeek.FRIDAY.name()));
+
+        String savedFreeTime = ConstraintStateManager.getSavedFreeTime(this);
+        if (FreeTimePreference.MORNING.name().equals(savedFreeTime)) {
+            radioGroupFreeTime.check(R.id.radioMorning);
+        } else if (FreeTimePreference.AFTERNOON.name().equals(savedFreeTime)) {
+            radioGroupFreeTime.check(R.id.radioAfternoon);
+        }
+
+        checkboxLunch.setChecked(ConstraintStateManager.getSavedLunch(this));
+        checkboxAvoidLongGap.setChecked(ConstraintStateManager.getSavedAvoidGap(this));
+        editPreferredProfessors.setText(ConstraintStateManager.getSavedProfessors(this));
+        checkboxTravelTime.setChecked(ConstraintStateManager.getSavedTravelTime(this));
     }
 
     private SoftConstraint collectConstraintFromUi() {
@@ -156,6 +209,63 @@ public class SoftConstraintActivity extends AppCompatActivity {
         }
 
         return result;
+    }
+
+    private void saveSoftConstraintState(SoftConstraint softConstraint) {
+        if (softConstraint == null) {
+            return;
+        }
+
+        List<String> preferredDays = new ArrayList<>();
+        if (softConstraint.getPreferredFreeDays() != null) {
+            for (DayOfWeek day : softConstraint.getPreferredFreeDays()) {
+                if (day != null) {
+                    preferredDays.add(day.name());
+                }
+            }
+        }
+
+        String freeTime = softConstraint.getFreeTimePreference() == null
+                ? FreeTimePreference.NONE.name()
+                : softConstraint.getFreeTimePreference().name();
+
+        String professors = joinProfessors(softConstraint.getPreferredProfessors());
+
+        ConstraintStateManager.saveSoftConstraintState(
+                this,
+                preferredDays,
+                freeTime,
+                softConstraint.isKeepLunch12To13Free(),
+                softConstraint.isAvoidGapOver3Hours(),
+                professors,
+                softConstraint.isConsiderTravelTime()
+        );
+    }
+
+    private String joinProfessors(List<String> professors) {
+        if (professors == null || professors.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (String professor : professors) {
+            if (professor == null || professor.trim().isEmpty()) {
+                continue;
+            }
+
+            if (builder.length() > 0) {
+                builder.append(",");
+            }
+            builder.append(professor.trim());
+        }
+
+        return builder.toString();
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveSoftConstraintState(collectConstraintFromUi());
+        super.onBackPressed();
     }
 
     private void navigateToMain(SoftConstraint softConstraint) {

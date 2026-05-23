@@ -27,12 +27,14 @@
 
                 <ImageButton
                     android:id="@+id/btn_back"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_marginBottom="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="뒤로가기"
-                    android:src="@drawable/ic_arrow_back" />
+                    android:padding="8dp"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -67,59 +69,62 @@
                 android:padding="20dp">
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_credits">
+                    android:hint="@string/hint_credits"
+                    app:boxBackgroundMode="outline"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    <AutoCompleteTextView
                         android:id="@+id/auto_credits"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:contentDescription="@string/hint_credits"
+                        android:hint="@string/hint_credits"
                         android:inputType="none"
                         android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:textColorHint="@color/smart_text_secondary" />
+                        android:paddingBottom="12dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
-                    android:hint="@string/hint_category">
+                    android:hint="@string/hint_category"
+                    app:boxBackgroundMode="outline"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    <AutoCompleteTextView
                         android:id="@+id/auto_category"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:contentDescription="@string/hint_category"
+                        android:hint="@string/hint_category"
                         android:inputType="none"
                         android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:textColorHint="@color/smart_text_secondary" />
+                        android:paddingBottom="12dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
-                    android:hint="@string/hint_lecture">
+                    android:hint="@string/hint_lecture"
+                    app:boxBackgroundMode="outline"
+                    app:endIconMode="none">
 
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    <AutoCompleteTextView
                         android:id="@+id/auto_lecture"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:contentDescription="@string/hint_lecture"
+                        android:hint="@string/hint_lecture"
                         android:inputType="none"
                         android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:textColorHint="@color/smart_text_secondary" />
+                        android:paddingBottom="12dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -355,6 +360,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:text="현재 카테고리 전체 선택"
+                    app:cornerRadius="18dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_reset"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="하드 제약 초기화"
                     app:cornerRadius="18dp" />
 
                 <com.google.android.material.button.MaterialButton

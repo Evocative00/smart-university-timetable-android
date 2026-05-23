@@ -27,12 +27,14 @@
 
                 <ImageButton
                     android:id="@+id/btn_back"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_marginBottom="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="뒤로가기"
-                    android:src="@drawable/ic_arrow_back" />
+                    android:padding="8dp"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -174,19 +176,19 @@
                     android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="@string/hint_professors">
+                    android:hint="@string/hint_professors"
+                    app:boxBackgroundMode="outline">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <EditText
                         android:id="@+id/editPreferredProfessors"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
-                        android:inputType="text"
-                        android:textColorHint="@color/smart_text_secondary" />
+                        android:hint="@string/hint_professors"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -196,6 +198,15 @@
                     android:layout_marginTop="14dp"
                     android:minHeight="48dp"
                     android:text="@string/soft_travel_title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_reset_soft"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="소프트 제약 초기화"
+                    app:cornerRadius="18dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

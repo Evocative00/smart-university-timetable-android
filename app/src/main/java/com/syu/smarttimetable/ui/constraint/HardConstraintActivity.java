@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.ConstraintStateManager;
 import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.LectureTime;
@@ -45,6 +47,8 @@ public class HardConstraintActivity extends AppCompatActivity {
     private AutoCompleteTextView autoLecture;
     private Button btnAddLecture;
     private Button btnNext;
+    private Button btnReset;
+    private ImageButton btnBack;
     private TextView tvSelectedLectures;
 
     private MaterialButton btnExcludedGrade1;
@@ -105,6 +109,9 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         bindViews();
 
+        btnBack.setOnClickListener(v -> onBackPressed());
+        btnReset.setOnClickListener(v -> resetHardConstraintState());
+
         lectureRepository = new LectureRepository();
         userGrade = getIntent().getIntExtra("userGrade", 0);
         studentId = getIntent().getStringExtra("studentId");
@@ -132,6 +139,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         setupButtons();
         setupExcludedCourseUi();
 
+        restoreSavedState();
         updateSelectedLectureText();
         updateSelectedExcludedText();
     }
@@ -142,6 +150,8 @@ public class HardConstraintActivity extends AppCompatActivity {
         autoLecture = findViewById(R.id.auto_lecture);
         btnAddLecture = findViewById(R.id.btn_add_lecture);
         btnNext = findViewById(R.id.btn_next);
+        btnReset = findViewById(R.id.btn_reset);
+        btnBack = findViewById(R.id.btn_back);
         tvSelectedLectures = findViewById(R.id.tv_selected_lectures);
 
         btnExcludedGrade1 = findViewById(R.id.btn_excluded_grade_1);
@@ -162,6 +172,93 @@ public class HardConstraintActivity extends AppCompatActivity {
         cbExcludedSocialScience = findViewById(R.id.cb_excluded_social_science);
         cbExcludedDigitalLiteracy = findViewById(R.id.cb_excluded_digital_literacy);
         cbExcludedCharacter = findViewById(R.id.cb_excluded_character);
+    }
+
+    private void restoreSavedState() {
+        String savedCredits = ConstraintStateManager.getSavedTargetCredits(this);
+        if (!TextUtils.isEmpty(savedCredits)) {
+            autoCredits.setText(savedCredits, false);
+        }
+
+        List<String> savedFixedLectures = ConstraintStateManager.getSavedFixedLectures(this);
+        for (String lectureKey : savedFixedLectures) {
+            if (TextUtils.isEmpty(lectureKey) || fixedLectureKeys.contains(lectureKey)) {
+                continue;
+            }
+
+            fixedLectureKeys.add(lectureKey);
+            Lecture lecture = findLectureByKey(lectureKey);
+            selectedLectureDisplayTexts.add(
+                    lecture != null ? buildLectureDisplayText(lecture) : lectureKey
+            );
+        }
+
+        Set<String> savedExcludedCourses = ConstraintStateManager.getSavedExcludedCourses(this);
+        for (String excludedCourseName : savedExcludedCourses) {
+            if (TextUtils.isEmpty(excludedCourseName) || excludedCourseNames.contains(excludedCourseName)) {
+                continue;
+            }
+
+            excludedCourseNames.add(excludedCourseName);
+            selectedExcludedDisplayTexts.add(findCourseDisplayName(excludedCourseName));
+        }
+
+        refreshCurrentExcludedChipList();
+    }
+
+    private void resetHardConstraintState() {
+        ConstraintStateManager.clearHardConstraintState(this);
+
+        autoCredits.setText("", false);
+        autoLecture.setText("", false);
+        fixedLectureKeys.clear();
+        selectedLectureDisplayTexts.clear();
+        excludedCourseNames.clear();
+        selectedExcludedDisplayTexts.clear();
+
+        cbExcludedHumanitiesArt.setChecked(false);
+        cbExcludedNaturalScience.setChecked(false);
+        cbExcludedSocialScience.setChecked(false);
+        cbExcludedDigitalLiteracy.setChecked(false);
+        cbExcludedCharacter.setChecked(false);
+
+        updateSelectedLectureText();
+        updateSelectedExcludedText();
+        refreshCurrentExcludedChipList();
+
+        Toast.makeText(this, "하드 제약이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+    }
+
+    private Lecture findLectureByKey(String lectureKey) {
+        if (TextUtils.isEmpty(lectureKey)) {
+            return null;
+        }
+
+        for (Lecture lecture : allLectures) {
+            if (lecture != null && lectureKey.equals(RequiredLectureConstraint.buildLectureKey(lecture))) {
+                return lecture;
+            }
+        }
+
+        return null;
+    }
+
+    private String findCourseDisplayName(String normalizedCourseName) {
+        if (TextUtils.isEmpty(normalizedCourseName)) {
+            return "";
+        }
+
+        for (Lecture lecture : allLectures) {
+            if (lecture == null || TextUtils.isEmpty(lecture.getCourseName())) {
+                continue;
+            }
+
+            if (normalizedCourseName.equals(normalizeCourseName(lecture.getCourseName()))) {
+                return lecture.getCourseName().trim();
+            }
+        }
+
+        return normalizedCourseName;
     }
 
     private void setupCreditDropdown() {
@@ -795,12 +892,30 @@ public class HardConstraintActivity extends AppCompatActivity {
                 completedCourseCodes
         );
 
+        saveCurrentHardConstraintState(creditText);
+
+        Toast.makeText(this, "하드제약 저장 완료", Toast.LENGTH_SHORT).show();
+
         Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
         intent.putExtra("userGrade", userGrade);
         intent.putExtra("studentId", studentId);
         startActivity(intent);
-        finish();
+    }
+
+    private void saveCurrentHardConstraintState(String creditText) {
+        ConstraintStateManager.saveHardConstraintState(
+                this,
+                creditText,
+                new ArrayList<>(fixedLectureKeys),
+                new LinkedHashSet<>(excludedCourseNames)
+        );
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveCurrentHardConstraintState(getText(autoCredits));
+        super.onBackPressed();
     }
 
     private List<String> buildCompletedCourseCodes() {

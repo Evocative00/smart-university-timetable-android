@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,14 +44,31 @@ public class ConstraintFragment extends Fragment {
         Button btnSoft = view.findViewById(R.id.btn_soft_constraint);
 
         btnHard.setOnClickListener(v -> navigateToHardConstraint());
-        btnSoft.setOnClickListener(v -> navigateToHardConstraint());
+        btnSoft.setOnClickListener(v -> {
+            Toast.makeText(
+                    requireContext(),
+                    "소프트 제약은 하드 제약 설정 후 이어서 설정할 수 있습니다.",
+                    Toast.LENGTH_SHORT
+            ).show();
+            navigateToHardConstraint();
+        });
 
+        loadUserInfo();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         loadUserInfo();
     }
 
     private void loadUserInfo() {
         FirebaseUser firebaseUser = userRepository.getCurrentFirebaseUser();
-        if (firebaseUser == null) return;
+        if (firebaseUser == null) {
+            userGrade = 0;
+            studentId = "";
+            return;
+        }
 
         userRepository.getUser(firebaseUser.getUid())
                 .addOnSuccessListener(doc -> {
