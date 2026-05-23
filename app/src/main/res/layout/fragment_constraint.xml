@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="하드/소프트 제약을 설정하여 시간표를 생성하세요."
+                    android:text="먼저 하드 제약을 설정한 뒤 소프트 제약을 이어서 조정하세요."
                     android:textColor="@color/white"
                     android:textSize="14sp" />
 
@@ -102,7 +102,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="공강 선호, 선호 교수, 이동시간 고려 등 설정"
+                    android:text="하드 제약 설정 후 공강 선호, 선호 교수, 이동시간 등을 이어서 설정"
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="13sp" />
 
@@ -112,7 +112,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="소프트 제약 설정하기"
+                    android:text="소프트 제약 안내 보기"
                     app:cornerRadius="18dp" />
 
             </LinearLayout>
