@@ -795,8 +795,6 @@ public class HardConstraintActivity extends AppCompatActivity {
                 completedCourseCodes
         );
 
-        Toast.makeText(this, "하드제약 저장 완료", Toast.LENGTH_SHORT).show();
-
         Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
         intent.putExtra("userGrade", userGrade);
