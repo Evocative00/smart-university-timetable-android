@@ -341,13 +341,13 @@ public class RecommendationActivity extends AppCompatActivity {
 
         btnPrev.setEnabled(false);
         btnNext.setEnabled(false);
-        btnRegenerate.setEnabled(true);
+
+        boolean canRegenerate = recommendationRequest != null;
+        btnRegenerate.setEnabled(canRegenerate);
 
         btnPrev.setAlpha(0.4f);
         btnNext.setAlpha(0.4f);
-        btnRegenerate.setAlpha(1f);
-
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        btnRegenerate.setAlpha(canRegenerate ? 1f : 0.4f);
     }
 
     private String dayOfWeekToKorean(DayOfWeek day) {
