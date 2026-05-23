@@ -75,6 +75,7 @@ public class TimetableFragment extends Fragment {
         super.onResume();
         refreshRecommendationRequest();
         updateRecommendationButtonVisibility();
+        loadUserInfo();
     }
 
     private void refreshRecommendationRequest() {
