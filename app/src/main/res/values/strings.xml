@@ -96,4 +96,17 @@
     <string name="toast_timetable_not_ready">시간표를 먼저 불러와 주세요.</string>
     <string name="toast_permission_denied">저장 권한이 필요합니다.</string>
     <string name="share_title">시간표 공유</string>
+    <string name="school_home_title">학교 홈페이지</string>
+    <string name="school_home_desc">검색과 주요 버튼은 고정하고, 학교 페이지는 아래에서 확인합니다.</string>
+    <string name="school_home_search_hint">학교 홈페이지 검색</string>
+    <string name="school_home_search">검색</string>
+    <string name="school_home_search_empty">검색어를 입력해주세요.</string>
+    <string name="school_home_home">홈</string>
+    <string name="school_home_schedule">학사일정</string>
+    <string name="school_home_refresh">새로고침</string>
+
+    <string name="calendar_schedule_subtitle">학교 홈페이지 기준 주요 학사일정을 더미데이터로 표시합니다.</string>
+    <string name="calendar_schedule_list_title">주요 학사일정</string>
+    <string name="calendar_schedule_list_desc">추후 학교 사이트 파싱/크롤링으로 교체할 수 있도록 데이터 구조를 분리했습니다.</string>
+
 </resources>
