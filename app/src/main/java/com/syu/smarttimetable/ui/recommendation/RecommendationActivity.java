@@ -291,7 +291,7 @@ public class RecommendationActivity extends AppCompatActivity {
             RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
 
             tvScreenTitle.setText("추천 시간표");
-            tvScreenSubtitle.setText("하드제약을 만족하는 후보 중 소프트제약 점수가 높은 시간표입니다.");
+            tvScreenSubtitle.setText("필수 조건을 만족하는 후보 중 선호 조건 점수가 높은 시간표입니다.");
 
             tvRank.setText((currentIndex + 1) + " / " + recommendationResults.size());
             tvScore.setText(String.valueOf(current.getScore()));

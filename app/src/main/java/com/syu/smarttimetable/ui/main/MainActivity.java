@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         tvMainTitle.setText("SmartTimetable");
 
         if (recommendationRequest != null) {
-            tvMainSubtitle.setText("하드제약과 소프트제약 입력이 완료되었습니다. 추천 결과를 확인해보세요.");
+            tvMainSubtitle.setText("필수 조건과 선호 조건 입력이 완료되었습니다. 추천 결과를 확인해보세요.");
 
             btnStartRecommendation.setText(getString(R.string.btn_view_result));
 
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     private void showEditConditionsDialog() {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("입력 조건 수정")
-                .setItems(new String[]{"하드제약 수정", "소프트제약 수정"}, (dialog, which) -> {
+                .setItems(new String[]{"필수 조건 수정", "선호 조건 수정"}, (dialog, which) -> {
                     if (which == 0) {
                         navigateToHardConstraintWithUserInfo();
                     } else {
