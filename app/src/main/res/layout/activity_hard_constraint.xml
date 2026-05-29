@@ -143,7 +143,7 @@
                     android:id="@+id/tv_selected_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="22dp"
+                    android:layout_marginTop="10dp"
                     android:text="@string/selected_fixed_lectures_title"
                     android:textColor="@color/smart_text_primary"
                     android:textSize="16sp"
@@ -178,6 +178,126 @@
                     android:text="전공 과목은 학년별 버튼에서 선택하고, 교양은 과목명을 직접 입력하세요."
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tv_excluded_general_category_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="제외할 과목 리스트"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <!-- 필수교양 버튼은 항상 보이도록, 영역별 교양 버튼과 같은 행에 배치합니다 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_excluded_required_general"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="필수교양"
+                        android:textSize="12sp"
+                        app:cornerRadius="14dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_excluded_general_group"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="영역별 교양"
+                        android:textSize="14sp"
+                        app:cornerRadius="14dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_general_area_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/cb_excluded_humanities_art"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="인문예술 영역 제외"
+                        android:checkable="true" />
+ㄷ
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/cb_excluded_natural_science"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="자연과학 영역 제외"
+                        android:checkable="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/cb_excluded_social_science"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="사회과학 영역 제외"
+                        android:checkable="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/cb_excluded_digital_literacy"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="디지털 리터러시 영역 제외"
+                        android:checkable="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/cb_excluded_character"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="인성교육 영역 제외"
+                        android:checkable="true" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_excluded_general_row_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_excluded_optional"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="일반선택"
+                        android:textSize="12sp"
+                        app:cornerRadius="14dp" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_select_all_current_category"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="현재 카테고리 전체 선택"
+                    app:cornerRadius="18dp" />
 
                 <LinearLayout
                     android:id="@+id/layout_excluded_grade_buttons"
@@ -243,6 +363,8 @@
                         android:orientation="vertical" />
                 </HorizontalScrollView>
 
+
+
                 <TextView
                     android:id="@+id/tv_selected_excluded_lectures"
                     android:layout_width="match_parent"
@@ -255,124 +377,13 @@
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/tv_excluded_general_category_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:text="교양 영역별 제외 과목"
-                    android:textColor="@color/smart_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <!-- 필수교양 버튼은 항상 보이도록, 영역별 교양 버튼과 같은 행에 배치합니다 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="6dp">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_required_general"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="필수교양"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_general_group"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:text="영역별 교양"
-                        android:textSize="14sp"
-                        app:cornerRadius="14dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_general_area_group"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:padding="8dp">
-
-                    <CheckBox
-                        android:id="@+id/cb_excluded_humanities_art"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="인문예술 영역 제외"
-                        android:textSize="14sp" />
-
-                    <CheckBox
-                        android:id="@+id/cb_excluded_natural_science"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="자연과학 영역 제외"
-                        android:textSize="14sp" />
-
-                    <CheckBox
-                        android:id="@+id/cb_excluded_social_science"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="사회과학 영역 제외"
-                        android:textSize="14sp" />
-
-                    <CheckBox
-                        android:id="@+id/cb_excluded_digital_literacy"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="디지털 영역 제외"
-                        android:textSize="14sp" />
-
-                    <CheckBox
-                        android:id="@+id/cb_excluded_character"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="인성교육 영역 제외"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_excluded_general_row_3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_optional"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="일반선택"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_select_all_current_category"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="현재 카테고리 전체 선택"
-                    app:cornerRadius="18dp" />
-
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_reset"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:text="하드 제약 초기화"
+                    android:layout_marginTop="30dp"
+                    android:text="필수 조건 초기화"
                     app:cornerRadius="18dp" />
 
                 <com.google.android.material.button.MaterialButton

@@ -44,7 +44,7 @@ public class RecommendationAdapter {
         }
 
         if (request.getSoftConstraint().isSkipped()) {
-            addChip(context, container, "소프트제약 없음");
+            addChip(context, container, "선택 조건 없음");
             return;
         }
 

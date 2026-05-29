@@ -6,11 +6,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.common.utils.ConstraintStateManager;
 import com.syu.smarttimetable.data.model.HardConstraint;
@@ -37,7 +38,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private CheckBox checkboxWednesday;
     private CheckBox checkboxThursday;
     private CheckBox checkboxFriday;
-    private RadioGroup radioGroupFreeTime;
+    private ChipGroup chipGroupFreeTime;
     private CheckBox checkboxLunch;
     private CheckBox checkboxAvoidLongGap;
     private EditText editPreferredProfessors;
@@ -73,7 +74,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
         checkboxWednesday = findViewById(R.id.checkboxWednesday);
         checkboxThursday = findViewById(R.id.checkboxThursday);
         checkboxFriday = findViewById(R.id.checkboxFriday);
-        radioGroupFreeTime = findViewById(R.id.radioGroupFreeTime);
+        chipGroupFreeTime = findViewById(R.id.chipGroupFreeTime);
         checkboxLunch = findViewById(R.id.checkboxLunch);
         checkboxAvoidLongGap = findViewById(R.id.checkboxAvoidLongGap);
         editPreferredProfessors = findViewById(R.id.editPreferredProfessors);
@@ -86,7 +87,17 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
     private void setupButtons() {
         btnBack.setOnClickListener(v -> onBackPressed());
-        buttonResetSoft.setOnClickListener(v -> resetSoftConstraintState());
+        buttonResetSoft.setOnClickListener(v -> {
+
+            new MaterialAlertDialogBuilder(SoftConstraintActivity.this)
+                    .setTitle("선택 조건 초기화")
+                    .setMessage("정말 선택 조건을 초기화하시겠습니까?")
+                    .setPositiveButton("초기화", (dialog, which) -> {
+                        resetSoftConstraintState();
+                    })
+                    .setNegativeButton("취소", null)
+                    .show();
+        });
 
         buttonSkip.setOnClickListener(v -> {
             SoftConstraint softConstraint = new SoftConstraint();
@@ -105,7 +116,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private void resetSoftConstraintState() {
         ConstraintStateManager.clearSoftConstraintState(this);
         resetSoftConstraintUi();
-        Toast.makeText(this, "소프트 제약이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "선택 조건이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
     }
 
     private void resetSoftConstraintUi() {
@@ -114,7 +125,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
         checkboxWednesday.setChecked(false);
         checkboxThursday.setChecked(false);
         checkboxFriday.setChecked(false);
-        radioGroupFreeTime.check(R.id.radioNone);
+        chipGroupFreeTime.check(R.id.chipNone);
         checkboxLunch.setChecked(false);
         checkboxAvoidLongGap.setChecked(false);
         editPreferredProfessors.setText("");
@@ -133,9 +144,9 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         String savedFreeTime = ConstraintStateManager.getSavedFreeTime(this);
         if (FreeTimePreference.MORNING.name().equals(savedFreeTime)) {
-            radioGroupFreeTime.check(R.id.radioMorning);
+            chipGroupFreeTime.check(R.id.chipMorning);
         } else if (FreeTimePreference.AFTERNOON.name().equals(savedFreeTime)) {
-            radioGroupFreeTime.check(R.id.radioAfternoon);
+            chipGroupFreeTime.check(R.id.chipAfternoon);
         }
 
         checkboxLunch.setChecked(ConstraintStateManager.getSavedLunch(this));
@@ -168,11 +179,11 @@ public class SoftConstraintActivity extends AppCompatActivity {
         }
 
         FreeTimePreference freeTimePreference;
-        int checkedId = radioGroupFreeTime.getCheckedRadioButtonId();
+        int checkedId = chipGroupFreeTime.getCheckedChipId();
 
-        if (checkedId == R.id.radioMorning) {
+        if (checkedId == R.id.chipMorning) {
             freeTimePreference = FreeTimePreference.MORNING;
-        } else if (checkedId == R.id.radioAfternoon) {
+        } else if (checkedId == R.id.chipAfternoon) {
             freeTimePreference = FreeTimePreference.AFTERNOON;
         } else {
             freeTimePreference = FreeTimePreference.NONE;

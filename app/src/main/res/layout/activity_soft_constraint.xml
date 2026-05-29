@@ -125,35 +125,38 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <RadioGroup
-                    android:id="@+id/radioGroupFreeTime"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupFreeTime"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="vertical">
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
 
-                    <RadioButton
-                        android:id="@+id/radioNone"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipNone"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:checked="true"
-                        android:text="@string/free_time_none" />
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:checkable="true"
+                        android:text="상관없음"/>
 
-                    <RadioButton
-                        android:id="@+id/radioMorning"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipMorning"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="@string/free_time_morning" />
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:checkable="true"
+                        android:text="오전 공강"/>
 
-                    <RadioButton
-                        android:id="@+id/radioAfternoon"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAfternoon"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="@string/free_time_afternoon" />
-                </RadioGroup>
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:checkable="true"
+                        android:text="오후 공강"/>
+
+                </com.google.android.material.chip.ChipGroup>
 
                 <CheckBox
                     android:id="@+id/checkboxLunch"

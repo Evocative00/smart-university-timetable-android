@@ -21,6 +21,8 @@ import android.widget.CompoundButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.common.utils.ConstraintStateManager;
@@ -64,12 +66,12 @@ public class HardConstraintActivity extends AppCompatActivity {
 
     // Grouped general-area UI
     private MaterialButton btnExcludedGeneralGroup;
-    private LinearLayout layoutGeneralAreaGroup;
-    private CheckBox cbExcludedHumanitiesArt;
-    private CheckBox cbExcludedNaturalScience;
-    private CheckBox cbExcludedSocialScience;
-    private CheckBox cbExcludedDigitalLiteracy;
-    private CheckBox cbExcludedCharacter;
+    private LinearLayout  layoutGeneralAreaGroup;
+    private Chip cbExcludedHumanitiesArt;
+    private Chip cbExcludedNaturalScience;
+    private Chip cbExcludedSocialScience;
+    private Chip cbExcludedDigitalLiteracy;
+    private Chip cbExcludedCharacter;
 
     private ExcludedTabType currentExcludedTabType = ExcludedTabType.MAJOR_GRADE_1;
 
@@ -110,8 +112,17 @@ public class HardConstraintActivity extends AppCompatActivity {
         bindViews();
 
         btnBack.setOnClickListener(v -> onBackPressed());
-        btnReset.setOnClickListener(v -> resetHardConstraintState());
+        btnReset.setOnClickListener(v -> {
 
+            new MaterialAlertDialogBuilder(HardConstraintActivity.this)
+                    .setTitle("필수 조건 초기화")
+                    .setMessage("입력한 필수 조건을 초기화하시겠습니까?")
+                    .setPositiveButton("초기화", (dialog, which) -> {
+                        resetHardConstraintState();
+                    })
+                    .setNegativeButton("취소", null)
+                    .show();
+        });
         lectureRepository = new LectureRepository();
         userGrade = getIntent().getIntExtra("userGrade", 0);
         studentId = getIntent().getStringExtra("studentId");
@@ -226,7 +237,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         updateSelectedExcludedText();
         refreshCurrentExcludedChipList();
 
-        Toast.makeText(this, "하드 제약이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "필수 조건이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
     }
 
     private Lecture findLectureByKey(String lectureKey) {
@@ -894,7 +905,7 @@ public class HardConstraintActivity extends AppCompatActivity {
 
         saveCurrentHardConstraintState(creditText);
 
-        Toast.makeText(this, "하드제약 저장 완료", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "필수 조건 저장 완료", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(this, SoftConstraintActivity.class);
         intent.putExtra("hardConstraint", hardConstraint);
@@ -999,7 +1010,23 @@ public class HardConstraintActivity extends AppCompatActivity {
     }
 
     private String buildLectureDisplayText(Lecture lecture) {
-        return lecture.getCourseName()
+
+        String parityText = "";
+
+        switch (lecture.getClassParity()) {
+            case ODD:
+                parityText = " (홀수반)";
+                break;
+            case EVEN:
+                parityText = " (짝수반)";
+                break;
+            case ALL:
+                parityText = "";
+                break;
+        }
+
+        return lecture.getCourseName() 
+                + parityText     //홀짝
                 + " / "
                 + lecture.getProfessor()
                 + " / "
