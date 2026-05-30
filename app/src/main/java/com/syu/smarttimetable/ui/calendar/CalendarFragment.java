@@ -1,5 +1,7 @@
 package com.syu.smarttimetable.ui.calendar;
 
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,39 +54,63 @@ public class CalendarFragment extends Fragment {
         cardParams.setMargins(0, 0, 0, dp(10));
         cardView.setLayoutParams(cardParams);
         cardView.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.smart_surface_alt));
-        cardView.setRadius(dp(16));
+        cardView.setRadius(dp(18));
         cardView.setCardElevation(0f);
         cardView.setStrokeWidth(dp(1));
         cardView.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.smart_border));
 
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dp(14), dp(14), dp(14), dp(14));
+
+        TextView dateBadge = new TextView(requireContext());
+        dateBadge.setText(formatDateBadge(schedule.getDate()));
+        dateBadge.setGravity(android.view.Gravity.CENTER);
+        dateBadge.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_primary));
+        dateBadge.setTextSize(12);
+        dateBadge.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        dateBadge.setBackground(createRoundedBackground(
+                ContextCompat.getColor(requireContext(), R.color.smart_primary_container),
+                ContextCompat.getColor(requireContext(), R.color.smart_border),
+                dp(15),
+                dp(1)
+        ));
+        LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(dp(68), dp(58));
+        badgeParams.setMargins(0, 0, dp(12), 0);
+        row.addView(dateBadge, badgeParams);
+
         LinearLayout content = new LinearLayout(requireContext());
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(16), dp(14), dp(16), dp(14));
+        LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+        );
 
         TextView categoryView = new TextView(requireContext());
         categoryView.setText(schedule.getCategory());
         categoryView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_primary));
         categoryView.setTextSize(12);
-        categoryView.setTypeface(categoryView.getTypeface(), android.graphics.Typeface.BOLD);
+        categoryView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         content.addView(categoryView);
 
         TextView titleView = new TextView(requireContext());
         titleView.setText(schedule.getTitle());
         titleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_text_primary));
         titleView.setTextSize(17);
-        titleView.setTypeface(titleView.getTypeface(), android.graphics.Typeface.BOLD);
+        titleView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        titleParams.setMargins(0, dp(4), 0, 0);
+        titleParams.setMargins(0, dp(3), 0, 0);
         titleView.setLayoutParams(titleParams);
         content.addView(titleView);
 
         TextView dateView = new TextView(requireContext());
         dateView.setText(schedule.getDate());
         dateView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_text_secondary));
-        dateView.setTextSize(14);
+        dateView.setTextSize(13);
         LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -102,12 +128,33 @@ public class CalendarFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        descParams.setMargins(0, dp(8), 0, 0);
+        descParams.setMargins(0, dp(7), 0, 0);
         descriptionView.setLayoutParams(descParams);
         content.addView(descriptionView);
 
-        cardView.addView(content);
+        row.addView(content, contentParams);
+        cardView.addView(row);
         return cardView;
+    }
+
+    private String formatDateBadge(String date) {
+        if (date == null || date.length() < 10) {
+            return "일정";
+        }
+        String firstDate = date.split("~")[0].trim();
+        String[] parts = firstDate.split("\\.");
+        if (parts.length >= 3) {
+            return parts[1] + "/" + parts[2];
+        }
+        return firstDate;
+    }
+
+    private GradientDrawable createRoundedBackground(int color, int strokeColor, int radius, int strokeWidth) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(color);
+        drawable.setCornerRadius(radius);
+        drawable.setStroke(strokeWidth, strokeColor);
+        return drawable;
     }
 
     private int dp(int value) {

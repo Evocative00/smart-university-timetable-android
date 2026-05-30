@@ -10,13 +10,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="18dp"
+        android:paddingTop="18dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="96dp">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardBackgroundColor="@color/smart_primary"
-            app:cardCornerRadius="28dp"
+            app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
             app:strokeColor="@color/smart_primary_dark"
             app:strokeWidth="1dp">
@@ -25,32 +28,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingStart="22dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="22dp"
+                android:paddingBottom="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="조건 설정"
                     android:textColor="@color/white"
-                    android:textSize="28sp"
+                    android:textSize="27sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="필수 조건을 먼저 설정한 뒤 선호 조건을 이어서 조정하세요."
+                    android:layout_marginTop="6dp"
+                    android:text="필수 조건을 먼저 정하고 선호 조건으로 추천 결과를 조정하세요."
                     android:textColor="@color/white"
                     android:textSize="14sp" />
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/smart_surface_card"
             app:cardCornerRadius="22dp"
             app:cardElevation="0dp"
@@ -61,28 +65,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="18dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="필수 조건"
                     android:textColor="@color/smart_text_primary"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="학점 범위, 고정 과목, 불가 시간대 설정"
+                    android:text="학점 범위, 고정 과목, 제외 과목처럼 반드시 지켜야 하는 조건입니다."
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_hard_constraint"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="52dp"
                     android:layout_marginTop="16dp"
                     android:text="필수 조건 설정하기"
                     app:cornerRadius="18dp" />
@@ -90,23 +94,23 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="24dp"
-                    android:background="@color/smart_background" />
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@color/smart_border" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="선호 조건"
                     android:textColor="@color/smart_text_primary"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="필수 조건 설정 후 공강 요일, 시간대 등 선호 조건을 이어서 설정"
+                    android:text="공강 요일, 시간대 등 있으면 좋은 조건을 이어서 설정합니다."
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="13sp" />
 
@@ -114,13 +118,11 @@
                     android:id="@+id/btn_soft_constraint"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="52dp"
                     android:layout_marginTop="16dp"
                     android:text="선호 조건 설정하기"
                     app:cornerRadius="18dp" />
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
     </LinearLayout>
 </ScrollView>

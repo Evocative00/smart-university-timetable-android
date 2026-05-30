@@ -14,5 +14,7 @@
         <item name="colorOnSurfaceVariant">@color/smart_text_secondary</item>
         <item name="colorOutline">@color/smart_border</item>
         <item name="android:windowBackground">@color/smart_background</item>
+        <item name="android:statusBarColor">@color/smart_primary</item>
+        <item name="android:navigationBarColor">@color/smart_background</item>
     </style>
 </resources>
