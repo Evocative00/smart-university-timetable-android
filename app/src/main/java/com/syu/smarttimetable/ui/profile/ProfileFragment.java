@@ -1,47 +1,76 @@
 package com.syu.smarttimetable.ui.profile;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.ProfilePhotoManager;
 import com.syu.smarttimetable.data.model.User;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.ui.auth.LoginActivity;
+import com.syu.smarttimetable.ui.main.MainNavigationActivity;
 import com.syu.smarttimetable.ui.onboarding.UserInfoActivity;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class ProfileFragment extends Fragment {
 
     private UserRepository userRepository;
     private User currentUser;
 
-    // Views
     private MaterialCardView cardNoInfo;
     private MaterialCardView cardUserInfo;
+    private ShapeableImageView ivProfilePhoto;
+    private TextView tvChangePhoto;
     private TextView tvName;
     private TextView tvDepartment;
-    private TextView tvMajorDetail;
-    private TextView tvGrade;
     private TextView tvStudentId;
     private MaterialButton btnSetupProfile;
     private MaterialButton btnEditProfile;
     private MaterialButton btnLogout;
     private MaterialButton btnLogoutNoInfo;
 
+    private ActivityResultLauncher<Intent> pickImageLauncher;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userRepository = new UserRepository();
+
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK
+                            && result.getData() != null) {
+                        Uri selectedUri = result.getData().getData();
+                        if (selectedUri != null) {
+                            handleSelectedPhoto(selectedUri);
+                        }
+                    }
+                }
+        );
     }
 
     @Nullable
@@ -58,10 +87,10 @@ public class ProfileFragment extends Fragment {
 
         cardNoInfo = view.findViewById(R.id.card_no_info);
         cardUserInfo = view.findViewById(R.id.card_user_info);
+        ivProfilePhoto = view.findViewById(R.id.iv_profile_photo);
+        tvChangePhoto = view.findViewById(R.id.tv_change_photo);
         tvName = view.findViewById(R.id.tv_name);
         tvDepartment = view.findViewById(R.id.tv_department);
-        tvMajorDetail = view.findViewById(R.id.tv_major_detail);
-        tvGrade = view.findViewById(R.id.tv_grade);
         tvStudentId = view.findViewById(R.id.tv_student_id);
         btnSetupProfile = view.findViewById(R.id.btn_setup_profile);
         btnEditProfile = view.findViewById(R.id.btn_edit_profile);
@@ -70,9 +99,11 @@ public class ProfileFragment extends Fragment {
 
         btnSetupProfile.setOnClickListener(v -> openUserInfoActivity("new"));
         btnEditProfile.setOnClickListener(v -> openUserInfoActivity("edit"));
-
         btnLogout.setOnClickListener(v -> logout());
         btnLogoutNoInfo.setOnClickListener(v -> logout());
+
+        ivProfilePhoto.setOnClickListener(v -> pickProfilePhoto());
+        tvChangePhoto.setOnClickListener(v -> pickProfilePhoto());
 
         loadUserInfo();
     }
@@ -81,6 +112,67 @@ public class ProfileFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadUserInfo();
+    }
+
+    private void pickProfilePhoto() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        pickImageLauncher.launch(intent);
+    }
+
+    private void handleSelectedPhoto(Uri uri) {
+        String path = copyImageToInternalStorage(uri);
+        if (path != null) {
+            ProfilePhotoManager.savePhotoPath(requireContext(), path);
+            loadProfilePhoto();
+            updateNavProfileIcon();
+            Toast.makeText(requireContext(), "프로필 사진이 변경되었습니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(requireContext(), "사진을 불러오지 못했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String copyImageToInternalStorage(Uri sourceUri) {
+        try {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) return null;
+
+            InputStream in = requireContext().getContentResolver().openInputStream(sourceUri);
+            File outFile = new File(requireContext().getFilesDir(), user.getUid() + "_profile.jpg");
+            OutputStream out = new FileOutputStream(outFile);
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+            return outFile.getAbsolutePath();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void loadProfilePhoto() {
+        if (ivProfilePhoto == null) return;
+        String path = ProfilePhotoManager.getPhotoPath(requireContext());
+        if (path != null) {
+            File file = new File(path);
+            if (file.exists()) {
+                Bitmap bmp = BitmapFactory.decodeFile(path);
+                if (bmp != null) {
+                    ivProfilePhoto.setImageBitmap(bmp);
+                    return;
+                }
+            }
+        }
+        ivProfilePhoto.setImageResource(R.drawable.ic_nav_profile);
+    }
+
+    private void updateNavProfileIcon() {
+        if (getActivity() instanceof MainNavigationActivity) {
+            ((MainNavigationActivity) getActivity()).updateProfileIcon();
+        }
     }
 
     private void openUserInfoActivity(String mode) {
@@ -109,18 +201,15 @@ public class ProfileFragment extends Fragment {
         userRepository.getUser(firebaseUser.getUid())
                 .addOnSuccessListener(doc -> {
                     if (getView() == null) return;
-
                     if (doc == null || !doc.exists()) {
                         showNoInfoState();
                         return;
                     }
-
                     User user = doc.toObject(User.class);
                     if (user == null || !hasBasicInfo(user)) {
                         showNoInfoState();
                         return;
                     }
-
                     currentUser = user;
                     showUserInfoState(user);
                 })
@@ -130,7 +219,6 @@ public class ProfileFragment extends Fragment {
                 });
     }
 
-    /** 기본 정보가 실제로 입력되어 있는지 확인 */
     private boolean hasBasicInfo(User user) {
         return user.getDepartment() != null && !user.getDepartment().isEmpty();
     }
@@ -146,13 +234,12 @@ public class ProfileFragment extends Fragment {
         cardUserInfo.setVisibility(View.VISIBLE);
         btnLogoutNoInfo.setVisibility(View.GONE);
 
-        tvName.setText("이름: " + (user.getName() != null && !user.getName().isEmpty()
-                ? user.getName() : "-"));
-        tvDepartment.setText("학과: " + (user.getDepartment() != null ? user.getDepartment() : "-"));
-        tvMajorDetail.setText("세부전공: " + (user.getMajorDetail() != null && !user.getMajorDetail().isEmpty()
-                ? user.getMajorDetail() : "-"));
-        tvGrade.setText("학년: " + (user.getGrade() > 0 ? user.getGrade() + "학년" : "-"));
-        tvStudentId.setText("학번: " + (user.getStudentId() != null && !user.getStudentId().isEmpty()
+        tvName.setText(user.getName() != null && !user.getName().isEmpty()
+                ? user.getName() : "이름 없음");
+        tvDepartment.setText(user.getDepartment() != null ? user.getDepartment() : "-");
+        tvStudentId.setText("학번 " + (user.getStudentId() != null && !user.getStudentId().isEmpty()
                 ? user.getStudentId() : "-"));
+
+        loadProfilePhoto();
     }
 }

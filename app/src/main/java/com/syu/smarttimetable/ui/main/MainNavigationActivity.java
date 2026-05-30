@@ -1,6 +1,14 @@
 package com.syu.smarttimetable.ui.main;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,12 +16,15 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.ProfilePhotoManager;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.calendar.CalendarFragment;
 import com.syu.smarttimetable.ui.constraint.ConstraintFragment;
 import com.syu.smarttimetable.ui.profile.ProfileFragment;
 import com.syu.smarttimetable.ui.school.SchoolHomeFragment;
 import com.syu.smarttimetable.ui.timetable.TimetableFragment;
+
+import java.io.File;
 
 public class MainNavigationActivity extends AppCompatActivity {
 
@@ -38,6 +49,13 @@ public class MainNavigationActivity extends AppCompatActivity {
         }
 
         setupNavListener();
+        updateProfileIcon();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateProfileIcon();
     }
 
     @Override
@@ -51,7 +69,6 @@ public class MainNavigationActivity extends AppCompatActivity {
                 lastRecommendationRequest = req;
             }
         }
-        // 이미 선택된 탭이면 리스너가 발동 안 되므로 직접 fragment 교체
         loadFragment(new TimetableFragment());
         bottomNavigation.setOnItemSelectedListener(null);
         bottomNavigation.setSelectedItemId(R.id.nav_timetable);
@@ -79,6 +96,40 @@ public class MainNavigationActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    public void updateProfileIcon() {
+        String path = ProfilePhotoManager.getPhotoPath(this);
+        if (path == null) return;
+
+        File file = new File(path);
+        if (!file.exists()) return;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        if (bitmap == null) return;
+
+        int size = (int) (36 * getResources().getDisplayMetrics().density);
+        Drawable circular = createCircularDrawable(bitmap, size);
+
+        android.view.MenuItem profileItem = bottomNavigation.getMenu().findItem(R.id.nav_profile);
+        if (profileItem != null) {
+            profileItem.setIcon(circular);
+            // 사진 색상이 왜곡되지 않도록 아이콘 틴트 제거
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                profileItem.setIconTintList(null);
+            }
+        }
+    }
+
+    private Drawable createCircularDrawable(Bitmap source, int size) {
+        Bitmap scaled = Bitmap.createScaledBitmap(source, size, size, true);
+        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(scaled, 0, 0, paint);
+        return new BitmapDrawable(getResources(), output);
     }
 
     public RecommendationRequest getLastRecommendationRequest() {
