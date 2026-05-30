@@ -12,6 +12,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- 헤더 카드 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,10 +45,59 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- 정보 없을 때 안내 카드 -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_no_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="28dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="기본 정보가 없습니다"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:text="아래 버튼을 눌러 기본 정보를 입력해주세요."
+                    android:textColor="@color/smart_text_secondary"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_setup_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="기본 정보 입력하기"
+                    app:cornerRadius="18dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 사용자 정보 카드 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_user_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="22dp"
             app:cardElevation="0dp">
@@ -67,11 +117,18 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tv_department"
+                    android:id="@+id/tv_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="학과: -"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/tv_department"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/smart_text_primary"
                     android:textSize="15sp" />
 
@@ -79,8 +136,7 @@
                     android:id="@+id/tv_major_detail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="세부전공: -"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/smart_text_primary"
                     android:textSize="15sp" />
 
@@ -88,8 +144,7 @@
                     android:id="@+id/tv_grade"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="학년: -"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/smart_text_primary"
                     android:textSize="15sp" />
 
@@ -97,8 +152,7 @@
                     android:id="@+id/tv_student_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="학번: -"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/smart_text_primary"
                     android:textSize="15sp" />
 
@@ -121,6 +175,18 @@
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <!-- 로그아웃 (정보 없을 때도 보임) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_logout_no_info"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"
+            android:text="로그아웃"
+            android:visibility="gone"
+            app:cornerRadius="18dp" />
 
     </LinearLayout>
 </ScrollView>

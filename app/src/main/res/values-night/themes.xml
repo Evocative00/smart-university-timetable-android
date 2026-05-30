@@ -1,7 +1,18 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.SmartTimetable" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/smart_primary</item>
+        <item name="colorOnPrimary">@color/smart_on_primary</item>
+        <item name="colorPrimaryContainer">@color/smart_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/smart_on_primary_container</item>
+        <item name="colorSecondary">@color/smart_secondary</item>
+        <item name="colorTertiary">@color/smart_accent</item>
+        <item name="colorSurface">@color/smart_surface_card</item>
+        <item name="colorSurfaceVariant">@color/smart_surface_variant</item>
+        <item name="android:colorBackground">@color/smart_background</item>
+        <item name="colorOnSurface">@color/smart_text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/smart_text_secondary</item>
+        <item name="colorOutline">@color/smart_border</item>
+        <item name="android:windowBackground">@color/smart_background</item>
     </style>
 </resources>

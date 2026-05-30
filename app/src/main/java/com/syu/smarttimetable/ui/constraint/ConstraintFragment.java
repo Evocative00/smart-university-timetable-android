@@ -47,7 +47,7 @@ public class ConstraintFragment extends Fragment {
         btnSoft.setOnClickListener(v -> {
             Toast.makeText(
                     requireContext(),
-                    "소프트 제약은 하드 제약 설정 후 이어서 설정할 수 있습니다.",
+                    "선호 조건은 필수 조건 설정 후 이어서 설정할 수 있습니다.",
                     Toast.LENGTH_SHORT
             ).show();
             navigateToHardConstraint();

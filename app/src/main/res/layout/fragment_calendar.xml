@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/smart_background"
+    android:background="@drawable/bg_screen_gradient"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,7 +18,9 @@
             android:layout_height="wrap_content"
             app:cardBackgroundColor="@color/smart_primary"
             app:cardCornerRadius="28dp"
-            app:cardElevation="0dp">
+            app:cardElevation="0dp"
+            app:strokeColor="@color/smart_primary_dark"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -38,7 +40,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="수업 일정과 주요 학사 일정을 한눈에 볼 수 있도록 준비 중입니다."
+                    android:text="@string/calendar_schedule_subtitle"
                     android:textColor="@color/white"
                     android:textSize="14sp" />
 
@@ -49,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/smart_surface_card"
             app:cardCornerRadius="22dp"
             app:cardElevation="0dp"
             app:strokeColor="@color/smart_border"
@@ -58,43 +60,32 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:padding="28dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@color/smart_chip_bg"
-                    android:paddingLeft="14dp"
-                    android:paddingTop="6dp"
-                    android:paddingRight="14dp"
-                    android:paddingBottom="6dp"
-                    android:text="준비 중"
-                    android:textColor="@color/smart_primary_dark"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:gravity="center"
-                    android:text="아직 캘린더 기능은 제공되지 않지만,\n시간표 추천 기능은 바로 사용할 수 있습니다."
+                    android:text="@string/calendar_schedule_list_title"
                     android:textColor="@color/smart_text_primary"
-                    android:textSize="17sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center"
-                    android:lineSpacingExtra="4dp"
-                    android:text="추후 학사일정, 시험 기간, 공휴일, 개인 일정 확인 기능을 추가할 예정입니다."
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="3dp"
+                    android:text="@string/calendar_schedule_list_desc"
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="14sp" />
 
+                <LinearLayout
+                    android:id="@+id/layout_academic_schedule_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
