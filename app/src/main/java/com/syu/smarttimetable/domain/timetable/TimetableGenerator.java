@@ -11,10 +11,8 @@ import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.domain.recommendation.constraints.RequiredLectureConstraint;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 public class TimetableGenerator {
@@ -66,6 +64,13 @@ public class TimetableGenerator {
             if (usedCourseCodes.contains(lecture.getCourseCode())) {
                 Log.w(TAG, "Fixed lecture already added: " + lecture.getCourseCode());
                 return results;
+            }
+
+            // 고정 강의의 홀짝 조건 경고 (사용자가 직접 선택한 것이므로 차단하지 않음)
+            if (!isValidByStudentIdParity(lecture, request.getStudentId())) {
+                Log.w(TAG, "Fixed lecture violates student parity: " + lectureKey
+                        + " (classParity=" + lecture.getClassParity()
+                        + ", studentId=" + request.getStudentId() + ")");
             }
 
             String normalizedCourseName = normalizeCourseName(lecture.getCourseName());
@@ -309,8 +314,16 @@ public class TimetableGenerator {
         conflictGradeMatchedMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
         safeOtherMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
         conflictOtherMajors.sort((f, s) -> Integer.compare(s.getCredits(), f.getCredits()));
-        Collections.shuffle(safeGenerals, new Random());
-        Collections.shuffle(conflictGenerals, new Random());
+        safeGenerals.sort((f, s) -> {
+            int cmp = Integer.compare(s.getCredits(), f.getCredits());
+            if (cmp != 0) return cmp;
+            return f.getCourseCode().compareTo(s.getCourseCode());
+        });
+        conflictGenerals.sort((f, s) -> {
+            int cmp = Integer.compare(s.getCredits(), f.getCredits());
+            if (cmp != 0) return cmp;
+            return f.getCourseCode().compareTo(s.getCourseCode());
+        });
 
         lectures.clear();
 

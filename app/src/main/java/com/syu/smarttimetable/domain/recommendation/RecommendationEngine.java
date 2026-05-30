@@ -6,6 +6,7 @@ import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.LectureTime;
 import com.syu.smarttimetable.data.model.SoftConstraint;
 import com.syu.smarttimetable.data.model.Timetable;
+import com.syu.smarttimetable.data.model.enums.ClassParity;
 import com.syu.smarttimetable.data.model.enums.CourseCategory;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.constraints.HardConstraintValidator;
@@ -97,6 +98,13 @@ public class RecommendationEngine {
                 continue;
             }
 
+            // 방어적 홀짝 이중 검증: TimetableGenerator에서 이미 필터링하지만, 안전을 위해 한 번 더 검증
+            if (hasParityViolation(candidate, effectiveRequest.getStudentId())) {
+                rejectedByHardConstraint++;
+                Log.d(TAG, "Candidate rejected by parity violation");
+                continue;
+            }
+
             // 삼육대 교양 영역 특성 반영: 인문예술/자연과학/사회과학/디지털/인성교육은 영역별 1개까지만 추천한다.
             if (hasExcessGeneralAreaLectures(candidate)) {
                 Log.d(TAG, "Candidate rejected: exceeds per-area general lecture limit");
@@ -118,6 +126,8 @@ public class RecommendationEngine {
         Log.d(TAG, "Valid recommendations after filtering: " + results.size());
         Log.d(TAG, "Rejected by hard constraint: " + rejectedByHardConstraint + ", by duplicate: " + rejectedByDuplicate);
 
+
+        // 동일 점수/학점에서도 일관된 순서를 보장하기 위해 tiebreaker로 시그니처 비교
         results.sort((first, second) -> {
             int firstFreeDayViolations = countPreferredFreeDayViolations(first.getTimetable(), effectiveRequest);
             int secondFreeDayViolations = countPreferredFreeDayViolations(second.getTimetable(), effectiveRequest);
@@ -140,10 +150,17 @@ public class RecommendationEngine {
                 return gradeMajorCompare;
             }
 
-            return Integer.compare(
+            int creditsCompare = Integer.compare(
                     second.getTimetable().getTotalCredits(),
                     first.getTimetable().getTotalCredits()
             );
+            if (creditsCompare != 0) {
+                return creditsCompare;
+            }
+
+            // 최종 tiebreaker: 시그니처 문자열 비교로 일관된 정렬 보장
+            return buildTimetableSignature(first.getTimetable())
+                    .compareTo(buildTimetableSignature(second.getTimetable()));
         });
 
         List<TimetableScoreTuple> limitedResults = results;
@@ -266,6 +283,70 @@ public class RecommendationEngine {
         public List<DayOfWeek> getConflictDays() {
             return conflictDays;
         }
+    }
+
+    /**
+     * 시간표 후보에 학번 홀짝 조건을 위반하는 강의가 포함되어 있는지 검증합니다.
+     * TimetableGenerator에서 이미 필터링하지만, 방어적 이중 검증으로 안전성을 보장합니다.
+     */
+    private boolean hasParityViolation(Timetable timetable, String studentId) {
+        if (timetable == null || timetable.getLecturesReadOnly() == null) {
+            return false;
+        }
+
+        Boolean isStudentEven = getStudentIdEven(studentId);
+        if (isStudentEven == null) {
+            return false;
+        }
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null) {
+                continue;
+            }
+
+            ClassParity classParity = lecture.getClassParity();
+            if (classParity == null || classParity == ClassParity.ALL) {
+                continue;
+            }
+
+            if (classParity == ClassParity.EVEN && !isStudentEven) {
+                Log.d(TAG, "Parity violation: lecture " + lecture.getCourseCode()
+                        + " requires EVEN but student is ODD");
+                return true;
+            }
+
+            if (classParity == ClassParity.ODD && isStudentEven) {
+                Log.d(TAG, "Parity violation: lecture " + lecture.getCourseCode()
+                        + " requires ODD but student is EVEN");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 학번에서 홀짝 여부를 판별합니다.
+     */
+    private Boolean getStudentIdEven(String studentId) {
+        if (studentId == null) {
+            return null;
+        }
+
+        String trimmed = studentId.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        for (int i = trimmed.length() - 1; i >= 0; i--) {
+            char ch = trimmed.charAt(i);
+            if (Character.isDigit(ch)) {
+                int digit = ch - '0';
+                return digit % 2 == 0;
+            }
+        }
+
+        return null;
     }
 
     private boolean hasExcessGeneralAreaLectures(Timetable timetable) {

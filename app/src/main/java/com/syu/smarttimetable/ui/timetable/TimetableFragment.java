@@ -6,8 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,11 +19,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
+import com.syu.smarttimetable.data.model.Timetable;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
 import com.syu.smarttimetable.ui.main.MainNavigationActivity;
 import com.syu.smarttimetable.ui.recommendation.RecommendationActivity;
+import com.google.gson.Gson;
 
 public class TimetableFragment extends Fragment {
 
@@ -31,10 +37,16 @@ public class TimetableFragment extends Fragment {
     private String studentId = "";
     private boolean isUserInfoLoaded = false;
     private UserRepository userRepository;
+    private RecommendationPreferenceManager preferenceManager;
 
     private MaterialButton btnCreate;
     private MaterialButton btnViewRecommendation;
     private TextView tvUserInfoStatus;
+    private TextView tvFavoriteEmpty;
+    private ImageButton btnFavoriteStar;
+    private View favoriteDivider;
+    private android.widget.HorizontalScrollView favoriteTimetableScroll;
+    private TableLayout favoriteTimetableTable;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,9 +67,17 @@ public class TimetableFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Context가 보장되는 시점에 preferenceManager 초기화
+        preferenceManager = new RecommendationPreferenceManager(requireContext());
+
         btnCreate = view.findViewById(R.id.btn_create_timetable);
         btnViewRecommendation = view.findViewById(R.id.btn_view_recommendation);
         tvUserInfoStatus = view.findViewById(R.id.tv_user_info_status);
+        tvFavoriteEmpty = view.findViewById(R.id.tv_favorite_empty);
+        btnFavoriteStar = view.findViewById(R.id.btn_favorite_star);
+        favoriteDivider = view.findViewById(R.id.favorite_divider);
+        favoriteTimetableScroll = view.findViewById(R.id.favorite_timetable_scroll);
+        favoriteTimetableTable = view.findViewById(R.id.favorite_timetable_table);
 
         // 사용자 정보 로딩 전까지 버튼 비활성화
         btnCreate.setEnabled(false);
@@ -67,6 +87,7 @@ public class TimetableFragment extends Fragment {
         btnViewRecommendation.setOnClickListener(v -> navigateToRecommendation());
 
         updateRecommendationButtonVisibility();
+        displayFavoriteTimetables();
         loadUserInfo();
     }
 
@@ -75,6 +96,7 @@ public class TimetableFragment extends Fragment {
         super.onResume();
         refreshRecommendationRequest();
         updateRecommendationButtonVisibility();
+        displayFavoriteTimetables();
         loadUserInfo();
     }
 
@@ -181,5 +203,56 @@ public class TimetableFragment extends Fragment {
         Intent intent = new Intent(requireContext(), RecommendationActivity.class);
         intent.putExtra("recommendationRequest", recommendationRequest);
         startActivity(intent);
+    }
+
+    private void displayFavoriteTimetables() {
+        if (tvFavoriteEmpty == null || favoriteTimetableTable == null ||
+                btnFavoriteStar == null || favoriteTimetableScroll == null || favoriteDivider == null) return;
+
+        java.util.List<String> favoriteKeys = preferenceManager.getAllFavoriteTimetableKeys();
+
+        if (favoriteKeys.isEmpty()) {
+            // 즐겨찾기된 시간표가 없음
+            tvFavoriteEmpty.setVisibility(View.VISIBLE);
+            favoriteDivider.setVisibility(View.VISIBLE);
+            btnFavoriteStar.setVisibility(View.GONE);
+            favoriteTimetableScroll.setVisibility(View.GONE);
+            return;
+        }
+
+        // 즐겨찾기된 시간표가 있음
+        tvFavoriteEmpty.setVisibility(View.GONE);
+        favoriteDivider.setVisibility(View.GONE);
+        btnFavoriteStar.setVisibility(View.VISIBLE);
+        favoriteTimetableScroll.setVisibility(View.VISIBLE);
+
+        // 기존 테이블 내용 제거
+        favoriteTimetableTable.removeAllViews();
+
+        Gson gson = new Gson();
+        for (String key : favoriteKeys) {
+            String timetableJson = preferenceManager.getFavoriteTimetableData(key);
+            if (timetableJson != null) {
+                try {
+                    Timetable timetable = gson.fromJson(timetableJson, Timetable.class);
+                    if (timetable != null) {
+                        // 시간표를 테이블 그리드에 직접 렌더링
+                        com.syu.smarttimetable.ui.recommendation.RecommendationAdapter.renderTimetableGrid(
+                                requireContext(),
+                                favoriteTimetableTable,
+                                timetable
+                        );
+
+                        // 별 버튼 클릭 리스너 설정: 해제 클릭 시 삭제
+                        btnFavoriteStar.setOnClickListener(v -> {
+                            preferenceManager.removeTimetableFavorite(key);
+                            displayFavoriteTimetables();
+                        });
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error parsing favorite timetable: " + key, e);
+                }
+            }
+        }
     }
 }

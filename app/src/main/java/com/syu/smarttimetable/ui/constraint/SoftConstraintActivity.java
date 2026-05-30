@@ -2,6 +2,7 @@ package com.syu.smarttimetable.ui.constraint;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -27,6 +28,7 @@ import java.util.List;
 
 public class SoftConstraintActivity extends AppCompatActivity {
 
+    private static final String TAG = "SoftConstraintActivity";
     private HardConstraint hardConstraint;
     private int userGrade = 0;
     private String studentId = "";
@@ -329,7 +331,15 @@ public class SoftConstraintActivity extends AppCompatActivity {
             boolean isChapel = isChapelCourse(courseName);
 
             if (isChapel && lecture.getGrade() == userGrade) {
+                // 이수 완료 과목과 충돌 검사: 이미 이수한 채플은 자동 고정하지 않음
+                if (hardConstraint != null
+                        && hardConstraint.getCompletedCourseCodes() != null
+                        && hardConstraint.getCompletedCourseCodes().contains(lecture.getCourseCode())) {
+                    Log.d(TAG, "Chapel auto-fix skipped: already completed: " + lecture.getCourseCode());
+                    continue;
+                }
                 fixedLectureKeySet.add(RequiredLectureConstraint.buildLectureKey(lecture));
+                Log.d(TAG, "Chapel auto-fixed: " + RequiredLectureConstraint.buildLectureKey(lecture));
                 return;
             }
         }

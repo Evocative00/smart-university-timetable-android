@@ -28,7 +28,7 @@ import java.util.Locale;
 public class RecommendationAdapter {
 
     private static final int START_HOUR = 9;
-    private static final int END_HOUR = 19;
+    private static final int DEFAULT_END_HOUR = 19;
 
     private RecommendationAdapter() {
     }
@@ -127,7 +127,9 @@ public class RecommendationAdapter {
 
         addHeaderRow(context, tableLayout);
 
-        for (int hour = START_HOUR; hour < END_HOUR; hour++) {
+        int endHour = calculateEndHour(timetable);
+
+        for (int hour = START_HOUR; hour < endHour; hour++) {
             TableRow row = new TableRow(context);
 
             TextView timeCell = buildCell(context, formatHourRange(hour), true, false);
@@ -239,6 +241,38 @@ public class RecommendationAdapter {
         }
 
         return null;
+    }
+
+    /**
+     * 시간표 내 강의들의 실제 종료 시간을 기반으로 동적으로 그리드 END_HOUR를 계산합니다.
+     * 야간 수업(19시 이후)이 포함된 경우 그리드를 확장합니다.
+     */
+    private static int calculateEndHour(Timetable timetable) {
+        int maxEndHour = DEFAULT_END_HOUR;
+
+        if (timetable == null || timetable.getLecturesReadOnly() == null) {
+            return maxEndHour;
+        }
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null || lecture.getTimes() == null) {
+                continue;
+            }
+
+            for (LectureTime time : lecture.getTimes()) {
+                if (time == null) {
+                    continue;
+                }
+
+                // endTime은 분 단위 (예: 1260 = 21:00)
+                int endHour = (time.getEndTime() + 59) / 60; // 올림으로 해당 시간대 포함
+                if (endHour > maxEndHour) {
+                    maxEndHour = endHour;
+                }
+            }
+        }
+
+        return maxEndHour;
     }
 
     private static String buildMetaText(Lecture lecture) {

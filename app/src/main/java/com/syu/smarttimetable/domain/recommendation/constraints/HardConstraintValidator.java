@@ -30,6 +30,24 @@ public class HardConstraintValidator {
             return new ValidationResult(false, errors);
         }
 
+        // 방어적 충돌 검사: 고정 강의의 과목 코드가 이수 완료 목록에도 존재하는 경우
+        if (request != null
+                && request.getFixedLectureKeys() != null
+                && request.getCompletedCourseCodes() != null) {
+            for (Lecture lecture : timetable) {
+                if (lecture == null) continue;
+
+                String lectureKey = RequiredLectureConstraint.buildLectureKey(lecture);
+                if (request.getFixedLectureKeys().contains(lectureKey)
+                        && request.getCompletedCourseCodes().contains(lecture.getCourseCode())) {
+                    String warning = "고정 과목 '" + lecture.getCourseName()
+                            + "'이(가) 이수 완료 목록에도 포함되어 있습니다.";
+                    errors.add(warning);
+                    Log.w(TAG, "Fixed-Completed conflict: " + lectureKey);
+                }
+            }
+        }
+
         int totalCredits = 0;
         for (Lecture lecture : timetable) {
             if (lecture != null) {

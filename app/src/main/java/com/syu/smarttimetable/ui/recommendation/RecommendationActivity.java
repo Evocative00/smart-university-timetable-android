@@ -19,6 +19,7 @@ import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
+import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
 
 import android.Manifest;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.syu.smarttimetable.data.repository.ImageStorageRepository;
 import com.syu.smarttimetable.domain.timetable.TimetableImageExporter;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,7 @@ public class RecommendationActivity extends AppCompatActivity {
     private TableLayout timetableTable;
     private LinearLayout lectureListContainer;
     private LinearLayout emptyStateContainer;
+    private TextView tvEmptyGuide;
     private View contentContainer;
     private Button btnPrev;
     private Button btnNext;
@@ -63,6 +66,9 @@ public class RecommendationActivity extends AppCompatActivity {
     private MaterialButton btnShareImage;
     private View timetableCard;
 
+    private RecommendationPreferenceManager preferenceManager;
+    private ImageButton btnFavoriteTimetable;
+
     private static final int REQUEST_WRITE_STORAGE = 1001;
 
     @Override
@@ -71,6 +77,7 @@ public class RecommendationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recommendation);
 
         recommendationRequest = (RecommendationRequest) getIntent().getSerializableExtra("recommendationRequest");
+        preferenceManager = new RecommendationPreferenceManager(this);
 
         bindViews();
         setupButtons();
@@ -92,6 +99,7 @@ public class RecommendationActivity extends AppCompatActivity {
         timetableTable = findViewById(R.id.timetable_table);
         lectureListContainer = findViewById(R.id.lecture_list_container);
         emptyStateContainer = findViewById(R.id.empty_state_container);
+        tvEmptyGuide = findViewById(R.id.tv_empty_guide);
         contentContainer = findViewById(R.id.content_container);
         btnPrev = findViewById(R.id.btn_prev);
         btnNext = findViewById(R.id.btn_next);
@@ -99,6 +107,7 @@ public class RecommendationActivity extends AppCompatActivity {
         btnSaveImage = findViewById(R.id.btn_save_image);
         btnShareImage = findViewById(R.id.btn_share_image);
         timetableCard = findViewById(R.id.timetable_card);
+        btnFavoriteTimetable = findViewById(R.id.btn_favorite_timetable);
     }
 
     private void setupButtons() {
@@ -131,6 +140,9 @@ public class RecommendationActivity extends AppCompatActivity {
 
         btnSaveImage.setOnClickListener(v -> saveCurrentTimetableImage());
         btnShareImage.setOnClickListener(v -> shareCurrentTimetableImage());
+
+        // 시간표 즐겨찾기 버튼
+        btnFavoriteTimetable.setOnClickListener(v -> toggleTimetableFavorite());
     }
 
     private void loadRecommendations() {
@@ -274,6 +286,10 @@ public class RecommendationActivity extends AppCompatActivity {
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
         emptyMessage.setText("추천 시간표를 생성하는 중입니다...");
 
+        if (tvEmptyGuide != null) {
+            tvEmptyGuide.setVisibility(View.GONE);
+        }
+
         btnPrev.setEnabled(false);
         btnNext.setEnabled(false);
         btnRegenerate.setEnabled(false);
@@ -310,12 +326,11 @@ public class RecommendationActivity extends AppCompatActivity {
                     current.getTimetable()
             );
 
-            Log.d(TAG, "Rendering lecture list...");
-            RecommendationAdapter.renderLectureList(
-                    this,
-                    lectureListContainer,
-                    current.getTimetable()
-            );
+            Log.d(TAG, "Rendering lecture list with RecyclerView adapter...");
+            renderLectureListWithAdapter(current.getTimetable());
+
+            // 시간표 즐겨찾기 상태 업데이트
+            updateTimetableFavoriteButton();
 
             btnPrev.setEnabled(currentIndex > 0);
             btnNext.setEnabled(currentIndex < recommendationResults.size() - 1);
@@ -332,12 +347,25 @@ public class RecommendationActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 강의 목록을 렌더링
+     */
+    private void renderLectureListWithAdapter(com.syu.smarttimetable.data.model.Timetable timetable) {
+        // 원래의 정적 메서드 사용
+        RecommendationAdapter.renderLectureList(this, lectureListContainer, timetable);
+    }
+
     private void showEmptyState(String message) {
         contentContainer.setVisibility(View.GONE);
         emptyStateContainer.setVisibility(View.VISIBLE);
 
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
         emptyMessage.setText(message);
+
+        // 결과 0개일 때 조건 완화 안내 가이드 표시
+        if (tvEmptyGuide != null) {
+            tvEmptyGuide.setVisibility(View.VISIBLE);
+        }
 
         btnPrev.setEnabled(false);
         btnNext.setEnabled(false);
@@ -479,6 +507,87 @@ public class RecommendationActivity extends AppCompatActivity {
             saveCurrentTimetableImage();
         } else if (requestCode == REQUEST_WRITE_STORAGE) {
             Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * 시간표의 강의 목록 정보를 기반으로 고유한 식별 키를 생성합니다.
+     */
+    private String getTimetableUniqueKey(com.syu.smarttimetable.data.model.Timetable timetable) {
+        if (timetable == null || timetable.getLecturesReadOnly().isEmpty()) {
+            return "empty_timetable";
+        }
+        List<Lecture> lectures = new ArrayList<>(timetable.getLecturesReadOnly());
+        lectures.sort((l1, l2) -> l1.getCourseCode().compareTo(l2.getCourseCode()));
+        StringBuilder sb = new StringBuilder();
+        sb.append("timetable_");
+        for (Lecture l : lectures) {
+            sb.append(l.getCourseCode()).append("_");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 시간표 즐겨찾기 토글
+     */
+    private void toggleTimetableFavorite() {
+        if (recommendationResults.isEmpty()) {
+            return;
+        }
+
+        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        String timetableKey = getTimetableUniqueKey(current.getTimetable());
+        boolean isFavorite = preferenceManager.isTimetableFavorite(timetableKey);
+
+        if (isFavorite) {
+            // 즐겨찾기 해제
+            preferenceManager.removeTimetableFavorite(timetableKey);
+            Log.d(TAG, "Timetable favorite removed: " + timetableKey);
+        } else {
+            // 즐겨찾기 설정 - 시간표 데이터를 JSON으로 직렬화하여 저장
+            try {
+                Gson gson = new Gson();
+                String timetableJson = gson.toJson(current.getTimetable());
+                preferenceManager.setTimetableFavorite(timetableKey, timetableJson);
+                Log.d(TAG, "Timetable favorite set with data: " + timetableKey);
+            } catch (Exception e) {
+                Log.e(TAG, "Error saving favorite timetable", e);
+            }
+        }
+
+        updateTimetableFavoriteButton();
+    }
+
+    /**
+     * 시간표 즐겨찾기 버튼 UI 업데이트
+     */
+    private void updateTimetableFavoriteButton() {
+        if (btnFavoriteTimetable == null || recommendationResults.isEmpty()) {
+            return;
+        }
+
+        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        String timetableKey = getTimetableUniqueKey(current.getTimetable());
+        boolean isFavorite = preferenceManager.isTimetableFavorite(timetableKey);
+
+        if (isFavorite) {
+            // 노란 별
+            btnFavoriteTimetable.setImageDrawable(
+                    ContextCompat.getDrawable(this, R.drawable.ic_star_filled)
+            );
+            btnFavoriteTimetable.setColorFilter(
+                    ContextCompat.getColor(this, R.color.smart_warning_yellow)
+            );
+            Log.d(TAG, "Timetable favorite button updated to filled: " + timetableKey);
+        } else {
+            // 빈 별
+            btnFavoriteTimetable.setImageDrawable(
+                    ContextCompat.getDrawable(this, R.drawable.ic_star_border)
+            );
+            btnFavoriteTimetable.setColorFilter(
+                    ContextCompat.getColor(this, R.color.smart_text_secondary)
+            );
+            Log.d(TAG, "Timetable favorite button updated to border: " + timetableKey);
         }
     }
 }

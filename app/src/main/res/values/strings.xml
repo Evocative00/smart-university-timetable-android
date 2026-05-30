@@ -75,6 +75,7 @@
     <string name="included_lectures_title">포함된 강의</string>
     <string name="recommendation_empty_title">추천 결과 없음</string>
     <string name="recommendation_empty_message">조건을 다시 조정해보세요.</string>
+    <string name="recommendation_empty_guide">• 희망 학점 범위를 넓혀보세요\n• 고정 과목 수를 줄여보세요\n• 공강 요일이나 시간 선호를 완화해보세요\n• 이수 과목 설정을 확인해보세요</string>
 
     <string name="btn_save_image">저장</string>
     <string name="btn_share_image">공유</string>

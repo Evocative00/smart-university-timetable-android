@@ -26,6 +26,10 @@ public class TimetableCacheManager {
         return request.getMinCredits()
                 + "_"
                 + request.getMaxCredits()
+                + "_grade:"
+                + request.getUserGrade()
+                + "_parity:"
+                + getStudentParity(request.getStudentId())
                 + "_fixed:"
                 + sortedListString(request.getFixedLectureKeys())
                 + "_completed:"
@@ -107,5 +111,27 @@ public class TimetableCacheManager {
 
         Collections.sort(timeKeys);
         return timeKeys.toString();
+    }
+
+    /**
+     * 학번에서 홀짝 구분 문자열을 반환합니다.
+     * 학번 마지막 숫자가 짝수면 "EVEN", 홀수면 "ODD", 판별 불가능하면 "UNKNOWN".
+     */
+    private static String getStudentParity(String studentId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return "UNKNOWN";
+        }
+
+        String trimmed = studentId.trim();
+
+        for (int i = trimmed.length() - 1; i >= 0; i--) {
+            char ch = trimmed.charAt(i);
+            if (Character.isDigit(ch)) {
+                int digit = ch - '0';
+                return (digit % 2 == 0) ? "EVEN" : "ODD";
+            }
+        }
+
+        return "UNKNOWN";
     }
 }
