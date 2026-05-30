@@ -3,12 +3,9 @@ package com.syu.smarttimetable.ui.school;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -23,7 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.syu.smarttimetable.R;
 
 import java.io.UnsupportedEncodingException;
@@ -39,8 +35,6 @@ public class SchoolHomeFragment extends Fragment {
     private View errorContainer;
     private TextView errorText;
     private Button retryButton;
-    private TextInputEditText searchEditText;
-    private MaterialButton searchButton;
     private MaterialButton homeButton;
     private MaterialButton scheduleButton;
     private MaterialButton refreshButton;
@@ -63,8 +57,6 @@ public class SchoolHomeFragment extends Fragment {
         errorContainer = view.findViewById(R.id.layout_school_error);
         errorText = view.findViewById(R.id.tv_school_error);
         retryButton = view.findViewById(R.id.btn_school_retry);
-        searchEditText = view.findViewById(R.id.et_school_search);
-        searchButton = view.findViewById(R.id.btn_school_search);
         homeButton = view.findViewById(R.id.btn_school_home);
         scheduleButton = view.findViewById(R.id.btn_school_schedule);
         refreshButton = view.findViewById(R.id.btn_school_refresh);
@@ -79,19 +71,6 @@ public class SchoolHomeFragment extends Fragment {
         homeButton.setOnClickListener(v -> loadSchoolHome());
         scheduleButton.setOnClickListener(v -> loadUrl(buildSearchUrl(SCHEDULE_QUERY)));
         refreshButton.setOnClickListener(v -> reloadCurrentPage());
-        searchButton.setOnClickListener(v -> searchSchoolSite());
-
-        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            boolean isSearchAction = actionId == EditorInfo.IME_ACTION_SEARCH;
-            boolean isEnterKey = event != null
-                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
-                    && event.getAction() == KeyEvent.ACTION_UP;
-            if (isSearchAction || isEnterKey) {
-                searchSchoolSite();
-                return true;
-            }
-            return false;
-        });
     }
 
     private void setupWebView() {
@@ -114,6 +93,7 @@ public class SchoolHomeFragment extends Fragment {
                 super.onPageFinished(view, url);
                 if (!mainFrameError) {
                     showWebView();
+                    stabilizeSchoolPageUi(view);
                 }
             }
 
@@ -128,21 +108,6 @@ public class SchoolHomeFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private void searchSchoolSite() {
-        String query = searchEditText.getText() == null
-                ? ""
-                : searchEditText.getText().toString().trim();
-        hideKeyboard();
-
-        if (TextUtils.isEmpty(query)) {
-            searchEditText.setError(getString(R.string.school_home_search_empty));
-            return;
-        }
-
-        searchEditText.setError(null);
-        loadUrl(buildSearchUrl(query));
     }
 
     private void loadSchoolHome() {
@@ -175,15 +140,23 @@ public class SchoolHomeFragment extends Fragment {
         }
     }
 
-    private void hideKeyboard() {
-        if (getContext() == null || searchEditText == null) {
-            return;
-        }
-        InputMethodManager imm = (InputMethodManager) requireContext()
-                .getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
-        }
+    /**
+     * 학교 홈페이지 안의 고정형 검색/퀵 메뉴가 WebView 중앙을 가리는 경우를 줄인다.
+     * 사이트 구조가 바뀌어도 앱이 깨지지 않도록 CSS 주입 실패는 무시한다.
+     */
+    private void stabilizeSchoolPageUi(WebView view) {
+        String javascript = "(function(){" +
+                "try{" +
+                "var style=document.getElementById('smartTimetableWebViewFix');" +
+                "if(!style){style=document.createElement('style');style.id='smartTimetableWebViewFix';document.head.appendChild(style);}" +
+                "style.innerHTML='" +
+                ".quick-menu,.quick_menu,.quickMenu,#quickMenu,.floating-menu,.floating_menu,.subot,.chatbot,.chat-bot{display:none!important;}" +
+                ".search-layer,.search_layer,.search-modal,.search_modal{max-height:55vh!important;overflow:auto!important;}" +
+                "body{overflow-x:hidden!important;}" +
+                "';" +
+                "}catch(e){}" +
+                "})();";
+        view.evaluateJavascript(javascript, null);
     }
 
     private void showLoading() {
@@ -221,8 +194,6 @@ public class SchoolHomeFragment extends Fragment {
         errorContainer = null;
         errorText = null;
         retryButton = null;
-        searchEditText = null;
-        searchButton = null;
         homeButton = null;
         scheduleButton = null;
         refreshButton = null;

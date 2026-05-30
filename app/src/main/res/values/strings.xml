@@ -97,7 +97,7 @@
     <string name="toast_permission_denied">저장 권한이 필요합니다.</string>
     <string name="share_title">시간표 공유</string>
     <string name="school_home_title">학교 홈페이지</string>
-    <string name="school_home_desc">검색과 주요 버튼은 고정하고, 학교 페이지는 아래에서 확인합니다.</string>
+    <string name="school_home_desc">학교 페이지는 아래에서 바로 확인합니다.</string>
     <string name="school_home_search_hint">학교 홈페이지 검색</string>
     <string name="school_home_search">검색</string>
     <string name="school_home_search_empty">검색어를 입력해주세요.</string>

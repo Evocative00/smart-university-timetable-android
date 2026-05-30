@@ -10,12 +10,12 @@
         android:id="@+id/card_school_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="8dp"
         app:cardBackgroundColor="@color/smart_surface_card"
-        app:cardCornerRadius="22dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
         app:strokeColor="@color/smart_border"
         app:strokeWidth="1dp">
@@ -23,104 +23,80 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="14dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/school_home_title"
-                android:textColor="@color/smart_text_primary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/school_home_desc"
-                android:textColor="@color/smart_text_secondary"
-                android:textSize="13sp" />
+            android:gravity="center_vertical"
+            android:minHeight="62dp"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingEnd="8dp">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/school_home_search_hint">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_school_search"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:imeOptions="actionSearch"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:singleLine="true" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_school_search"
-                    android:layout_width="72dp"
-                    android:layout_height="56dp"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/school_home_search"
-                    android:textSize="13sp"
-                    app:cornerRadius="16dp" />
-            </LinearLayout>
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:overScrollMode="never"
-                android:scrollbars="none">
-
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:text="@string/school_home_title"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_school_home"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:text="@string/school_home_home"
-                        android:textColor="@color/smart_primary"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="@color/smart_primary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/school_home_desc"
+                    android:textColor="@color/smart_text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_school_schedule"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/school_home_schedule"
-                        android:textColor="@color/smart_primary"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="@color/smart_primary" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_school_home"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="48dp"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:text="@string/school_home_home"
+                android:textColor="@color/smart_primary"
+                android:textSize="12sp"
+                app:cornerRadius="16dp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_school_refresh"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/school_home_refresh"
-                        android:textColor="@color/smart_primary"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="@color/smart_primary" />
-                </LinearLayout>
-            </HorizontalScrollView>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_school_schedule"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="72dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="2dp"
+                android:minWidth="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:text="@string/school_home_schedule"
+                android:textColor="@color/smart_primary"
+                android:textSize="12sp"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_school_refresh"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="64dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="2dp"
+                android:minWidth="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:text="@string/school_home_refresh"
+                android:textColor="@color/smart_primary"
+                android:textSize="12sp"
+                app:cornerRadius="16dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
