@@ -1,8 +1,8 @@
 package com.syu.smarttimetable.ui.calendar;
 
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +14,16 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.card.MaterialCardView;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.data.model.AcademicSchedule;
 import com.syu.smarttimetable.data.source.local.AcademicScheduleDummyData;
 
+import java.util.List;
+
 public class CalendarFragment extends Fragment {
 
     private LinearLayout scheduleListContainer;
+    private TextView scheduleCountText;
 
     @Nullable
     @Override
@@ -35,89 +37,117 @@ public class CalendarFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         scheduleListContainer = view.findViewById(R.id.layout_academic_schedule_list);
+        scheduleCountText = view.findViewById(R.id.tv_schedule_count);
         renderAcademicSchedules();
     }
 
     private void renderAcademicSchedules() {
         scheduleListContainer.removeAllViews();
-        for (AcademicSchedule schedule : AcademicScheduleDummyData.getSchedules()) {
-            scheduleListContainer.addView(createScheduleCard(schedule));
+        List<AcademicSchedule> schedules = AcademicScheduleDummyData.getSchedules();
+        if (scheduleCountText != null) {
+            scheduleCountText.setText(schedules.size() + "개");
+        }
+        for (int i = 0; i < schedules.size(); i++) {
+            scheduleListContainer.addView(createTimelineItem(schedules.get(i), i == schedules.size() - 1));
         }
     }
 
-    private View createScheduleCard(AcademicSchedule schedule) {
-        MaterialCardView cardView = new MaterialCardView(requireContext());
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+    private View createTimelineItem(AcademicSchedule schedule, boolean isLastItem) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.TOP);
+        row.setPadding(0, dp(14), 0, isLastItem ? 0 : dp(2));
+
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        cardParams.setMargins(0, 0, 0, dp(10));
-        cardView.setLayoutParams(cardParams);
-        cardView.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.smart_surface_alt));
-        cardView.setRadius(dp(18));
-        cardView.setCardElevation(0f);
-        cardView.setStrokeWidth(dp(1));
-        cardView.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.smart_border));
+        row.setLayoutParams(rowParams);
 
-        LinearLayout row = new LinearLayout(requireContext());
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(dp(14), dp(14), dp(14), dp(14));
+        LinearLayout dateColumn = new LinearLayout(requireContext());
+        dateColumn.setOrientation(LinearLayout.VERTICAL);
+        dateColumn.setGravity(Gravity.CENTER_HORIZONTAL);
+        LinearLayout.LayoutParams dateColumnParams = new LinearLayout.LayoutParams(dp(58), LinearLayout.LayoutParams.MATCH_PARENT);
+        dateColumn.setLayoutParams(dateColumnParams);
 
-        TextView dateBadge = new TextView(requireContext());
-        dateBadge.setText(formatDateBadge(schedule.getDate()));
-        dateBadge.setGravity(android.view.Gravity.CENTER);
-        dateBadge.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_primary));
-        dateBadge.setTextSize(12);
-        dateBadge.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        dateBadge.setBackground(createRoundedBackground(
-                ContextCompat.getColor(requireContext(), R.color.smart_primary_container),
-                ContextCompat.getColor(requireContext(), R.color.smart_border),
-                dp(15),
-                dp(1)
-        ));
-        LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(dp(68), dp(58));
-        badgeParams.setMargins(0, 0, dp(12), 0);
-        row.addView(dateBadge, badgeParams);
+        LinearLayout dateChip = new LinearLayout(requireContext());
+        dateChip.setOrientation(LinearLayout.VERTICAL);
+        dateChip.setGravity(Gravity.CENTER);
+        dateChip.setBackgroundResource(R.drawable.bg_calendar_date_chip);
+        LinearLayout.LayoutParams dateChipParams = new LinearLayout.LayoutParams(dp(54), dp(54));
+        dateChip.setLayoutParams(dateChipParams);
+
+        TextView monthView = new TextView(requireContext());
+        monthView.setText(getMonthText(schedule.getDate()));
+        monthView.setGravity(Gravity.CENTER);
+        monthView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_primary));
+        monthView.setTextSize(11);
+        monthView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        dateChip.addView(monthView);
+
+        TextView dayView = new TextView(requireContext());
+        dayView.setText(getDayText(schedule.getDate()));
+        dayView.setGravity(Gravity.CENTER);
+        dayView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_text_primary));
+        dayView.setTextSize(16);
+        dayView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        dateChip.addView(dayView);
+        dateColumn.addView(dateChip);
+
+        if (!isLastItem) {
+            View line = new View(requireContext());
+            line.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.smart_border));
+            LinearLayout.LayoutParams lineParams = new LinearLayout.LayoutParams(dp(1), dp(34));
+            lineParams.setMargins(0, dp(6), 0, 0);
+            line.setLayoutParams(lineParams);
+            dateColumn.addView(line);
+        }
+
+        row.addView(dateColumn);
 
         LinearLayout content = new LinearLayout(requireContext());
         content.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-        );
+        content.setBackgroundResource(R.drawable.bg_calendar_item_surface);
+        content.setPadding(dp(14), dp(13), dp(14), dp(13));
+        LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        contentParams.setMargins(dp(10), 0, 0, 0);
+        content.setLayoutParams(contentParams);
+
+        LinearLayout header = new LinearLayout(requireContext());
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
 
         TextView categoryView = new TextView(requireContext());
         categoryView.setText(schedule.getCategory());
         categoryView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_primary));
         categoryView.setTextSize(12);
         categoryView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        content.addView(categoryView);
+        categoryView.setBackgroundResource(R.drawable.bg_pill_primary_soft);
+        categoryView.setPadding(dp(10), dp(4), dp(10), dp(4));
+        header.addView(categoryView);
+
+        TextView dateView = new TextView(requireContext());
+        dateView.setText(schedule.getDate());
+        dateView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_text_secondary));
+        dateView.setTextSize(12);
+        LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        dateParams.setMargins(dp(10), 0, 0, 0);
+        dateView.setLayoutParams(dateParams);
+        header.addView(dateView);
+        content.addView(header);
 
         TextView titleView = new TextView(requireContext());
         titleView.setText(schedule.getTitle());
         titleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_text_primary));
-        titleView.setTextSize(17);
+        titleView.setTextSize(16);
         titleView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        titleParams.setMargins(0, dp(3), 0, 0);
+        titleParams.setMargins(0, dp(8), 0, 0);
         titleView.setLayoutParams(titleParams);
         content.addView(titleView);
-
-        TextView dateView = new TextView(requireContext());
-        dateView.setText(schedule.getDate());
-        dateView.setTextColor(ContextCompat.getColor(requireContext(), R.color.smart_text_secondary));
-        dateView.setTextSize(13);
-        LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        dateParams.setMargins(0, dp(4), 0, 0);
-        dateView.setLayoutParams(dateParams);
-        content.addView(dateView);
 
         TextView descriptionView = new TextView(requireContext());
         descriptionView.setText(schedule.getDescription());
@@ -128,33 +158,30 @@ public class CalendarFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        descParams.setMargins(0, dp(7), 0, 0);
+        descParams.setMargins(0, dp(5), 0, 0);
         descriptionView.setLayoutParams(descParams);
         content.addView(descriptionView);
 
-        row.addView(content, contentParams);
-        cardView.addView(row);
-        return cardView;
+        row.addView(content);
+        return row;
     }
 
-    private String formatDateBadge(String date) {
-        if (date == null || date.length() < 10) {
+    private String getMonthText(String date) {
+        if (date == null || date.length() < 7) {
             return "일정";
         }
-        String firstDate = date.split("~")[0].trim();
-        String[] parts = firstDate.split("\\.");
-        if (parts.length >= 3) {
-            return parts[1] + "/" + parts[2];
+        String month = date.substring(5, 7);
+        if (month.startsWith("0")) {
+            month = month.substring(1);
         }
-        return firstDate;
+        return month + "월";
     }
 
-    private GradientDrawable createRoundedBackground(int color, int strokeColor, int radius, int strokeWidth) {
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setColor(color);
-        drawable.setCornerRadius(radius);
-        drawable.setStroke(strokeWidth, strokeColor);
-        return drawable;
+    private String getDayText(String date) {
+        if (date == null || date.length() < 10) {
+            return "--";
+        }
+        return date.substring(8, 10);
     }
 
     private int dp(int value) {
@@ -164,6 +191,7 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onDestroyView() {
         scheduleListContainer = null;
+        scheduleCountText = null;
         super.onDestroyView();
     }
 }

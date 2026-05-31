@@ -19,25 +19,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.button.MaterialButton;
 import com.syu.smarttimetable.R;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 public class SchoolHomeFragment extends Fragment {
 
     private static final String SCHOOL_URL = "https://www.syu.ac.kr";
-    private static final String SCHEDULE_QUERY = "학사일정";
 
     private WebView webView;
     private ProgressBar progressBar;
     private View errorContainer;
     private TextView errorText;
     private Button retryButton;
-    private MaterialButton homeButton;
-    private MaterialButton scheduleButton;
-    private MaterialButton refreshButton;
     private boolean mainFrameError;
 
     @Nullable
@@ -57,9 +49,6 @@ public class SchoolHomeFragment extends Fragment {
         errorContainer = view.findViewById(R.id.layout_school_error);
         errorText = view.findViewById(R.id.tv_school_error);
         retryButton = view.findViewById(R.id.btn_school_retry);
-        homeButton = view.findViewById(R.id.btn_school_home);
-        scheduleButton = view.findViewById(R.id.btn_school_schedule);
-        refreshButton = view.findViewById(R.id.btn_school_refresh);
 
         setupWebView();
         setupActions();
@@ -68,9 +57,6 @@ public class SchoolHomeFragment extends Fragment {
 
     private void setupActions() {
         retryButton.setOnClickListener(v -> reloadCurrentPage());
-        homeButton.setOnClickListener(v -> loadSchoolHome());
-        scheduleButton.setOnClickListener(v -> loadUrl(buildSearchUrl(SCHEDULE_QUERY)));
-        refreshButton.setOnClickListener(v -> reloadCurrentPage());
     }
 
     private void setupWebView() {
@@ -91,9 +77,9 @@ public class SchoolHomeFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                stabilizeSchoolPageUi(view);
                 if (!mainFrameError) {
                     showWebView();
-                    stabilizeSchoolPageUi(view);
                 }
             }
 
@@ -132,30 +118,18 @@ public class SchoolHomeFragment extends Fragment {
         webView.loadUrl(url);
     }
 
-    private String buildSearchUrl(String query) {
-        try {
-            return SCHOOL_URL + "/?s=" + URLEncoder.encode(query, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return SCHOOL_URL + "/?s=" + query;
-        }
-    }
-
-    /**
-     * 학교 홈페이지 안의 고정형 검색/퀵 메뉴가 WebView 중앙을 가리는 경우를 줄인다.
-     * 사이트 구조가 바뀌어도 앱이 깨지지 않도록 CSS 주입 실패는 무시한다.
-     */
     private void stabilizeSchoolPageUi(WebView view) {
-        String javascript = "(function(){" +
-                "try{" +
-                "var style=document.getElementById('smartTimetableWebViewFix');" +
-                "if(!style){style=document.createElement('style');style.id='smartTimetableWebViewFix';document.head.appendChild(style);}" +
-                "style.innerHTML='" +
-                ".quick-menu,.quick_menu,.quickMenu,#quickMenu,.floating-menu,.floating_menu,.subot,.chatbot,.chat-bot{display:none!important;}" +
-                ".search-layer,.search_layer,.search-modal,.search_modal{max-height:55vh!important;overflow:auto!important;}" +
-                "body{overflow-x:hidden!important;}" +
-                "';" +
-                "}catch(e){}" +
-                "})();";
+        String javascript = "(function(){"
+                + "try{"
+                + "var style=document.getElementById('smartTimetableWebViewFix');"
+                + "if(!style){style=document.createElement('style');style.id='smartTimetableWebViewFix';document.head.appendChild(style);}"
+                + "style.innerHTML='"
+                + ".quick-menu,.quick_menu,.quickMenu,#quickMenu,.floating-menu,.floating_menu,.subot,.chatbot,.chat-bot{display:none!important;}"
+                + ".search-layer,.search_layer,.search-modal,.search_modal{max-height:55vh!important;overflow:auto!important;}"
+                + "body{overflow-x:hidden!important;}"
+                + "';"
+                + "}catch(e){}"
+                + "})();";
         view.evaluateJavascript(javascript, null);
     }
 
@@ -194,9 +168,6 @@ public class SchoolHomeFragment extends Fragment {
         errorContainer = null;
         errorText = null;
         retryButton = null;
-        homeButton = null;
-        scheduleButton = null;
-        refreshButton = null;
         super.onDestroyView();
     }
 }
