@@ -1,14 +1,16 @@
-# First
-- Main에 직접 push "절대" 금지
+# smart_timetable
 
-# Second
-- dev에도 웬만하면 직접 push 금지, 기능은 [feature/* branch] 에서 작업하는걸 권장
+A new Flutter project.
 
-# Third
-- 작업 전엔 git checkout dev / git pull origin dev / git checkout -b feature/* 습관화 하기
-- 작업 후엔 git add . / git commit -m "feat: 블라블라블라" / git push origin feature/*
-- 추후에 Github에서 feature에서 dev로 Pull Request 생성
-- feature branch Naming은 각 기능에 맞게 할 것
+## Getting Started
 
-# Fourth
-- commit 메세지 양식은 통일합시다! Ex) feat: 로그인 화면 추가, fix: 시간 충돌 계산 오류 수정, refactor: lecture model 정리, docs: update readme
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
