@@ -39,12 +39,17 @@
     <string name="day_wednesday">수요일</string>
     <string name="day_thursday">목요일</string>
     <string name="day_friday">금요일</string>
+    <string name="day_none">해당 없음</string>
     <string name="soft_free_time_title">2) 오전/오후 공강 선호</string>
-    <string name="free_time_none">상관없음</string>
+    <string name="free_time_none">해당 없음</string>
     <string name="free_time_morning">오전</string>
     <string name="free_time_afternoon">오후</string>
     <string name="soft_lunch_title">3) 점심시간(12~13시) 비우기</string>
     <string name="soft_gap_title">4) 3시간 이상 공강 만들지 않기</string>
+    <string name="dialog_reset_title">선호 조건 초기화</string>
+    <string name="dialog_reset_message">입력한 선호 조건을 모두 초기화할까요?</string>
+    <string name="dialog_reset_confirm">초기화</string>
+    <string name="dialog_reset_cancel">취소</string>
     <string name="soft_professor_title">5) 선호 교수(쉼표로 구분)</string>
     <string name="hint_professors">예: 김교수, 이교수</string>
     <string name="soft_travel_title">6) 강의실 간 이동시간 고려</string>
@@ -75,6 +80,7 @@
     <string name="included_lectures_title">포함된 강의</string>
     <string name="recommendation_empty_title">추천 결과 없음</string>
     <string name="recommendation_empty_message">조건을 다시 조정해보세요.</string>
+    <string name="recommendation_empty_guide">• 희망 학점 범위를 넓혀보세요\n• 고정 과목 수를 줄여보세요\n• 공강 요일이나 시간 선호를 완화해보세요\n• 이수 과목 설정을 확인해보세요</string>
 
     <string name="btn_save_image">저장</string>
     <string name="btn_share_image">공유</string>

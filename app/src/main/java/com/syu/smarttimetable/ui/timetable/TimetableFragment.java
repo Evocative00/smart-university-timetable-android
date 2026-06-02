@@ -6,6 +6,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,14 +16,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
+import com.syu.smarttimetable.data.model.Timetable;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
 import com.syu.smarttimetable.ui.main.MainNavigationActivity;
 import com.syu.smarttimetable.ui.recommendation.RecommendationActivity;
+
+import java.util.List;
 
 public class TimetableFragment extends Fragment {
 
@@ -31,10 +39,16 @@ public class TimetableFragment extends Fragment {
     private String studentId = "";
     private boolean isUserInfoLoaded = false;
     private UserRepository userRepository;
+    private RecommendationPreferenceManager preferenceManager;
 
     private MaterialButton btnCreate;
     private MaterialButton btnViewRecommendation;
     private TextView tvUserInfoStatus;
+    private TextView tvFavoriteEmpty;
+    private ImageButton btnFavoriteStar;
+    private View favoriteDivider;
+    private HorizontalScrollView favoriteTimetableScroll;
+    private TableLayout favoriteTimetableTable;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,9 +69,16 @@ public class TimetableFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        preferenceManager = new RecommendationPreferenceManager(requireContext());
+
         btnCreate = view.findViewById(R.id.btn_create_timetable);
         btnViewRecommendation = view.findViewById(R.id.btn_view_recommendation);
         tvUserInfoStatus = view.findViewById(R.id.tv_user_info_status);
+        tvFavoriteEmpty = view.findViewById(R.id.tv_favorite_empty);
+        btnFavoriteStar = view.findViewById(R.id.btn_favorite_star);
+        favoriteDivider = view.findViewById(R.id.favorite_divider);
+        favoriteTimetableScroll = view.findViewById(R.id.favorite_timetable_scroll);
+        favoriteTimetableTable = view.findViewById(R.id.favorite_timetable_table);
 
         // 사용자 정보 로딩 전까지 버튼 비활성화
         btnCreate.setEnabled(false);
@@ -67,6 +88,7 @@ public class TimetableFragment extends Fragment {
         btnViewRecommendation.setOnClickListener(v -> navigateToRecommendation());
 
         updateRecommendationButtonVisibility();
+        displayFavoriteTimetable();
         loadUserInfo();
     }
 
@@ -75,6 +97,7 @@ public class TimetableFragment extends Fragment {
         super.onResume();
         refreshRecommendationRequest();
         updateRecommendationButtonVisibility();
+        displayFavoriteTimetable();
         loadUserInfo();
     }
 
@@ -160,6 +183,78 @@ public class TimetableFragment extends Fragment {
             tvUserInfoStatus.setVisibility(View.VISIBLE);
         } else {
             tvUserInfoStatus.setVisibility(View.GONE);
+        }
+    }
+
+
+    private void displayFavoriteTimetable() {
+        if (preferenceManager == null
+                || tvFavoriteEmpty == null
+                || btnFavoriteStar == null
+                || favoriteDivider == null
+                || favoriteTimetableScroll == null
+                || favoriteTimetableTable == null) {
+            return;
+        }
+
+        favoriteTimetableTable.removeAllViews();
+
+        List<String> favoriteKeys = preferenceManager.getAllFavoriteTimetableKeys();
+        if (favoriteKeys.isEmpty()) {
+            showFavoriteEmptyState();
+            return;
+        }
+
+        String favoriteKey = favoriteKeys.get(0);
+        String timetableJson = preferenceManager.getFavoriteTimetableData(favoriteKey);
+        if (timetableJson == null || timetableJson.trim().isEmpty()) {
+            showFavoriteEmptyState();
+            return;
+        }
+
+        try {
+            Timetable timetable = new Gson().fromJson(timetableJson, Timetable.class);
+            if (timetable == null || timetable.getLecturesReadOnly().isEmpty()) {
+                showFavoriteEmptyState();
+                return;
+            }
+
+            tvFavoriteEmpty.setVisibility(View.GONE);
+            favoriteDivider.setVisibility(View.GONE);
+            btnFavoriteStar.setVisibility(View.VISIBLE);
+            favoriteTimetableScroll.setVisibility(View.VISIBLE);
+
+            com.syu.smarttimetable.ui.recommendation.RecommendationAdapter.renderTimetableGrid(
+                    requireContext(),
+                    favoriteTimetableTable,
+                    timetable
+            );
+
+            btnFavoriteStar.setOnClickListener(v -> {
+                preferenceManager.removeTimetableFavorite(favoriteKey);
+                displayFavoriteTimetable();
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing favorite timetable", e);
+            showFavoriteEmptyState();
+        }
+    }
+
+    private void showFavoriteEmptyState() {
+        if (tvFavoriteEmpty != null) {
+            tvFavoriteEmpty.setVisibility(View.VISIBLE);
+        }
+        if (favoriteDivider != null) {
+            favoriteDivider.setVisibility(View.VISIBLE);
+        }
+        if (btnFavoriteStar != null) {
+            btnFavoriteStar.setVisibility(View.GONE);
+        }
+        if (favoriteTimetableScroll != null) {
+            favoriteTimetableScroll.setVisibility(View.GONE);
+        }
+        if (favoriteTimetableTable != null) {
+            favoriteTimetableTable.removeAllViews();
         }
     }
 

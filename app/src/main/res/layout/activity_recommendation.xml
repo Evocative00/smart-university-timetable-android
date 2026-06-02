@@ -254,13 +254,32 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/timetable_preview_title"
-                        android:textColor="@color/smart_text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/timetable_preview_title"
+                            android:textColor="@color/smart_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <ImageButton
+                            android:id="@+id/btn_favorite_timetable"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="시간표 즐겨찾기"
+                            android:padding="6dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_star_border"
+                            app:tint="@color/smart_text_secondary" />
+                    </LinearLayout>
 
                     <HorizontalScrollView
                         android:layout_width="match_parent"
@@ -358,6 +377,18 @@
                         android:text="@string/recommendation_empty_message"
                         android:textColor="@color/smart_text_secondary"
                         android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_empty_guide"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="start"
+                        android:lineSpacingExtra="4dp"
+                        android:text="@string/recommendation_empty_guide"
+                        android:textColor="@color/smart_text_secondary"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -29,5 +29,6 @@
     <color name="smart_grid_fill">#8B80FF</color>
     <color name="smart_success">#34D399</color>
     <color name="smart_warning">#FBBF24</color>
+    <color name="smart_warning_yellow">#FFD700</color>
     <color name="smart_error">#F87171</color>
 </resources>

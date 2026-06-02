@@ -30,5 +30,6 @@
     <color name="smart_grid_fill">#6366F1</color>
     <color name="smart_success">#10B981</color>
     <color name="smart_warning">#F59E0B</color>
+    <color name="smart_warning_yellow">#FFD700</color>
     <color name="smart_error">#EF4444</color>
 </resources>

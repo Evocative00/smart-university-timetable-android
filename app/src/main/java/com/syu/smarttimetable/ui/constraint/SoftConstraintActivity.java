@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
@@ -37,11 +37,10 @@ public class SoftConstraintActivity extends AppCompatActivity {
     private CheckBox checkboxWednesday;
     private CheckBox checkboxThursday;
     private CheckBox checkboxFriday;
+    private CheckBox checkboxNoneDay;
     private RadioGroup radioGroupFreeTime;
     private CheckBox checkboxLunch;
     private CheckBox checkboxAvoidLongGap;
-    private EditText editPreferredProfessors;
-    private CheckBox checkboxTravelTime;
     private Button buttonSkip;
     private Button buttonRecommend;
     private Button buttonResetSoft;
@@ -73,11 +72,10 @@ public class SoftConstraintActivity extends AppCompatActivity {
         checkboxWednesday = findViewById(R.id.checkboxWednesday);
         checkboxThursday = findViewById(R.id.checkboxThursday);
         checkboxFriday = findViewById(R.id.checkboxFriday);
+        checkboxNoneDay = findViewById(R.id.checkboxNoneDay);
         radioGroupFreeTime = findViewById(R.id.radioGroupFreeTime);
         checkboxLunch = findViewById(R.id.checkboxLunch);
         checkboxAvoidLongGap = findViewById(R.id.checkboxAvoidLongGap);
-        editPreferredProfessors = findViewById(R.id.editPreferredProfessors);
-        checkboxTravelTime = findViewById(R.id.checkboxTravelTime);
         buttonSkip = findViewById(R.id.buttonSkip);
         buttonRecommend = findViewById(R.id.buttonRecommend);
         buttonResetSoft = findViewById(R.id.btn_reset_soft);
@@ -86,7 +84,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
     private void setupButtons() {
         btnBack.setOnClickListener(v -> onBackPressed());
-        buttonResetSoft.setOnClickListener(v -> resetSoftConstraintState());
+        buttonResetSoft.setOnClickListener(v -> showResetConfirmDialog());
 
         buttonSkip.setOnClickListener(v -> {
             SoftConstraint softConstraint = new SoftConstraint();
@@ -100,12 +98,42 @@ public class SoftConstraintActivity extends AppCompatActivity {
             saveSoftConstraintState(softConstraint);
             navigateToMain(softConstraint);
         });
+
+        setupNoneDayMutualExclusion();
     }
 
-    private void resetSoftConstraintState() {
-        ConstraintStateManager.clearSoftConstraintState(this);
-        resetSoftConstraintUi();
-        Toast.makeText(this, "소프트 제약이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+    private void setupNoneDayMutualExclusion() {
+        CheckBox[] dayCheckboxes = {checkboxMonday, checkboxTuesday, checkboxWednesday,
+                checkboxThursday, checkboxFriday};
+
+        checkboxNoneDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                for (CheckBox cb : dayCheckboxes) {
+                    cb.setChecked(false);
+                }
+            }
+        });
+
+        for (CheckBox cb : dayCheckboxes) {
+            cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    checkboxNoneDay.setChecked(false);
+                }
+            });
+        }
+    }
+
+    private void showResetConfirmDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_reset_title)
+                .setMessage(R.string.dialog_reset_message)
+                .setPositiveButton(R.string.dialog_reset_confirm, (dialog, which) -> {
+                    ConstraintStateManager.clearSoftConstraintState(this);
+                    resetSoftConstraintUi();
+                    Toast.makeText(this, "선호 조건이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(R.string.dialog_reset_cancel, null)
+                .show();
     }
 
     private void resetSoftConstraintUi() {
@@ -114,11 +142,10 @@ public class SoftConstraintActivity extends AppCompatActivity {
         checkboxWednesday.setChecked(false);
         checkboxThursday.setChecked(false);
         checkboxFriday.setChecked(false);
+        checkboxNoneDay.setChecked(false);
         radioGroupFreeTime.check(R.id.radioNone);
         checkboxLunch.setChecked(false);
         checkboxAvoidLongGap.setChecked(false);
-        editPreferredProfessors.setText("");
-        checkboxTravelTime.setChecked(false);
     }
 
     private void restoreSavedState() {
@@ -140,31 +167,17 @@ public class SoftConstraintActivity extends AppCompatActivity {
 
         checkboxLunch.setChecked(ConstraintStateManager.getSavedLunch(this));
         checkboxAvoidLongGap.setChecked(ConstraintStateManager.getSavedAvoidGap(this));
-        editPreferredProfessors.setText(ConstraintStateManager.getSavedProfessors(this));
-        checkboxTravelTime.setChecked(ConstraintStateManager.getSavedTravelTime(this));
     }
 
     private SoftConstraint collectConstraintFromUi() {
         List<DayOfWeek> preferredDays = new ArrayList<>();
 
-        if (checkboxMonday.isChecked()) {
-            preferredDays.add(DayOfWeek.MONDAY);
-        }
-
-        if (checkboxTuesday.isChecked()) {
-            preferredDays.add(DayOfWeek.TUESDAY);
-        }
-
-        if (checkboxWednesday.isChecked()) {
-            preferredDays.add(DayOfWeek.WEDNESDAY);
-        }
-
-        if (checkboxThursday.isChecked()) {
-            preferredDays.add(DayOfWeek.THURSDAY);
-        }
-
-        if (checkboxFriday.isChecked()) {
-            preferredDays.add(DayOfWeek.FRIDAY);
+        if (!checkboxNoneDay.isChecked()) {
+            if (checkboxMonday.isChecked()) preferredDays.add(DayOfWeek.MONDAY);
+            if (checkboxTuesday.isChecked()) preferredDays.add(DayOfWeek.TUESDAY);
+            if (checkboxWednesday.isChecked()) preferredDays.add(DayOfWeek.WEDNESDAY);
+            if (checkboxThursday.isChecked()) preferredDays.add(DayOfWeek.THURSDAY);
+            if (checkboxFriday.isChecked()) preferredDays.add(DayOfWeek.FRIDAY);
         }
 
         FreeTimePreference freeTimePreference;
@@ -178,37 +191,15 @@ public class SoftConstraintActivity extends AppCompatActivity {
             freeTimePreference = FreeTimePreference.NONE;
         }
 
-        List<String> professors = parseProfessorInput(editPreferredProfessors.getText().toString());
-
         return new SoftConstraint(
                 false,
                 preferredDays,
                 freeTimePreference,
                 checkboxLunch.isChecked(),
                 checkboxAvoidLongGap.isChecked(),
-                professors,
-                checkboxTravelTime.isChecked()
+                new ArrayList<>(),
+                false
         );
-    }
-
-    private List<String> parseProfessorInput(String input) {
-        List<String> result = new ArrayList<>();
-
-        if (input == null || input.trim().isEmpty()) {
-            return result;
-        }
-
-        String[] split = input.split(",");
-
-        for (String name : split) {
-            String trimmed = name.trim();
-
-            if (!trimmed.isEmpty()) {
-                result.add(trimmed);
-            }
-        }
-
-        return result;
     }
 
     private void saveSoftConstraintState(SoftConstraint softConstraint) {
@@ -229,37 +220,15 @@ public class SoftConstraintActivity extends AppCompatActivity {
                 ? FreeTimePreference.NONE.name()
                 : softConstraint.getFreeTimePreference().name();
 
-        String professors = joinProfessors(softConstraint.getPreferredProfessors());
-
         ConstraintStateManager.saveSoftConstraintState(
                 this,
                 preferredDays,
                 freeTime,
                 softConstraint.isKeepLunch12To13Free(),
                 softConstraint.isAvoidGapOver3Hours(),
-                professors,
-                softConstraint.isConsiderTravelTime()
+                "",
+                false
         );
-    }
-
-    private String joinProfessors(List<String> professors) {
-        if (professors == null || professors.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        for (String professor : professors) {
-            if (professor == null || professor.trim().isEmpty()) {
-                continue;
-            }
-
-            if (builder.length() > 0) {
-                builder.append(",");
-            }
-            builder.append(professor.trim());
-        }
-
-        return builder.toString();
     }
 
     @Override

@@ -19,6 +19,7 @@ import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
+import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
 
 import android.Manifest;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.syu.smarttimetable.data.repository.ImageStorageRepository;
 import com.syu.smarttimetable.domain.timetable.TimetableImageExporter;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,7 @@ public class RecommendationActivity extends AppCompatActivity {
     private TableLayout timetableTable;
     private LinearLayout lectureListContainer;
     private LinearLayout emptyStateContainer;
+    private TextView tvEmptyGuide;
     private View contentContainer;
     private Button btnPrev;
     private Button btnNext;
@@ -63,6 +66,9 @@ public class RecommendationActivity extends AppCompatActivity {
     private MaterialButton btnShareImage;
     private View timetableCard;
 
+    private RecommendationPreferenceManager preferenceManager;
+    private ImageButton btnFavoriteTimetable;
+
     private static final int REQUEST_WRITE_STORAGE = 1001;
 
     @Override
@@ -71,6 +77,7 @@ public class RecommendationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recommendation);
 
         recommendationRequest = (RecommendationRequest) getIntent().getSerializableExtra("recommendationRequest");
+        preferenceManager = new RecommendationPreferenceManager(this);
 
         bindViews();
         setupButtons();
@@ -92,6 +99,7 @@ public class RecommendationActivity extends AppCompatActivity {
         timetableTable = findViewById(R.id.timetable_table);
         lectureListContainer = findViewById(R.id.lecture_list_container);
         emptyStateContainer = findViewById(R.id.empty_state_container);
+        tvEmptyGuide = findViewById(R.id.tv_empty_guide);
         contentContainer = findViewById(R.id.content_container);
         btnPrev = findViewById(R.id.btn_prev);
         btnNext = findViewById(R.id.btn_next);
@@ -99,6 +107,7 @@ public class RecommendationActivity extends AppCompatActivity {
         btnSaveImage = findViewById(R.id.btn_save_image);
         btnShareImage = findViewById(R.id.btn_share_image);
         timetableCard = findViewById(R.id.timetable_card);
+        btnFavoriteTimetable = findViewById(R.id.btn_favorite_timetable);
     }
 
     private void setupButtons() {
@@ -131,6 +140,10 @@ public class RecommendationActivity extends AppCompatActivity {
 
         btnSaveImage.setOnClickListener(v -> saveCurrentTimetableImage());
         btnShareImage.setOnClickListener(v -> shareCurrentTimetableImage());
+
+        if (btnFavoriteTimetable != null) {
+            btnFavoriteTimetable.setOnClickListener(v -> toggleTimetableFavorite());
+        }
     }
 
     private void loadRecommendations() {
@@ -274,6 +287,10 @@ public class RecommendationActivity extends AppCompatActivity {
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
         emptyMessage.setText("추천 시간표를 생성하는 중입니다...");
 
+        if (tvEmptyGuide != null) {
+            tvEmptyGuide.setVisibility(View.GONE);
+        }
+
         btnPrev.setEnabled(false);
         btnNext.setEnabled(false);
         btnRegenerate.setEnabled(false);
@@ -317,6 +334,8 @@ public class RecommendationActivity extends AppCompatActivity {
                     current.getTimetable()
             );
 
+            updateTimetableFavoriteButton();
+
             btnPrev.setEnabled(currentIndex > 0);
             btnNext.setEnabled(currentIndex < recommendationResults.size() - 1);
             btnRegenerate.setEnabled(true);
@@ -338,6 +357,10 @@ public class RecommendationActivity extends AppCompatActivity {
 
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
         emptyMessage.setText(message);
+
+        if (tvEmptyGuide != null) {
+            tvEmptyGuide.setVisibility(View.VISIBLE);
+        }
 
         btnPrev.setEnabled(false);
         btnNext.setEnabled(false);
@@ -467,6 +490,80 @@ public class RecommendationActivity extends AppCompatActivity {
                 );
             }
         }).start();
+    }
+
+
+    private String getTimetableUniqueKey(com.syu.smarttimetable.data.model.Timetable timetable) {
+        if (timetable == null || timetable.getLecturesReadOnly().isEmpty()) {
+            return "empty_timetable";
+        }
+
+        List<Lecture> lectures = new ArrayList<>(timetable.getLecturesReadOnly());
+        lectures.sort((first, second) -> safeKeyPart(first == null ? null : first.getCourseCode())
+                .compareTo(safeKeyPart(second == null ? null : second.getCourseCode())));
+
+        StringBuilder builder = new StringBuilder("timetable_");
+        for (Lecture lecture : lectures) {
+            if (lecture == null) {
+                continue;
+            }
+            builder.append(safeKeyPart(lecture.getCourseCode()))
+                    .append("_")
+                    .append(safeKeyPart(lecture.getCourseName()))
+                    .append("_")
+                    .append(safeKeyPart(lecture.getProfessor()))
+                    .append("|");
+        }
+        return builder.toString();
+    }
+
+    private String safeKeyPart(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private void toggleTimetableFavorite() {
+        if (recommendationResults.isEmpty() || preferenceManager == null) {
+            return;
+        }
+
+        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        String timetableKey = getTimetableUniqueKey(current.getTimetable());
+        boolean isFavorite = preferenceManager.isTimetableFavorite(timetableKey);
+
+        if (isFavorite) {
+            preferenceManager.removeTimetableFavorite(timetableKey);
+            Toast.makeText(this, "즐겨찾기를 해제했습니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            try {
+                String timetableJson = new Gson().toJson(current.getTimetable());
+                preferenceManager.setTimetableFavorite(timetableKey, timetableJson);
+                Toast.makeText(this, "즐겨찾기에 저장했습니다.", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Log.e(TAG, "Error saving favorite timetable", e);
+                Toast.makeText(this, "즐겨찾기 저장에 실패했습니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        updateTimetableFavoriteButton();
+    }
+
+    private void updateTimetableFavoriteButton() {
+        if (btnFavoriteTimetable == null || recommendationResults.isEmpty() || preferenceManager == null) {
+            return;
+        }
+
+        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        String timetableKey = getTimetableUniqueKey(current.getTimetable());
+        boolean isFavorite = preferenceManager.isTimetableFavorite(timetableKey);
+
+        btnFavoriteTimetable.setImageDrawable(ContextCompat.getDrawable(
+                this,
+                isFavorite ? R.drawable.ic_star_filled : R.drawable.ic_star_border
+        ));
+        btnFavoriteTimetable.setColorFilter(ContextCompat.getColor(
+                this,
+                isFavorite ? R.color.smart_warning_yellow : R.color.smart_text_secondary
+        ));
     }
 
     @Override

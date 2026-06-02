@@ -28,7 +28,7 @@ import java.util.Locale;
 public class RecommendationAdapter {
 
     private static final int START_HOUR = 9;
-    private static final int END_HOUR = 19;
+    private static final int DEFAULT_END_HOUR = 19;
 
     private RecommendationAdapter() {
     }
@@ -127,7 +127,9 @@ public class RecommendationAdapter {
 
         addHeaderRow(context, tableLayout);
 
-        for (int hour = START_HOUR; hour < END_HOUR; hour++) {
+        int endHour = calculateEndHour(timetable);
+
+        for (int hour = START_HOUR; hour < endHour; hour++) {
             TableRow row = new TableRow(context);
 
             TextView timeCell = buildCell(context, formatHourRange(hour), true, false);
@@ -239,6 +241,34 @@ public class RecommendationAdapter {
         }
 
         return null;
+    }
+
+
+    private static int calculateEndHour(Timetable timetable) {
+        int maxEndHour = DEFAULT_END_HOUR;
+
+        if (timetable == null || timetable.getLecturesReadOnly() == null) {
+            return maxEndHour;
+        }
+
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null || lecture.getTimes() == null) {
+                continue;
+            }
+
+            for (LectureTime time : lecture.getTimes()) {
+                if (time == null) {
+                    continue;
+                }
+
+                int endHour = (time.getEndTime() + 59) / 60;
+                if (endHour > maxEndHour) {
+                    maxEndHour = endHour;
+                }
+            }
+        }
+
+        return maxEndHour;
     }
 
     private static String buildMetaText(Lecture lecture) {

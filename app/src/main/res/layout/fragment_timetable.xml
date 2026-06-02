@@ -67,19 +67,46 @@
                 android:orientation="vertical"
                 android:padding="18dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/timetable_favorite_title"
-                    android:textColor="@color/smart_text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/timetable_favorite_title"
+                        android:textColor="@color/smart_text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/btn_favorite_star"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="시간표 즐겨찾기 해제"
+                        android:padding="6dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_star_filled"
+                        android:visibility="gone"
+                        app:tint="@color/smart_warning_yellow" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/favorite_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/smart_background" />
 
                 <TextView
                     android:id="@+id/tv_favorite_empty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
                     android:background="@drawable/bg_selected_box"
                     android:gravity="center"
                     android:minHeight="56dp"
@@ -90,6 +117,23 @@
                     android:text="@string/timetable_favorite_empty"
                     android:textColor="@color/smart_text_secondary"
                     android:textSize="14sp" />
+
+                <HorizontalScrollView
+                    android:id="@+id/favorite_timetable_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fillViewport="true"
+                    android:scrollbars="none"
+                    android:visibility="gone">
+
+                    <TableLayout
+                        android:id="@+id/favorite_timetable_table"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:shrinkColumns="*"
+                        android:stretchColumns="*" />
+                </HorizontalScrollView>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
