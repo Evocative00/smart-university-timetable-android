@@ -4,60 +4,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_screen_gradient"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="18dp"
-        android:paddingTop="18dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="96dp">
+        android:paddingStart="@dimen/smart_main_screen_padding"
+        android:paddingTop="@dimen/smart_main_top_padding"
+        android:paddingEnd="@dimen/smart_main_screen_padding"
+        android:paddingBottom="@dimen/smart_main_bottom_padding">
+
+        <TextView
+            style="@style/Text.SmartTimetable.ScreenTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timetable_title" />
+
+        <TextView
+            style="@style/Text.SmartTimetable.ScreenSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/timetable_desc" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/smart_primary"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/smart_primary_dark"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="22dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="22dp"
-                android:paddingBottom="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/timetable_title"
-                    android:textColor="@color/white"
-                    android:textSize="27sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/timetable_desc"
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="18dp"
             app:cardBackgroundColor="@color/smart_surface_card"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/smart_main_card_radius"
+            app:cardElevation="@dimen/smart_main_card_elevation"
             app:strokeColor="@color/smart_border"
             app:strokeWidth="1dp">
 
@@ -65,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="@dimen/smart_main_card_padding">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -73,19 +51,30 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/timetable_favorite_title"
-                        android:textColor="@color/smart_text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.SmartTimetable.CardTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/timetable_favorite_title" />
+
+                        <TextView
+                            style="@style/Text.SmartTimetable.CardBody"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="저장한 대표 시간표를 한눈에 확인하세요." />
+                    </LinearLayout>
 
                     <ImageButton
                         android:id="@+id/btn_favorite_star"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="시간표 즐겨찾기 해제"
                         android:padding="6dp"
@@ -99,41 +88,32 @@
                     android:id="@+id/favorite_divider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="14dp"
                     android:layout_marginBottom="12dp"
-                    android:background="@color/smart_background" />
+                    android:background="@color/smart_border" />
 
                 <TextView
                     android:id="@+id/tv_favorite_empty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_selected_box"
+                    android:background="@drawable/bg_smart_empty_state"
                     android:gravity="center"
-                    android:minHeight="56dp"
-                    android:paddingStart="12dp"
+                    android:minHeight="66dp"
+                    android:paddingStart="14dp"
                     android:paddingTop="12dp"
-                    android:paddingEnd="12dp"
+                    android:paddingEnd="14dp"
                     android:paddingBottom="12dp"
                     android:text="@string/timetable_favorite_empty"
                     android:textColor="@color/smart_text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
-                <HorizontalScrollView
-                    android:id="@+id/favorite_timetable_scroll"
+                <com.syu.smarttimetable.ui.recommendation.TimetablePreviewView
+                    android:id="@+id/favorite_timetable_preview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:fillViewport="true"
-                    android:scrollbars="none"
-                    android:visibility="gone">
+                    android:layout_marginTop="14dp"
+                    android:visibility="gone" />
 
-                    <TableLayout
-                        android:id="@+id/favorite_timetable_table"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:shrinkColumns="*"
-                        android:stretchColumns="*" />
-                </HorizontalScrollView>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -142,8 +122,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             app:cardBackgroundColor="@color/smart_surface_card"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/smart_main_card_radius"
+            app:cardElevation="@dimen/smart_main_card_elevation"
             app:strokeColor="@color/smart_border"
             app:strokeWidth="1dp">
 
@@ -151,44 +131,40 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="@dimen/smart_main_card_padding">
 
                 <TextView
+                    style="@style/Text.SmartTimetable.CardTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/timetable_create_title"
-                    android:textColor="@color/smart_text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:text="@string/timetable_create_title" />
 
                 <TextView
                     android:id="@+id/tv_user_info_status"
+                    style="@style/Text.SmartTimetable.CardBody"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="6dp"
                     android:text="@string/timetable_loading_user_info"
-                    android:textColor="@color/smart_text_secondary"
-                    android:textSize="13sp"
                     android:visibility="visible" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_create_timetable"
+                    style="@style/Widget.SmartTimetable.Button.Primary"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_height="@dimen/smart_button_height"
+                    android:layout_marginTop="14dp"
                     android:enabled="false"
-                    android:text="@string/timetable_create_button"
-                    app:cornerRadius="18dp" />
+                    android:text="@string/timetable_create_button" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_view_recommendation"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/Widget.SmartTimetable.Button.Outline"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="@dimen/smart_button_height"
+                    android:layout_marginTop="9dp"
                     android:text="@string/timetable_view_recommendation"
-                    android:visibility="gone"
-                    app:cornerRadius="18dp" />
+                    android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

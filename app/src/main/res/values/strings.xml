@@ -1,51 +1,72 @@
 <resources>
     <string name="app_name">SmartTimetable</string>
+    <string name="brand_name">Smart Timetable</string>
+    <string name="content_app_logo">Smart Timetable 로고</string>
+    <string name="login_feature_ai">AI 추천</string>
+    <string name="login_feature_grade">학년 맞춤</string>
+    <string name="login_feature_manage">시간표 관리</string>
+    <string name="signup_login_prompt">이미 계정이 있으신가요? 로그인</string>
 
-    <string name="login_title">로그인</string>
-    <string name="login_desc">시간표 추천을 시작하려면 먼저 로그인해 주세요.</string>
+    <string name="login_title">Smart Timetable</string>
+    <string name="login_desc">나만의 시간표를 쉽게 추천받아 보세요.</string>
     <string name="hint_email">이메일</string>
     <string name="hint_password">비밀번호</string>
     <string name="btn_login">로그인</string>
-    <string name="btn_move_signup">회원가입 하러가기</string>
+    <string name="btn_move_signup">회원가입</string>
 
     <string name="signup_title">회원가입</string>
-    <string name="signup_desc">기본 정보를 입력하고 나만의 시간표를 추천받아 보세요.</string>
+    <string name="signup_desc">계정을 만들고 나만의 시간표 추천을 시작하세요.</string>
     <string name="hint_name">이름</string>
     <string name="btn_signup">회원가입</string>
 
     <string name="user_info_title">기본 정보 입력</string>
-    <string name="user_info_desc">학과, 학년, 학번을 입력하면 추천 조건이 자동으로 이어집니다.</string>
-    <string name="hint_department">학과 선택</string>
-    <string name="hint_major_detail">세부전공 선택</string>
-    <string name="hint_grade">학년 선택</string>
-    <string name="hint_student_id">학번 입력 (예: 2026123456)</string>
+    <string name="user_info_desc">추천 조건에 사용할 기본 정보를 입력하세요.</string>
+    <string name="user_info_card_note">학년과 학번은 추천 조건에 사용됩니다.</string>
+    <string name="hint_department">학과</string>
+    <string name="hint_major_detail">세부전공</string>
+    <string name="hint_grade">학년</string>
+    <string name="hint_student_id">학번</string>
     <string name="btn_save">저장</string>
 
     <string name="hard_title">필수 조건 입력</string>
-    <string name="hard_desc">희망 학점과 꼭 포함할 과목을 선택해 주세요.</string>
-    <string name="hint_credits">희망 학점</string>
-    <string name="hint_category">과목 카테고리</string>
-    <string name="hint_lecture">고정할 과목 선택</string>
-    <string name="btn_add_fixed_lecture">고정 과목 추가</string>
-    <string name="selected_fixed_lectures_title">선택된 고정 과목</string>
+    <string name="hard_desc">추천에 꼭 반영할 조건을 설정하세요.</string>
+    <string name="hint_credits">목표 학점</string>
+    <string name="hint_category">과목 범위</string>
+    <string name="hint_lecture">과목명을 입력하세요</string>
+    <string name="btn_add_fixed_lecture">과목 추가</string>
+    <string name="selected_fixed_lectures_title">고정 과목</string>
     <string name="selected_fixed_lectures_empty">선택된 고정 과목 없음</string>
     <string name="btn_next">다음</string>
 
+    <string name="hard_basic_condition_title">기본 조건</string>
+    <string name="hard_basic_condition_desc">목표 학점과 과목 범위를 정합니다.</string>
+    <string name="hard_fixed_lecture_desc">반드시 포함할 강의를 선택합니다.</string>
+    <string name="hard_excluded_title">이수/제외 과목</string>
+    <string name="hard_excluded_desc">이미 이수했거나 추천에서 제외할 과목을 관리합니다.</string>
+    <string name="hard_excluded_manage_title">과목 관리</string>
+    <string name="hard_excluded_manage_desc">학년별 전공, 필수교양, 영역별 교양, 일반선택을 선택하세요.</string>
+    <string name="soft_free_day_desc">원하는 공강 요일을 선택하세요.</string>
+    <string name="soft_free_time_desc">수업을 듣고 싶은 시간대를 선택하세요.</string>
+    <string name="soft_life_pattern_title">생활 패턴</string>
+    <string name="soft_life_pattern_desc">하루 시간표의 흐름을 조정합니다.</string>
+    <string name="fixed_lecture_sheet_title">고정 과목 추가</string>
+    <string name="fixed_lecture_sheet_desc">추천 시간표에 반드시 포함할 과목을 선택하세요.</string>
+
     <string name="soft_title">선호 조건 설정</string>
-    <string name="soft_desc">원하는 분위기에 맞게 추천 점수를 조정해 보세요.</string>
-    <string name="soft_free_day_title">1) 만들 공강 요일</string>
-    <string name="day_monday">월요일</string>
-    <string name="day_tuesday">화요일</string>
-    <string name="day_wednesday">수요일</string>
-    <string name="day_thursday">목요일</string>
-    <string name="day_friday">금요일</string>
+    <string name="soft_desc">원하는 수업 스타일을 선택하세요.</string>
+    <string name="soft_free_day_title">공강 요일</string>
+    <string name="day_monday">월</string>
+    <string name="day_tuesday">화</string>
+    <string name="day_wednesday">수</string>
+    <string name="day_thursday">목</string>
+    <string name="day_friday">금</string>
     <string name="day_none">해당 없음</string>
-    <string name="soft_free_time_title">2) 오전/오후 공강 선호</string>
+    <string name="soft_free_time_title">시간대 선호</string>
     <string name="free_time_none">해당 없음</string>
     <string name="free_time_morning">오전</string>
     <string name="free_time_afternoon">오후</string>
-    <string name="soft_lunch_title">3) 점심시간(12~13시) 비우기</string>
-    <string name="soft_gap_title">4) 3시간 이상 공강 만들지 않기</string>
+    <string name="soft_lunch_title">12시~13시 수업을 피합니다.</string>
+    <string name="soft_gap_title">3시간 이상 긴 공강을 줄입니다.</string>
     <string name="dialog_reset_title">선호 조건 초기화</string>
     <string name="dialog_reset_message">입력한 선호 조건을 모두 초기화할까요?</string>
     <string name="dialog_reset_confirm">초기화</string>
@@ -67,6 +88,7 @@
 
     <string name="recommendation_title">추천 시간표</string>
     <string name="recommendation_subtitle">조건을 만족한 후보를 정렬했습니다.</string>
+    <string name="recommendation_subtitle_redesign">조건에 맞는 시간표를 생성했어요.</string>
     <string name="rank_default">1 / 1</string>
     <string name="btn_prev">이전</string>
     <string name="label_score">점수</string>
@@ -82,16 +104,18 @@
     <string name="recommendation_empty_message">조건을 다시 조정해보세요.</string>
     <string name="recommendation_empty_guide">• 희망 학점 범위를 넓혀보세요\n• 고정 과목 수를 줄여보세요\n• 공강 요일이나 시간 선호를 완화해보세요\n• 이수 과목 설정을 확인해보세요</string>
 
-    <string name="btn_save_image">저장</string>
+    <string name="btn_save_image">저장하기</string>
     <string name="btn_share_image">공유</string>
     <string name="btn_back_description">뒤로가기</string>
     <string name="btn_reset_soft_constraint">선호 조건 초기화</string>
     <string name="school_home_error">학교 홈페이지를 불러오지 못했습니다.\n네트워크 연결을 확인한 뒤 다시 시도해주세요.</string>
     <string name="school_home_retry">다시 시도</string>
     <string name="timetable_title">추천 시간표</string>
-    <string name="timetable_desc">나만의 시간표를 생성하고 관리하세요.</string>
+    <string name="timetable_desc">나에게 맞는 시간표를 생성하고 관리하세요.</string>
     <string name="timetable_favorite_title">즐겨찾기 시간표</string>
-    <string name="timetable_favorite_empty">즐겨찾기한 시간표가 없습니다.</string>
+    <string name="timetable_favorite_full_timetable_title">즐겨찾기 전체 시간표</string>
+    <string name="timetable_favorite_empty">아직 즐겨찾기한 시간표가 없습니다.
+추천 결과에서 별을 눌러 대표 시간표를 설정하세요.</string>
     <string name="timetable_create_title">시간표 생성</string>
     <string name="timetable_loading_user_info">사용자 정보를 불러오는 중…</string>
     <string name="timetable_create_button">시간표 생성하기</string>
@@ -114,5 +138,41 @@
     <string name="calendar_schedule_subtitle">학교 홈페이지 기준 주요 학사일정을 더미데이터로 표시합니다.</string>
     <string name="calendar_schedule_list_title">주요 학사일정</string>
     <string name="calendar_schedule_list_desc">주요 일정을 카드로 정리했습니다. 추후 학교 사이트 연동으로 교체할 수 있습니다.</string>
+
+    <string name="btn_cancel">취소</string>
+    <string name="btn_manage_excluded_lectures">과목 관리</string>
+    <string name="excluded_sheet_title">이수/제외 과목 관리</string>
+    <string name="excluded_sheet_desc">이미 이수했거나 추천에서 제외할 과목을 선택하세요.</string>
+    <string name="fixed_lecture_sheet_category_hint">과목 카테고리</string>
+    <string name="fixed_lecture_sheet_selected_empty">선택된 고정 과목 없음</string>
+    <string name="fixed_lecture_sheet_confirm">고정 과목 추가</string>
+
+    <string name="recommendation_tab_1">추천 1</string>
+    <string name="recommendation_tab_2">추천 2</string>
+    <string name="recommendation_tab_3">추천 3</string>
+    <string name="recommendation_more">더보기</string>
+    <string name="recommendation_plan_short">추천 %1$d</string>
+    <string name="recommendation_plan_label">추천안 %1$d</string>
+    <string name="recommendation_condition_edit">조건 수정</string>
+    <string name="recommendation_rating_high">추천도 높음</string>
+    <string name="recommendation_rating_normal">추천도 보통</string>
+    <string name="recommendation_rating_qualified">조건 충족</string>
+    <string name="recommendation_favorite_description">대표 시간표 설정</string>
+    <string name="recommendation_picker_title">추천 시간표 선택</string>
+    <string name="recommendation_picker_desc">생성된 후보 중 비교할 시간표를 선택하세요.</string>
+    <string name="recommendation_picker_item_format">추천 %1$d · %2$d학점 · %3$s</string>
+    <string name="included_lectures_summary_default">포함된 강의 0개</string>
+    <string name="included_lectures_summary_format">포함된 강의 %1$d개 보기</string>
+    <string name="included_lectures_sheet_title">포함된 강의</string>
+    <string name="included_lectures_sheet_desc">시간표에 포함된 강의 정보를 확인하세요.</string>
+    <string name="menu_share_timetable">공유하기</string>
+    <string name="menu_regenerate_timetable">다시 생성</string>
+
+    <string name="recommendation_after_hours_default">18시 이후 수업 있음</string>
+    <string name="recommendation_after_hours_format">18시 이후 수업 %1$d개</string>
+    <string name="recommendation_full_timetable_action">전체 보기</string>
+    <string name="recommendation_full_timetable_title_default">전체 시간표</string>
+    <string name="recommendation_full_timetable_title">추천 %1$d 전체 시간표</string>
+    <string name="recommendation_full_timetable_desc">09시부터 21시까지 전체 수업 배치를 확인하세요.</string>
 
 </resources>

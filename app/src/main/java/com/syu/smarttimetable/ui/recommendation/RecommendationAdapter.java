@@ -2,8 +2,8 @@ package com.syu.smarttimetable.ui.recommendation;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -29,8 +29,13 @@ public class RecommendationAdapter {
 
     private static final int START_HOUR = 9;
     private static final int DEFAULT_END_HOUR = 19;
+    private static final int PREVIEW_END_HOUR = 18;
 
     private RecommendationAdapter() {
+    }
+
+    public interface OnLectureClickListener {
+        void onLectureClick(Lecture lecture);
     }
 
     public static void renderPreferenceChips(Context context,
@@ -92,6 +97,13 @@ public class RecommendationAdapter {
     public static void renderLectureList(Context context,
                                          LinearLayout container,
                                          Timetable timetable) {
+        renderLectureList(context, container, timetable, null);
+    }
+
+    public static void renderLectureList(Context context,
+                                         LinearLayout container,
+                                         Timetable timetable,
+                                         OnLectureClickListener lectureClickListener) {
         container.removeAllViews();
 
         List<Lecture> lectures = new ArrayList<>(timetable.getLecturesReadOnly());
@@ -100,7 +112,7 @@ public class RecommendationAdapter {
         LayoutInflater inflater = LayoutInflater.from(context);
 
         for (Lecture lecture : lectures) {
-            View item = inflater.inflate(
+            android.view.View item = inflater.inflate(
                     R.layout.item_recommendation,
                     container,
                     false
@@ -116,6 +128,12 @@ public class RecommendationAdapter {
             tvMeta.setText(buildMetaText(lecture));
             tvTime.setText(buildTimeText(lecture));
 
+            if (lectureClickListener != null) {
+                item.setClickable(true);
+                item.setFocusable(true);
+                item.setOnClickListener(v -> lectureClickListener.onLectureClick(lecture));
+            }
+
             container.addView(item);
         }
     }
@@ -123,16 +141,31 @@ public class RecommendationAdapter {
     public static void renderTimetableGrid(Context context,
                                            TableLayout tableLayout,
                                            Timetable timetable) {
+        renderTimetableGrid(context, tableLayout, timetable, false, null);
+    }
+
+    public static void renderTimetableGrid(Context context,
+                                           TableLayout tableLayout,
+                                           Timetable timetable,
+                                           boolean compactPreview) {
+        renderTimetableGrid(context, tableLayout, timetable, compactPreview, null);
+    }
+
+    public static void renderTimetableGrid(Context context,
+                                           TableLayout tableLayout,
+                                           Timetable timetable,
+                                           boolean compactPreview,
+                                           OnLectureClickListener lectureClickListener) {
         tableLayout.removeAllViews();
 
-        addHeaderRow(context, tableLayout);
+        addHeaderRow(context, tableLayout, compactPreview);
 
-        int endHour = calculateEndHour(timetable);
+        int endHour = compactPreview ? PREVIEW_END_HOUR : calculateEndHour(timetable);
 
         for (int hour = START_HOUR; hour < endHour; hour++) {
             TableRow row = new TableRow(context);
 
-            TextView timeCell = buildCell(context, formatHourRange(hour), true, false);
+            TextView timeCell = buildCell(context, formatHourRange(hour, compactPreview), true, false, compactPreview);
             row.addView(timeCell);
 
             DayOfWeek[] days = {
@@ -148,10 +181,16 @@ public class RecommendationAdapter {
                 TextView dayCell;
 
                 if (matchedLecture != null) {
-                    String label = matchedLecture.getCourseName() + "\n" + matchedLecture.getProfessor();
-                    dayCell = buildCell(context, label, false, true);
+                    String label = compactPreview
+                            ? buildCompactLectureLabel(matchedLecture)
+                            : matchedLecture.getCourseName() + "\n" + matchedLecture.getProfessor();
+                    dayCell = buildCell(context, label, false, true, compactPreview);
+                    if (lectureClickListener != null) {
+                        Lecture selectedLecture = matchedLecture;
+                        dayCell.setOnClickListener(v -> lectureClickListener.onLectureClick(selectedLecture));
+                    }
                 } else {
-                    dayCell = buildCell(context, "", false, false);
+                    dayCell = buildCell(context, "", false, false, compactPreview);
                 }
 
                 row.addView(dayCell);
@@ -161,46 +200,68 @@ public class RecommendationAdapter {
         }
     }
 
-    private static void addHeaderRow(Context context, TableLayout tableLayout) {
+    private static void addHeaderRow(Context context, TableLayout tableLayout, boolean compactPreview) {
         TableRow headerRow = new TableRow(context);
 
-        headerRow.addView(buildHeaderCell(context, "시간"));
-        headerRow.addView(buildHeaderCell(context, "월"));
-        headerRow.addView(buildHeaderCell(context, "화"));
-        headerRow.addView(buildHeaderCell(context, "수"));
-        headerRow.addView(buildHeaderCell(context, "목"));
-        headerRow.addView(buildHeaderCell(context, "금"));
+        headerRow.addView(buildHeaderCell(context, compactPreview ? "" : "시간", compactPreview));
+        headerRow.addView(buildHeaderCell(context, "월", compactPreview));
+        headerRow.addView(buildHeaderCell(context, "화", compactPreview));
+        headerRow.addView(buildHeaderCell(context, "수", compactPreview));
+        headerRow.addView(buildHeaderCell(context, "목", compactPreview));
+        headerRow.addView(buildHeaderCell(context, "금", compactPreview));
 
         tableLayout.addView(headerRow);
     }
 
-    private static TextView buildHeaderCell(Context context, String text) {
+    private static TextView buildHeaderCell(Context context, String text, boolean compactPreview) {
         TextView textView = new TextView(context);
         textView.setText(text);
+        textView.setGravity(Gravity.CENTER);
         textView.setTypeface(Typeface.DEFAULT_BOLD);
-        textView.setTextSize(13);
-        textView.setPadding(16, 14, 16, 14);
+        textView.setTextSize(compactPreview ? 10 : 13);
+        textView.setPadding(
+                dp(context, compactPreview ? 6 : 16),
+                dp(context, compactPreview ? 7 : 14),
+                dp(context, compactPreview ? 6 : 16),
+                dp(context, compactPreview ? 7 : 14)
+        );
         textView.setBackgroundResource(R.drawable.bg_timetable_header_cell);
         textView.setTextColor(ContextCompat.getColor(context, R.color.smart_text_primary));
 
-        TableRow.LayoutParams params = new TableRow.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                text.isEmpty() ? 0.72f : 1f
+        );
         textView.setLayoutParams(params);
         return textView;
     }
 
-    private static TextView buildCell(Context context, String text, boolean isTimeColumn, boolean occupied) {
+    private static TextView buildCell(Context context,
+                                      String text,
+                                      boolean isTimeColumn,
+                                      boolean occupied,
+                                      boolean compactPreview) {
         TextView textView = new TextView(context);
         textView.setText(text);
-        textView.setTextSize(isTimeColumn ? 12 : 11);
-        textView.setPadding(10, 14, 10, 14);
-        textView.setMinLines(2);
-        textView.setMaxLines(3);
+        textView.setGravity(Gravity.CENTER);
+        textView.setTextSize(compactPreview ? (isTimeColumn ? 9 : 8) : (isTimeColumn ? 12 : 11));
+        textView.setPadding(
+                dp(context, compactPreview ? 3 : 10),
+                dp(context, compactPreview ? 5 : 14),
+                dp(context, compactPreview ? 3 : 10),
+                dp(context, compactPreview ? 5 : 14)
+        );
+        textView.setMinLines(compactPreview ? 1 : 2);
+        textView.setMaxLines(compactPreview ? 2 : 3);
+        textView.setMinHeight(dp(context, compactPreview ? 30 : 52));
 
         if (isTimeColumn) {
             textView.setTypeface(Typeface.DEFAULT_BOLD);
             textView.setBackgroundResource(R.drawable.bg_timetable_side_cell);
             textView.setTextColor(ContextCompat.getColor(context, R.color.smart_text_primary));
         } else if (occupied) {
+            textView.setTypeface(Typeface.DEFAULT_BOLD);
             textView.setBackgroundResource(R.drawable.bg_timetable_filled_cell);
             textView.setTextColor(ContextCompat.getColor(context, R.color.white));
         } else {
@@ -208,7 +269,11 @@ public class RecommendationAdapter {
             textView.setTextColor(ContextCompat.getColor(context, R.color.smart_text_secondary));
         }
 
-        TableRow.LayoutParams params = new TableRow.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                isTimeColumn ? 0.72f : 1f
+        );
         textView.setLayoutParams(params);
         return textView;
     }
@@ -243,7 +308,6 @@ public class RecommendationAdapter {
         return null;
     }
 
-
     private static int calculateEndHour(Timetable timetable) {
         int maxEndHour = DEFAULT_END_HOUR;
 
@@ -269,6 +333,14 @@ public class RecommendationAdapter {
         }
 
         return maxEndHour;
+    }
+
+    public static String buildLectureMetaText(Lecture lecture) {
+        return buildMetaText(lecture);
+    }
+
+    public static String buildLectureTimeText(Lecture lecture) {
+        return buildTimeText(lecture);
     }
 
     private static String buildMetaText(Lecture lecture) {
@@ -299,23 +371,40 @@ public class RecommendationAdapter {
         return builder.toString();
     }
 
+    private static String buildCompactLectureLabel(Lecture lecture) {
+        String name = lecture == null ? "" : lecture.getCourseName();
+        if (name == null) {
+            return "";
+        }
+
+        String trimmed = name.trim();
+        if (trimmed.length() <= 5) {
+            return trimmed;
+        }
+
+        return trimmed.substring(0, Math.min(trimmed.length(), 5));
+    }
+
     private static void addChip(Context context, LinearLayout container, String text) {
         TextView chip = new TextView(context);
         chip.setText(text);
         chip.setTextSize(12);
-        chip.setPadding(24, 14, 24, 14);
+        chip.setPadding(dp(context, 18), dp(context, 10), dp(context, 18), dp(context, 10));
         chip.setBackgroundResource(R.drawable.bg_preference_chip);
         chip.setTextColor(ContextCompat.getColor(context, R.color.smart_primary_dark));
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, 16, 16);
+        params.setMargins(0, 0, dp(context, 8), 0);
         chip.setLayoutParams(params);
 
         container.addView(chip);
     }
 
-    private static String formatHourRange(int hour) {
+    private static String formatHourRange(int hour, boolean compactPreview) {
+        if (compactPreview) {
+            return String.format(Locale.getDefault(), "%02d", hour);
+        }
         return String.format(Locale.getDefault(), "%02d:00\n~ %02d:00", hour, hour + 1);
     }
 
@@ -344,5 +433,9 @@ public class RecommendationAdapter {
             default:
                 return "?";
         }
+    }
+
+    private static int dp(Context context, int value) {
+        return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
 }

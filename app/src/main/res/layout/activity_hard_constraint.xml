@@ -10,59 +10,42 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="@dimen/smart_main_screen_padding"
+        android:paddingTop="18dp"
+        android:paddingEnd="@dimen/smart_main_screen_padding"
+        android:paddingBottom="28dp">
 
-        <com.google.android.material.card.MaterialCardView
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="@dimen/smart_back_button_size"
+            android:layout_height="@dimen/smart_back_button_size"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_back_description"
+            android:padding="7dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/smart_text_primary" />
+
+        <TextView
+            style="@style/Text.SmartTimetable.ScreenTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/hard_title" />
+
+        <TextView
+            style="@style/Text.SmartTimetable.ScreenSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/smart_primary"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/smart_primary_dark"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <ImageButton
-                    android:id="@+id/btn_back"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="뒤로가기"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_arrow_back"
-                    app:tint="@color/white" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hard_title"
-                    android:textColor="@color/white"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/hard_desc"
-                    android:textColor="@color/white"
-                    android:textSize="15sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_marginTop="5dp"
+            android:text="@string/hard_desc" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             app:cardBackgroundColor="@color/smart_surface_card"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/smart_main_card_radius"
+            app:cardElevation="@dimen/smart_main_card_elevation"
             app:strokeColor="@color/smart_border"
             app:strokeWidth="1dp">
 
@@ -70,160 +53,279 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/smart_main_card_padding">
 
-                <com.google.android.material.textfield.TextInputLayout
+                <TextView
+                    style="@style/Text.SmartTimetable.CardTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_credits"
-                    app:boxBackgroundMode="outline"
-                    app:endIconMode="dropdown_menu">
+                    android:text="@string/hard_basic_condition_title" />
 
-                    <AutoCompleteTextView
-                        android:id="@+id/auto_credits"
-                        android:layout_width="match_parent"
+                <TextView
+                    style="@style/Text.SmartTimetable.CardBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/hard_basic_condition_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.SmartTimetable.TextInput"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:contentDescription="@string/hint_credits"
+                        android:layout_weight="1"
                         android:hint="@string/hint_credits"
-                        android:inputType="none"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        app:endIconMode="dropdown_menu">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:hint="@string/hint_category"
-                    app:boxBackgroundMode="outline"
-                    app:endIconMode="dropdown_menu">
+                        <AutoCompleteTextView
+                            android:id="@+id/auto_credits"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/hint_credits"
+                            android:inputType="none"
+                            android:minHeight="46dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="8dp"
+                            android:singleLine="true"
+                            android:textColor="@color/smart_text_primary"
+                            android:textSize="12sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <AutoCompleteTextView
-                        android:id="@+id/auto_category"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.SmartTimetable.TextInput"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:contentDescription="@string/hint_category"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
                         android:hint="@string/hint_category"
-                        android:inputType="none"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        app:endIconMode="dropdown_menu">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:hint="@string/hint_lecture"
-                    app:boxBackgroundMode="outline"
-                    app:endIconMode="none">
+                        <AutoCompleteTextView
+                            android:id="@+id/auto_category"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/hint_category"
+                            android:inputType="none"
+                            android:minHeight="46dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="8dp"
+                            android:singleLine="true"
+                            android:textColor="@color/smart_text_primary"
+                            android:textSize="12sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <AutoCompleteTextView
-                        android:id="@+id/auto_lecture"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:contentDescription="@string/hint_lecture"
-                        android:hint="@string/hint_lecture"
-                        android:inputType="none"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
-                </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/smart_surface_card"
+            app:cardCornerRadius="@dimen/smart_main_card_radius"
+            app:cardElevation="@dimen/smart_main_card_elevation"
+            app:strokeColor="@color/smart_border"
+            app:strokeWidth="1dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_add_lecture"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/btn_add_fixed_lecture"
-                    app:cornerRadius="18dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/smart_main_card_padding">
 
                 <TextView
                     android:id="@+id/tv_selected_title"
+                    style="@style/Text.SmartTimetable.CardTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/selected_fixed_lectures_title"
-                    android:textColor="@color/smart_text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:text="@string/selected_fixed_lectures_title" />
+
+                <TextView
+                    style="@style/Text.SmartTimetable.CardBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/hard_fixed_lecture_desc" />
 
                 <TextView
                     android:id="@+id/tv_selected_lectures"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_selected_box"
-                    android:minHeight="72dp"
-                    android:padding="14dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_smart_empty_state"
+                    android:minHeight="42dp"
+                    android:paddingStart="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="10dp"
                     android:text="@string/selected_fixed_lectures_empty"
                     android:textColor="@color/smart_text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_add_lecture"
+                    style="@style/Widget.SmartTimetable.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/btn_add_fixed_lecture" />
+
+                <AutoCompleteTextView
+                    android:id="@+id/auto_lecture"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:importantForAccessibility="no"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/smart_surface_card"
+            app:cardCornerRadius="@dimen/smart_main_card_radius"
+            app:cardElevation="@dimen/smart_main_card_elevation"
+            app:strokeColor="@color/smart_border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/smart_main_card_padding">
 
                 <TextView
                     android:id="@+id/tv_excluded_title"
+                    style="@style/Text.SmartTimetable.CardTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="26dp"
-                    android:text="이미 이수했거나 추천에서 제외할 과목"
-                    android:textColor="@color/smart_text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:text="@string/hard_excluded_title" />
 
                 <TextView
+                    style="@style/Text.SmartTimetable.CardBody"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="전공 과목은 학년별 버튼에서 선택하고, 교양은 과목명을 직접 입력하세요."
-                    android:textColor="@color/smart_text_secondary"
-                    android:textSize="13sp" />
+                    android:layout_marginTop="5dp"
+                    android:text="@string/hard_excluded_desc" />
 
-                <TextView
-                    android:id="@+id/tv_excluded_general_category_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:text="이수/제외 과목 선택"
-                    android:textColor="@color/smart_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <!-- 필수교양 버튼은 항상 보이도록, 영역별 교양 버튼과 같은 행에 배치합니다 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="6dp">
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_selected_excluded_lectures"
+                        android:layout_width="0dp"
+                        android:layout_height="28dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_smart_summary_pill"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:text="이수/제외 0개"
+                        android:textColor="@color/smart_text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_selected_general_area_summary"
+                        android:layout_width="0dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_smart_summary_pill"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:text="교양 영역 0개"
+                        android:textColor="@color/smart_text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_manage_excluded_lectures"
+                    style="@style/Widget.SmartTimetable.Button.Outline"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/btn_manage_excluded_lectures"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:id="@+id/layout_excluded_manage_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_excluded_general_category_title"
+                    style="@style/Text.SmartTimetable.CardTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/hard_excluded_manage_title" />
+
+                <TextView
+                    style="@style/Text.SmartTimetable.CardBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/hard_excluded_manage_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_required_general"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="필수교양"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_general_group"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_height="38dp"
+                        android:layout_marginStart="7dp"
                         android:layout_weight="1"
                         android:text="영역별 교양"
-                        android:textSize="14sp"
-                        app:cornerRadius="14dp" />
+                        android:textSize="11sp" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_excluded_optional"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_marginStart="7dp"
+                        android:layout_weight="1"
+                        android:text="일반선택"
+                        android:textSize="11sp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_excluded_general_row_3"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/layout_general_area_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -232,16 +334,19 @@
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:checkable="true"
                         android:text="인문예술 영역 제외"
-                        android:checkable="true" />
+                        android:textSize="11sp" />
+
                     <com.google.android.material.chip.Chip
                         android:id="@+id/cb_excluded_natural_science"
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:checkable="true"
                         android:text="자연과학 영역 제외"
-                        android:checkable="true" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/cb_excluded_social_science"
@@ -249,8 +354,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:checkable="true"
                         android:text="사회과학 영역 제외"
-                        android:checkable="true" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/cb_excluded_digital_literacy"
@@ -258,8 +364,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:checkable="true"
                         android:text="디지털 리터러시 영역 제외"
-                        android:checkable="true" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/cb_excluded_character"
@@ -267,87 +374,66 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:checkable="true"
                         android:text="인성교육 영역 제외"
-                        android:checkable="true" />
-
+                        android:textSize="11sp" />
                 </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_excluded_general_row_3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_excluded_optional"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="일반선택"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_select_all_current_category"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="현재 카테고리 전체 선택"
-                    app:cornerRadius="18dp" />
 
                 <LinearLayout
                     android:id="@+id/layout_excluded_grade_buttons"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_grade_1"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="36dp"
                         android:layout_weight="1"
                         android:text="1학년"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_grade_2"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="36dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:text="2학년"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_grade_3"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="36dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:text="3학년"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:textSize="11sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_excluded_grade_4"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/Widget.SmartTimetable.Button.Outline"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="36dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:text="4학년"
-                        android:textSize="12sp"
-                        app:cornerRadius="14dp" />
+                        android:textSize="11sp" />
                 </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_select_all_current_category"
+                    style="@style/Widget.SmartTimetable.Button.Outline"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:layout_marginTop="8dp"
+                    android:text="현재 카테고리 전체 선택"
+                    android:textSize="11sp" />
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
@@ -361,40 +447,32 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical" />
                 </HorizontalScrollView>
-
-
-
-                <TextView
-                    android:id="@+id/tv_selected_excluded_lectures"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_selected_box"
-                    android:minHeight="64dp"
-                    android:padding="14dp"
-                    android:text="선택된 이수/제외 과목 없음"
-                    android:textColor="@color/smart_text_secondary"
-                    android:textSize="14sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_reset"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:text="필수 조건 초기화"
-                    app:cornerRadius="18dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_next"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="22dp"
-                    android:text="@string/btn_next"
-                    app:cornerRadius="18dp" />
-
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset"
+                style="@style/Widget.SmartTimetable.Button.Outline"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="초기화" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_next"
+                style="@style/Widget.SmartTimetable.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="@string/btn_next" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

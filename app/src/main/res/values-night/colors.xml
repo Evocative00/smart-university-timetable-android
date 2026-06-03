@@ -3,32 +3,44 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="smart_background">#0B1020</color>
-    <color name="smart_background_alt">#111827</color>
-    <color name="smart_primary">#8B80FF</color>
-    <color name="smart_primary_dark">#6D5EF7</color>
-    <color name="smart_primary_container">#26245E</color>
+    <!-- Smart Timetable redesign palette - aligned to the Figma PDF's gray surface + violet CTA direction. -->
+    <color name="smart_background">#C4C5C8</color>
+    <color name="smart_background_alt">#C9CACD</color>
+    <color name="smart_primary">#3F38B7</color>
+    <color name="smart_primary_dark">#332B9E</color>
+    <color name="smart_primary_container">#D8D7EC</color>
     <color name="smart_on_primary">#FFFFFFFF</color>
-    <color name="smart_on_primary_container">#EDEBFF</color>
-    <color name="smart_secondary">#38BDF8</color>
-    <color name="smart_accent">#A78BFA</color>
-    <color name="smart_surface">#111827</color>
-    <color name="smart_surface_card">#182033</color>
-    <color name="smart_surface_alt">#202A3F</color>
-    <color name="smart_surface_variant">#2A344A</color>
-    <color name="smart_chip_bg">#252E48</color>
-    <color name="smart_chip_text">#C7D2FE</color>
-    <color name="smart_text_primary">#F8FAFC</color>
-    <color name="smart_text_secondary">#CBD5E1</color>
-    <color name="smart_text_muted">#94A3B8</color>
-    <color name="smart_border">#334155</color>
-    <color name="smart_border_strong">#475569</color>
-    <color name="smart_grid_header">#1F2937</color>
-    <color name="smart_grid_side">#111827</color>
-    <color name="smart_grid_empty">#182033</color>
-    <color name="smart_grid_fill">#8B80FF</color>
-    <color name="smart_success">#34D399</color>
-    <color name="smart_warning">#FBBF24</color>
+    <color name="smart_on_primary_container">#201A63</color>
+    <color name="smart_secondary">#53607A</color>
+    <color name="smart_accent">#6A5AF9</color>
+
+    <color name="smart_surface">#CCCCCC</color>
+    <color name="smart_surface_card">#CCCCCC</color>
+    <color name="smart_surface_alt">#D2D3D7</color>
+    <color name="smart_surface_variant">#C9CACD</color>
+    <color name="smart_input_background">#CCCCCC</color>
+    <color name="smart_chip_bg">#D2D3D7</color>
+    <color name="smart_chip_text">#3F38B7</color>
+
+    <color name="smart_text_primary">#1F2430</color>
+    <color name="smart_text_secondary">#566175</color>
+    <color name="smart_text_muted">#6C7483</color>
+    <color name="smart_border">#AEB8C7</color>
+    <color name="smart_border_strong">#8F98A8</color>
+
+    <color name="smart_grid_header">#C9CACD</color>
+    <color name="smart_grid_side">#CCCCCC</color>
+    <color name="smart_grid_empty">#D3D5DA</color>
+    <color name="smart_grid_fill">#7068D7</color>
+
+    <color name="smart_success">#10B981</color>
+    <color name="smart_warning">#F59E0B</color>
     <color name="smart_warning_yellow">#FFD700</color>
-    <color name="smart_error">#F87171</color>
+    <color name="smart_error">#EF4444</color>
+
+
+    <!-- Main tab surfaces -->
+    <color name="smart_bottom_nav_background">#C4C6CC</color>
+    <color name="smart_bottom_nav_active_bg">#E2E3EA</color>
+    <color name="smart_avatar_placeholder">#A9AFBA</color>
 </resources>

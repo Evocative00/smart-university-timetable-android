@@ -1,11 +1,13 @@
 package com.syu.smarttimetable.ui.constraint;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import android.widget.CompoundButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -52,6 +55,8 @@ public class HardConstraintActivity extends AppCompatActivity {
     private Button btnReset;
     private ImageButton btnBack;
     private TextView tvSelectedLectures;
+    private MaterialButton btnManageExcludedLectures;
+    private LinearLayout layoutExcludedManageContent;
 
     private MaterialButton btnExcludedGrade1;
     private MaterialButton btnExcludedGrade2;
@@ -59,6 +64,7 @@ public class HardConstraintActivity extends AppCompatActivity {
     private MaterialButton btnExcludedGrade4;
     private LinearLayout layoutExcludedMajorChips;
     private TextView tvSelectedExcludedLectures;
+    private TextView tvSelectedGeneralAreaSummary;
 
     private MaterialButton btnExcludedRequiredGeneral;
     private MaterialButton btnExcludedOptional;
@@ -164,6 +170,8 @@ public class HardConstraintActivity extends AppCompatActivity {
         btnReset = findViewById(R.id.btn_reset);
         btnBack = findViewById(R.id.btn_back);
         tvSelectedLectures = findViewById(R.id.tv_selected_lectures);
+        btnManageExcludedLectures = findViewById(R.id.btn_manage_excluded_lectures);
+        layoutExcludedManageContent = findViewById(R.id.layout_excluded_manage_content);
 
         btnExcludedGrade1 = findViewById(R.id.btn_excluded_grade_1);
         btnExcludedGrade2 = findViewById(R.id.btn_excluded_grade_2);
@@ -171,6 +179,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         btnExcludedGrade4 = findViewById(R.id.btn_excluded_grade_4);
         layoutExcludedMajorChips = findViewById(R.id.layout_excluded_major_chips);
         tvSelectedExcludedLectures = findViewById(R.id.tv_selected_excluded_lectures);
+        tvSelectedGeneralAreaSummary = findViewById(R.id.tv_selected_general_area_summary);
 
         btnExcludedRequiredGeneral = findViewById(R.id.btn_excluded_required_general);
         btnExcludedOptional = findViewById(R.id.btn_excluded_optional);
@@ -200,7 +209,7 @@ public class HardConstraintActivity extends AppCompatActivity {
             fixedLectureKeys.add(lectureKey);
             Lecture lecture = findLectureByKey(lectureKey);
             selectedLectureDisplayTexts.add(
-                    lecture != null ? buildLectureDisplayText(lecture) : lectureKey
+                    lecture != null ? buildFixedLectureSummaryText(lecture) : extractCourseTitle(lectureKey)
             );
         }
 
@@ -326,29 +335,66 @@ public class HardConstraintActivity extends AppCompatActivity {
     private void showLectureSearchDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_lecture_search, null);
 
+        AutoCompleteTextView autoSheetCategory = dialogView.findViewById(R.id.auto_sheet_category);
         EditText etSearch = dialogView.findViewById(R.id.et_search);
         ListView lvLectures = dialogView.findViewById(R.id.lv_lectures);
+        TextView tvSelectedSheetLecture = dialogView.findViewById(R.id.tv_selected_sheet_lecture);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel_fixed_sheet);
+        MaterialButton btnConfirm = dialogView.findViewById(R.id.btn_confirm_fixed_sheet);
 
-        etSearch.setHint("강의명 / 교수명 / 과목코드로 검색");
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        dialog.setContentView(dialogView);
 
-        List<String> allDisplayList = new ArrayList<>();
-        for (Lecture lecture : filteredLectures) {
-            allDisplayList.add(buildLectureDisplayText(lecture));
-        }
+        String[] categoryOptions = {"전공", "교양"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                categoryOptions
+        );
+        autoSheetCategory.setAdapter(categoryAdapter);
+        autoSheetCategory.setText(selectedCategory, false);
+        autoSheetCategory.setOnClickListener(v -> autoSheetCategory.showDropDown());
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayAdapter<String> lectureAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
-                new ArrayList<>(allDisplayList)
+                new ArrayList<>()
         );
+        lvLectures.setAdapter(lectureAdapter);
 
-        lvLectures.setAdapter(adapter);
+        final String[] sheetCategory = {selectedCategory};
+        final String[] selectedDisplayText = {""};
 
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle("고정 과목 검색")
-                .setView(dialogView)
-                .setNegativeButton("닫기", null)
-                .create();
+        Runnable refreshLectureList = () -> {
+            String query = etSearch.getText() == null
+                    ? ""
+                    : etSearch.getText().toString().toLowerCase().trim();
+            CourseCategory targetCategory = "전공".equals(sheetCategory[0])
+                    ? CourseCategory.MAJOR
+                    : CourseCategory.GENERAL;
+
+            lectureAdapter.clear();
+
+            for (Lecture lecture : allLectures) {
+                if (lecture == null || lecture.getCategory() != targetCategory) {
+                    continue;
+                }
+
+                String displayText = buildLectureDisplayText(lecture);
+                if (displayText.toLowerCase().contains(query)) {
+                    lectureAdapter.add(displayText);
+                }
+            }
+
+            lectureAdapter.notifyDataSetChanged();
+        };
+
+        autoSheetCategory.setOnItemClickListener((parent, view, position, id) -> {
+            sheetCategory[0] = (String) parent.getItemAtPosition(position);
+            selectedDisplayText[0] = "";
+            tvSelectedSheetLecture.setText(R.string.fixed_lecture_sheet_selected_empty);
+            refreshLectureList.run();
+        });
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -357,17 +403,9 @@ public class HardConstraintActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s == null ? "" : s.toString().toLowerCase().trim();
-
-                adapter.clear();
-
-                for (String item : allDisplayList) {
-                    if (item.toLowerCase().contains(query)) {
-                        adapter.add(item);
-                    }
-                }
-
-                adapter.notifyDataSetChanged();
+                selectedDisplayText[0] = "";
+                tvSelectedSheetLecture.setText(R.string.fixed_lecture_sheet_selected_empty);
+                refreshLectureList.run();
             }
 
             @Override
@@ -376,21 +414,115 @@ public class HardConstraintActivity extends AppCompatActivity {
         });
 
         lvLectures.setOnItemClickListener((parent, view, position, id) -> {
-            String selected = (String) parent.getItemAtPosition(position);
-            autoLecture.setText(selected, false);
+            selectedDisplayText[0] = (String) parent.getItemAtPosition(position);
+            tvSelectedSheetLecture.setText(selectedDisplayText[0]);
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnConfirm.setOnClickListener(v -> {
+            if (TextUtils.isEmpty(selectedDisplayText[0])) {
+                Toast.makeText(this, "고정할 과목을 선택해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            selectedCategory = sheetCategory[0];
+            autoCategory.setText(selectedCategory, false);
+            setupLectureDropdown(selectedCategory);
+            autoLecture.setText(selectedDisplayText[0], false);
+            addFixedLecture();
             dialog.dismiss();
         });
 
+        refreshLectureList.run();
         dialog.show();
     }
 
     private void setupButtons() {
-        btnAddLecture.setOnClickListener(v -> addFixedLecture());
+        btnAddLecture.setOnClickListener(v -> showLectureSearchDialog());
         btnNext.setOnClickListener(v -> submitHardConstraint());
 
         tvSelectedLectures.setOnClickListener(v -> showRemoveFixedLectureDialog());
-        tvSelectedExcludedLectures.setOnClickListener(v -> showRemoveExcludedCourseDialog());
+        tvSelectedExcludedLectures.setOnClickListener(v -> showExcludedManageSheet());
+        btnManageExcludedLectures.setOnClickListener(v -> showExcludedManageSheet());
         btnSelectAllCurrentCategory.setOnClickListener(v -> selectAllCurrentExcludedCategory());
+    }
+
+    private void showExcludedManageSheet() {
+        if (layoutExcludedManageContent == null) {
+            return;
+        }
+
+        ViewGroup originalParent = (ViewGroup) layoutExcludedManageContent.getParent();
+        if (originalParent == null) {
+            return;
+        }
+
+        int originalIndex = originalParent.indexOfChild(layoutExcludedManageContent);
+        ViewGroup.LayoutParams originalLayoutParams = layoutExcludedManageContent.getLayoutParams();
+
+        Set<String> originalExcludedCourseNames = new LinkedHashSet<>(excludedCourseNames);
+        List<String> originalSelectedExcludedDisplayTexts = new ArrayList<>(selectedExcludedDisplayTexts);
+        ExcludedTabType originalTabType = currentExcludedTabType;
+        int originalSelectedGrade = selectedExcludedGrade;
+        int originalGeneralAreaVisibility = layoutGeneralAreaGroup.getVisibility();
+
+        View sheetView = getLayoutInflater().inflate(R.layout.dialog_excluded_courses_sheet, null);
+        LinearLayout sheetContentHost = sheetView.findViewById(R.id.layout_excluded_sheet_content_host);
+        MaterialButton btnCancel = sheetView.findViewById(R.id.btn_cancel_excluded_sheet);
+        MaterialButton btnSave = sheetView.findViewById(R.id.btn_save_excluded_sheet);
+
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        final boolean[] saved = {false};
+
+        originalParent.removeView(layoutExcludedManageContent);
+        sheetContentHost.addView(
+                layoutExcludedManageContent,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+        );
+        layoutExcludedManageContent.setVisibility(View.VISIBLE);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            saved[0] = true;
+            updateSelectedExcludedText();
+            saveCurrentHardConstraintState(getText(autoCredits));
+            Toast.makeText(this, "이수/제외 과목을 저장했습니다.", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.setOnDismissListener(dialogInterface -> {
+            ViewGroup currentParent = (ViewGroup) layoutExcludedManageContent.getParent();
+            if (currentParent != null) {
+                currentParent.removeView(layoutExcludedManageContent);
+            }
+
+            layoutExcludedManageContent.setVisibility(View.GONE);
+
+            int restoreIndex = originalIndex >= 0 && originalIndex <= originalParent.getChildCount()
+                    ? originalIndex
+                    : originalParent.getChildCount();
+            originalParent.addView(layoutExcludedManageContent, restoreIndex, originalLayoutParams);
+
+            if (!saved[0]) {
+                excludedCourseNames.clear();
+                excludedCourseNames.addAll(originalExcludedCourseNames);
+                selectedExcludedDisplayTexts.clear();
+                selectedExcludedDisplayTexts.addAll(originalSelectedExcludedDisplayTexts);
+                currentExcludedTabType = originalTabType;
+                selectedExcludedGrade = originalSelectedGrade;
+                layoutGeneralAreaGroup.setVisibility(originalGeneralAreaVisibility);
+            }
+
+            updateSelectedExcludedText();
+            refreshCurrentExcludedChipList();
+        });
+
+        dialog.setContentView(sheetView);
+        refreshCurrentExcludedChipList();
+        dialog.show();
     }
 
     private void setupExcludedCourseUi() {
@@ -536,8 +668,7 @@ public class HardConstraintActivity extends AppCompatActivity {
             boolean selected = excludedCourseNames.contains(normalizedName);
 
             chipButton.setText(selected ? "✓ " + courseName : courseName);
-            chipButton.setMinHeight(dpToPx(42));
-            chipButton.setTextSize(13);
+            styleExcludedChipButton(chipButton, selected);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -597,8 +728,7 @@ public class HardConstraintActivity extends AppCompatActivity {
             boolean selected = excludedCourseNames.contains(normalizedName);
 
             chipButton.setText(selected ? "✓ " + courseName : courseName);
-            chipButton.setMinHeight(dpToPx(42));
-            chipButton.setTextSize(13);
+            styleExcludedChipButton(chipButton, selected);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -614,6 +744,24 @@ public class HardConstraintActivity extends AppCompatActivity {
 
             layoutExcludedMajorChips.addView(chipButton);
         }
+    }
+
+    private void styleExcludedChipButton(MaterialButton chipButton, boolean selected) {
+        chipButton.setMinHeight(dpToPx(34));
+        chipButton.setMinimumHeight(dpToPx(34));
+        chipButton.setTextSize(11);
+        chipButton.setCornerRadius(dpToPx(14));
+        chipButton.setStrokeWidth(dpToPx(1));
+        chipButton.setInsetTop(0);
+        chipButton.setInsetBottom(0);
+
+        int backgroundColor = selected ? R.color.smart_primary_container : R.color.smart_surface_card;
+        int strokeColor = selected ? R.color.smart_primary : R.color.smart_border;
+        int textColor = selected ? R.color.smart_primary : R.color.smart_text_secondary;
+
+        chipButton.setBackgroundTintList(ColorStateList.valueOf(getColor(backgroundColor)));
+        chipButton.setStrokeColor(ColorStateList.valueOf(getColor(strokeColor)));
+        chipButton.setTextColor(getColor(textColor));
     }
 
     private boolean isLectureInGeneralTab(Lecture lecture, ExcludedTabType tabType) {
@@ -870,7 +1018,7 @@ public class HardConstraintActivity extends AppCompatActivity {
         }
 
         fixedLectureKeys.add(lectureKey);
-        selectedLectureDisplayTexts.add(buildLectureDisplayText(selectedLecture));
+        selectedLectureDisplayTexts.add(buildFixedLectureSummaryText(selectedLecture));
 
         updateSelectedLectureText();
         autoLecture.setText("", false);
@@ -955,40 +1103,61 @@ public class HardConstraintActivity extends AppCompatActivity {
 
     private void updateSelectedLectureText() {
         if (selectedLectureDisplayTexts.isEmpty()) {
-            tvSelectedLectures.setText("선택된 고정 과목 없음");
+            tvSelectedLectures.setText("고정 과목 없음");
             return;
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append("선택된 고정 과목\n");
+        int previewCount = Math.min(3, selectedLectureDisplayTexts.size());
 
-        for (int i = 0; i < selectedLectureDisplayTexts.size(); i++) {
-            builder.append(i + 1)
-                    .append(". ")
-                    .append(selectedLectureDisplayTexts.get(i))
-                    .append("\n");
+        for (int i = 0; i < previewCount; i++) {
+            if (i > 0) {
+                builder.append("\n");
+            }
+            builder.append(selectedLectureDisplayTexts.get(i));
+        }
+
+        if (selectedLectureDisplayTexts.size() > previewCount) {
+            builder.append("\n외 ")
+                    .append(selectedLectureDisplayTexts.size() - previewCount)
+                    .append("개");
         }
 
         tvSelectedLectures.setText(builder.toString().trim());
     }
 
     private void updateSelectedExcludedText() {
-        if (selectedExcludedDisplayTexts.isEmpty()) {
-            tvSelectedExcludedLectures.setText("선택된 이수/제외 과목 없음");
-            return;
+        tvSelectedExcludedLectures.setText("이수/제외 " + selectedExcludedDisplayTexts.size() + "개");
+
+        if (tvSelectedGeneralAreaSummary != null) {
+            tvSelectedGeneralAreaSummary.setText("교양 영역 " + countSelectedGeneralAreas() + "개");
+        }
+    }
+
+    private int countSelectedGeneralAreas() {
+        Set<GeneralArea> selectedAreas = new HashSet<>();
+
+        for (Lecture lecture : allLectures) {
+            if (lecture == null || lecture.getCategory() != CourseCategory.GENERAL) {
+                continue;
+            }
+
+            String courseName = lecture.getCourseName();
+            if (TextUtils.isEmpty(courseName)) {
+                continue;
+            }
+
+            if (!excludedCourseNames.contains(normalizeCourseName(courseName))) {
+                continue;
+            }
+
+            GeneralArea area = lecture.getGeneralArea();
+            if (area != null && area != GeneralArea.NONE) {
+                selectedAreas.add(area);
+            }
         }
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("선택된 이수/제외 과목\n");
-
-        for (int i = 0; i < selectedExcludedDisplayTexts.size(); i++) {
-            builder.append(i + 1)
-                    .append(". ")
-                    .append(selectedExcludedDisplayTexts.get(i))
-                    .append("\n");
-        }
-
-        tvSelectedExcludedLectures.setText(builder.toString().trim());
+        return selectedAreas.size();
     }
 
     private void removeExcludedDisplayText(String normalizedName) {
@@ -1022,6 +1191,28 @@ public class HardConstraintActivity extends AppCompatActivity {
                 + lecture.getClassroom()
                 + " / "
                 + lecture.getCourseCode();
+    }
+
+    private String buildFixedLectureSummaryText(Lecture lecture) {
+        if (lecture == null || TextUtils.isEmpty(lecture.getCourseName())) {
+            return "강의명 없음";
+        }
+
+        return lecture.getCourseName().trim();
+    }
+
+    private String extractCourseTitle(String rawText) {
+        if (TextUtils.isEmpty(rawText)) {
+            return "강의명 없음";
+        }
+
+        String trimmedText = rawText.trim();
+        int slashIndex = trimmedText.indexOf(" /");
+        if (slashIndex > 0) {
+            return trimmedText.substring(0, slashIndex).trim();
+        }
+
+        return trimmedText;
     }
 
     private String buildClassParityText(Lecture lecture) {

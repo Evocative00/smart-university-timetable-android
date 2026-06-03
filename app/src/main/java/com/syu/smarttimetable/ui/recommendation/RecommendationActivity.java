@@ -1,40 +1,42 @@
 package com.syu.smarttimetable.ui.recommendation;
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.syu.smarttimetable.R;
-import com.syu.smarttimetable.data.model.Lecture;
-import com.syu.smarttimetable.data.repository.LectureRepository;
-import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
-import com.syu.smarttimetable.data.model.enums.DayOfWeek;
-import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
-import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
-import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
-import com.syu.smarttimetable.data.repository.ImageStorageRepository;
-import com.syu.smarttimetable.domain.timetable.TimetableImageExporter;
 import com.google.gson.Gson;
+import com.syu.smarttimetable.R;
+import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
+import com.syu.smarttimetable.data.model.Lecture;
+import com.syu.smarttimetable.data.model.LectureTime;
+import com.syu.smarttimetable.data.model.Timetable;
+import com.syu.smarttimetable.data.repository.ImageStorageRepository;
+import com.syu.smarttimetable.data.repository.LectureRepository;
+import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
+import com.syu.smarttimetable.data.model.enums.DayOfWeek;
+import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
+import com.syu.smarttimetable.domain.timetable.TimetableImageExporter;
+import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +50,16 @@ public class RecommendationActivity extends AppCompatActivity {
     private TextView tvRank;
     private TextView tvScore;
     private TextView tvCredits;
+    private TextView tvIncludedCount;
     private LinearLayout chipContainer;
-    private TableLayout timetableTable;
+    private TimetablePreviewView timetablePreviewView;
+    private TextView tvAfterHoursHint;
     private LinearLayout lectureListContainer;
     private LinearLayout emptyStateContainer;
     private TextView tvEmptyGuide;
     private View contentContainer;
+    private View bottomActionContainer;
+    private View includedLecturesSummaryCard;
     private Button btnPrev;
     private Button btnNext;
     private Button btnRegenerate;
@@ -64,6 +70,13 @@ public class RecommendationActivity extends AppCompatActivity {
 
     private MaterialButton btnSaveImage;
     private MaterialButton btnShareImage;
+    private MaterialButton btnTab1;
+    private MaterialButton btnTab2;
+    private MaterialButton btnTab3;
+    private MaterialButton btnMoreRecommendations;
+    private MaterialButton btnConditionEdit;
+    private MaterialButton btnFullTimetableView;
+    private View btnMoreActions;
     private View timetableCard;
 
     private RecommendationPreferenceManager preferenceManager;
@@ -95,55 +108,106 @@ public class RecommendationActivity extends AppCompatActivity {
         tvRank = findViewById(R.id.tv_rank);
         tvScore = findViewById(R.id.tv_score);
         tvCredits = findViewById(R.id.tv_credits);
+        tvIncludedCount = findViewById(R.id.tv_included_count);
         chipContainer = findViewById(R.id.chip_container);
-        timetableTable = findViewById(R.id.timetable_table);
+        timetablePreviewView = findViewById(R.id.timetable_preview);
+        tvAfterHoursHint = findViewById(R.id.tv_after_hours_hint);
         lectureListContainer = findViewById(R.id.lecture_list_container);
         emptyStateContainer = findViewById(R.id.empty_state_container);
         tvEmptyGuide = findViewById(R.id.tv_empty_guide);
         contentContainer = findViewById(R.id.content_container);
+        bottomActionContainer = findViewById(R.id.bottom_action_container);
+        includedLecturesSummaryCard = findViewById(R.id.included_lectures_summary_card);
         btnPrev = findViewById(R.id.btn_prev);
         btnNext = findViewById(R.id.btn_next);
         btnRegenerate = findViewById(R.id.btn_regenerate);
         btnSaveImage = findViewById(R.id.btn_save_image);
         btnShareImage = findViewById(R.id.btn_share_image);
+        btnTab1 = findViewById(R.id.btn_tab_1);
+        btnTab2 = findViewById(R.id.btn_tab_2);
+        btnTab3 = findViewById(R.id.btn_tab_3);
+        btnMoreRecommendations = findViewById(R.id.btn_more_recommendations);
+        btnConditionEdit = findViewById(R.id.btn_condition_edit);
+        btnFullTimetableView = findViewById(R.id.btn_full_timetable_view);
+        btnMoreActions = findViewById(R.id.btn_more_actions);
         timetableCard = findViewById(R.id.timetable_card);
         btnFavoriteTimetable = findViewById(R.id.btn_favorite_timetable);
     }
 
     private void setupButtons() {
-        btnPrev.setOnClickListener(v -> {
-            if (recommendationResults.isEmpty()) {
-                return;
-            }
+        if (btnPrev != null) {
+            btnPrev.setOnClickListener(v -> moveToRecommendation(currentIndex - 1));
+        }
 
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderCurrentRecommendation();
-            }
-        });
+        if (btnNext != null) {
+            btnNext.setOnClickListener(v -> moveToRecommendation(currentIndex + 1));
+        }
 
-        btnNext.setOnClickListener(v -> {
-            if (recommendationResults.isEmpty()) {
-                return;
-            }
+        if (btnRegenerate != null) {
+            btnRegenerate.setOnClickListener(v -> regenerateRecommendations());
+        }
 
-            if (currentIndex < recommendationResults.size() - 1) {
-                currentIndex++;
-                renderCurrentRecommendation();
-            }
-        });
+        if (btnSaveImage != null) {
+            btnSaveImage.setOnClickListener(v -> saveCurrentTimetableImage());
+        }
 
-        btnRegenerate.setOnClickListener(v -> {
-            TimetableCacheManager.clear();
-            loadRecommendations();
-        });
-
-        btnSaveImage.setOnClickListener(v -> saveCurrentTimetableImage());
-        btnShareImage.setOnClickListener(v -> shareCurrentTimetableImage());
+        if (btnShareImage != null) {
+            btnShareImage.setOnClickListener(v -> shareCurrentTimetableImage());
+        }
 
         if (btnFavoriteTimetable != null) {
             btnFavoriteTimetable.setOnClickListener(v -> toggleTimetableFavorite());
         }
+
+        if (btnTab1 != null) {
+            btnTab1.setOnClickListener(v -> moveToRecommendation(0));
+        }
+
+        if (btnTab2 != null) {
+            btnTab2.setOnClickListener(v -> moveToRecommendation(1));
+        }
+
+        if (btnTab3 != null) {
+            btnTab3.setOnClickListener(v -> moveToRecommendation(2));
+        }
+
+        if (btnMoreRecommendations != null) {
+            btnMoreRecommendations.setOnClickListener(v -> showRecommendationPickerSheet());
+        }
+
+        if (btnConditionEdit != null) {
+            btnConditionEdit.setOnClickListener(v -> finish());
+        }
+
+        if (btnMoreActions != null) {
+            btnMoreActions.setOnClickListener(this::showMoreActionsMenu);
+        }
+
+        if (includedLecturesSummaryCard != null) {
+            includedLecturesSummaryCard.setOnClickListener(v -> showIncludedLecturesSheet());
+        }
+
+        if (btnFullTimetableView != null) {
+            btnFullTimetableView.setOnClickListener(v -> showFullTimetableSheet());
+        }
+    }
+
+    private void moveToRecommendation(int targetIndex) {
+        if (recommendationResults.isEmpty()) {
+            return;
+        }
+
+        if (targetIndex < 0 || targetIndex >= recommendationResults.size()) {
+            return;
+        }
+
+        currentIndex = targetIndex;
+        renderCurrentRecommendation();
+    }
+
+    private void regenerateRecommendations() {
+        TimetableCacheManager.clear();
+        loadRecommendations();
     }
 
     private void loadRecommendations() {
@@ -180,8 +244,7 @@ public class RecommendationActivity extends AppCompatActivity {
                 return;
             }
 
-            contentContainer.setVisibility(View.VISIBLE);
-            emptyStateContainer.setVisibility(View.GONE);
+            setContentVisible(true);
             renderCurrentRecommendation();
             return;
         }
@@ -245,8 +308,7 @@ public class RecommendationActivity extends AppCompatActivity {
                             return;
                         }
 
-                        contentContainer.setVisibility(View.VISIBLE);
-                        emptyStateContainer.setVisibility(View.GONE);
+                        setContentVisible(true);
                         renderCurrentRecommendation();
 
                         if (conflictDays != null && !conflictDays.isEmpty()) {
@@ -281,7 +343,7 @@ public class RecommendationActivity extends AppCompatActivity {
     }
 
     private void showLoadingState() {
-        contentContainer.setVisibility(View.GONE);
+        setContentVisible(false);
         emptyStateContainer.setVisibility(View.VISIBLE);
 
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
@@ -291,9 +353,8 @@ public class RecommendationActivity extends AppCompatActivity {
             tvEmptyGuide.setVisibility(View.GONE);
         }
 
-        btnPrev.setEnabled(false);
-        btnNext.setEnabled(false);
-        btnRegenerate.setEnabled(false);
+        setNavigationEnabled(false);
+        setButtonEnabled(btnRegenerate, false);
     }
 
     private void renderCurrentRecommendation() {
@@ -307,11 +368,11 @@ public class RecommendationActivity extends AppCompatActivity {
 
             RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
 
-            tvScreenTitle.setText("추천 시간표");
-            tvScreenSubtitle.setText("필수 조건을 만족하는 후보 중 선호 조건 점수가 높은 시간표입니다.");
+            tvScreenTitle.setText(getString(R.string.recommendation_title));
+            tvScreenSubtitle.setText(getString(R.string.recommendation_subtitle_redesign));
 
-            tvRank.setText((currentIndex + 1) + " / " + recommendationResults.size());
-            tvScore.setText(String.valueOf(current.getScore()));
+            tvRank.setText(getString(R.string.recommendation_plan_label, currentIndex + 1));
+            tvScore.setText(getRecommendationLevelLabel(current.getScore()));
             tvCredits.setText(current.getTimetable().getTotalCredits() + "학점");
 
             RecommendationAdapter.renderPreferenceChips(
@@ -320,29 +381,23 @@ public class RecommendationActivity extends AppCompatActivity {
                     recommendationRequest
             );
 
-            Log.d(TAG, "Rendering timetable grid...");
-            RecommendationAdapter.renderTimetableGrid(
-                    this,
-                    timetableTable,
-                    current.getTimetable()
-            );
+            Log.d(TAG, "Rendering compact timetable preview...");
+            if (timetablePreviewView != null) {
+                timetablePreviewView.setTimetable(
+                        current.getTimetable(),
+                        9,
+                        18,
+                        this::showLectureDetailSheet
+                );
+            }
 
-            Log.d(TAG, "Rendering lecture list...");
-            RecommendationAdapter.renderLectureList(
-                    this,
-                    lectureListContainer,
-                    current.getTimetable()
-            );
-
+            updateAfterHoursHint(current);
+            updateIncludedLecturesSummary(current);
+            updateRecommendationTabs();
             updateTimetableFavoriteButton();
 
-            btnPrev.setEnabled(currentIndex > 0);
-            btnNext.setEnabled(currentIndex < recommendationResults.size() - 1);
-            btnRegenerate.setEnabled(true);
-
-            btnPrev.setAlpha(currentIndex > 0 ? 1f : 0.4f);
-            btnNext.setAlpha(currentIndex < recommendationResults.size() - 1 ? 1f : 0.4f);
-            btnRegenerate.setAlpha(1f);
+            setNavigationEnabled(true);
+            setButtonEnabled(btnRegenerate, true);
 
             Log.d(TAG, "Rendering complete");
         } catch (Exception e) {
@@ -352,7 +407,7 @@ public class RecommendationActivity extends AppCompatActivity {
     }
 
     private void showEmptyState(String message) {
-        contentContainer.setVisibility(View.GONE);
+        setContentVisible(false);
         emptyStateContainer.setVisibility(View.VISIBLE);
 
         TextView emptyMessage = findViewById(R.id.tv_empty_message);
@@ -362,15 +417,307 @@ public class RecommendationActivity extends AppCompatActivity {
             tvEmptyGuide.setVisibility(View.VISIBLE);
         }
 
-        btnPrev.setEnabled(false);
-        btnNext.setEnabled(false);
+        setNavigationEnabled(false);
 
         boolean canRegenerate = recommendationRequest != null;
-        btnRegenerate.setEnabled(canRegenerate);
+        setButtonEnabled(btnRegenerate, canRegenerate);
+    }
 
-        btnPrev.setAlpha(0.4f);
-        btnNext.setAlpha(0.4f);
-        btnRegenerate.setAlpha(canRegenerate ? 1f : 0.4f);
+    private void setContentVisible(boolean visible) {
+        if (contentContainer != null) {
+            contentContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        if (emptyStateContainer != null) {
+            emptyStateContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
+        }
+        if (bottomActionContainer != null) {
+            bottomActionContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void setNavigationEnabled(boolean enabled) {
+        setButtonEnabled(btnPrev, enabled && currentIndex > 0);
+        setButtonEnabled(btnNext, enabled && currentIndex < recommendationResults.size() - 1);
+        setButtonEnabled(btnTab1, enabled && recommendationResults.size() >= 1);
+        setButtonEnabled(btnTab2, enabled && recommendationResults.size() >= 2);
+        setButtonEnabled(btnTab3, enabled && recommendationResults.size() >= 3);
+        setButtonEnabled(btnMoreRecommendations, enabled && recommendationResults.size() > 3);
+    }
+
+    private void setButtonEnabled(View button, boolean enabled) {
+        if (button == null) {
+            return;
+        }
+        button.setEnabled(enabled);
+        button.setAlpha(enabled ? 1f : 0.42f);
+    }
+
+    private void updateRecommendationTabs() {
+        updateRecommendationTab(btnTab1, 0);
+        updateRecommendationTab(btnTab2, 1);
+        updateRecommendationTab(btnTab3, 2);
+
+        if (btnMoreRecommendations == null) {
+            return;
+        }
+
+        boolean hasMore = recommendationResults.size() > 3;
+        btnMoreRecommendations.setVisibility(hasMore ? View.VISIBLE : View.GONE);
+        if (!hasMore) {
+            return;
+        }
+
+        boolean selectedFromMore = currentIndex >= 3;
+        btnMoreRecommendations.setText(selectedFromMore
+                ? getString(R.string.recommendation_plan_short, currentIndex + 1)
+                : getString(R.string.recommendation_more));
+        btnMoreRecommendations.setChecked(selectedFromMore);
+    }
+
+    private void updateRecommendationTab(MaterialButton button, int index) {
+        if (button == null) {
+            return;
+        }
+
+        boolean exists = recommendationResults.size() > index;
+        button.setVisibility(exists ? View.VISIBLE : View.GONE);
+        if (!exists) {
+            return;
+        }
+
+        button.setText(getString(R.string.recommendation_plan_short, index + 1));
+        button.setChecked(currentIndex == index);
+    }
+
+    private void updateIncludedLecturesSummary(RecommendationEngine.TimetableScoreTuple current) {
+        if (tvIncludedCount == null || current == null || current.getTimetable() == null) {
+            return;
+        }
+
+        int count = current.getTimetable().getLecturesReadOnly().size();
+        tvIncludedCount.setText(getString(R.string.included_lectures_summary_format, count));
+
+        if (lectureListContainer != null) {
+            lectureListContainer.removeAllViews();
+        }
+    }
+
+    private void updateAfterHoursHint(RecommendationEngine.TimetableScoreTuple current) {
+        if (tvAfterHoursHint == null || current == null || current.getTimetable() == null) {
+            return;
+        }
+
+        int afterHoursCount = countLecturesAfterHour(current.getTimetable(), 18);
+        if (afterHoursCount > 0) {
+            tvAfterHoursHint.setText(getString(R.string.recommendation_after_hours_format, afterHoursCount));
+            tvAfterHoursHint.setVisibility(View.VISIBLE);
+        } else {
+            tvAfterHoursHint.setVisibility(View.GONE);
+        }
+    }
+
+    private int countLecturesAfterHour(Timetable timetable, int hour) {
+        if (timetable == null || timetable.getLecturesReadOnly() == null) {
+            return 0;
+        }
+
+        int threshold = hour * 60;
+        int count = 0;
+        for (Lecture lecture : timetable.getLecturesReadOnly()) {
+            if (lecture == null || lecture.getTimes() == null) {
+                continue;
+            }
+
+            boolean counted = false;
+            for (LectureTime time : lecture.getTimes()) {
+                if (time != null && time.getEndTime() > threshold) {
+                    count++;
+                    counted = true;
+                    break;
+                }
+            }
+            if (counted) {
+                continue;
+            }
+        }
+        return count;
+    }
+
+    private String getRecommendationLevelLabel(int score) {
+        if (recommendationResults.isEmpty()) {
+            return getString(R.string.recommendation_rating_high);
+        }
+
+        int total = recommendationResults.size();
+        int highRankLimit = Math.max(1, (int) Math.ceil(total * 0.3));
+        int normalRankLimit = Math.max(highRankLimit + 1, (int) Math.ceil(total * 0.7));
+
+        int topScore = recommendationResults.get(0).getScore();
+        double ratioToBest = topScore > 0 ? score / (double) topScore : 0.0;
+
+        if (currentIndex < highRankLimit || ratioToBest >= 0.85) {
+            return getString(R.string.recommendation_rating_high);
+        }
+
+        if (currentIndex < normalRankLimit || ratioToBest >= 0.65) {
+            return getString(R.string.recommendation_rating_normal);
+        }
+
+        return getString(R.string.recommendation_rating_qualified);
+    }
+
+    private void showRecommendationPickerSheet() {
+        if (recommendationResults.isEmpty()) {
+            return;
+        }
+
+        if (btnMoreRecommendations != null) {
+            btnMoreRecommendations.setChecked(currentIndex >= 3);
+        }
+
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        dialog.setOnDismissListener(sheet -> updateRecommendationTabs());
+        View view = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_recommendation_picker, null);
+        LinearLayout container = view.findViewById(R.id.recommendation_picker_container);
+
+        for (int i = 0; i < recommendationResults.size(); i++) {
+            RecommendationEngine.TimetableScoreTuple result = recommendationResults.get(i);
+            TextView item = new TextView(this);
+            String text = getString(
+                    R.string.recommendation_picker_item_format,
+                    i + 1,
+                    result.getTimetable().getTotalCredits(),
+                    getRecommendationLevelLabelForIndex(i)
+            );
+            item.setText(text);
+            item.setTextSize(14);
+            item.setTextColor(ContextCompat.getColor(this, R.color.smart_text_primary));
+            item.setPadding(dp(16), dp(14), dp(16), dp(14));
+            item.setBackgroundResource(i == currentIndex
+                    ? R.drawable.bg_recommendation_picker_item_selected
+                    : R.drawable.bg_recommendation_picker_item);
+            item.setClickable(true);
+            item.setFocusable(true);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 0, 0, dp(10));
+            item.setLayoutParams(params);
+
+            final int targetIndex = i;
+            item.setOnClickListener(v -> {
+                dialog.dismiss();
+                moveToRecommendation(targetIndex);
+            });
+
+            container.addView(item);
+        }
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private String getRecommendationLevelLabelForIndex(int index) {
+        if (index < 0 || index >= recommendationResults.size()) {
+            return getString(R.string.recommendation_rating_qualified);
+        }
+
+        int previousIndex = currentIndex;
+        currentIndex = index;
+        String label = getRecommendationLevelLabel(recommendationResults.get(index).getScore());
+        currentIndex = previousIndex;
+        return label;
+    }
+
+    private void showIncludedLecturesSheet() {
+        if (recommendationResults.isEmpty()) {
+            return;
+        }
+
+        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_included_lectures, null);
+        LinearLayout container = view.findViewById(R.id.included_lecture_list_container);
+
+        RecommendationAdapter.renderLectureList(this, container, current.getTimetable(), this::showLectureDetailSheet);
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+
+    private void showFullTimetableSheet() {
+        if (recommendationResults.isEmpty()) {
+            return;
+        }
+
+        RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_full_timetable, null);
+
+        TextView tvTitle = view.findViewById(R.id.tv_full_timetable_title);
+        TimetablePreviewView fullPreview = view.findViewById(R.id.full_timetable_preview);
+
+        if (tvTitle != null) {
+            tvTitle.setText(getString(R.string.recommendation_full_timetable_title, currentIndex + 1));
+        }
+
+        if (fullPreview != null) {
+            fullPreview.setTimetable(current.getTimetable(), 9, 21, this::showLectureDetailSheet);
+        }
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+
+    private void showLectureDetailSheet(Lecture lecture) {
+        if (lecture == null) {
+            return;
+        }
+
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_lecture_detail, null);
+
+        TextView tvCourseName = view.findViewById(R.id.tv_detail_course_name);
+        TextView tvProfessor = view.findViewById(R.id.tv_detail_professor);
+        TextView tvMeta = view.findViewById(R.id.tv_detail_meta);
+        TextView tvTime = view.findViewById(R.id.tv_detail_time);
+
+        tvCourseName.setText(lecture.getCourseName());
+        tvProfessor.setText(lecture.getProfessor());
+        tvMeta.setText(RecommendationAdapter.buildLectureMetaText(lecture));
+        tvTime.setText(RecommendationAdapter.buildLectureTimeText(lecture));
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private void showMoreActionsMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(this, anchor);
+        popupMenu.getMenu().add(getString(R.string.menu_share_timetable));
+        popupMenu.getMenu().add(getString(R.string.menu_regenerate_timetable));
+        popupMenu.setOnMenuItemClickListener(item -> {
+            String title = String.valueOf(item.getTitle());
+            if (title.equals(getString(R.string.menu_share_timetable))) {
+                shareCurrentTimetableImage();
+                return true;
+            }
+
+            if (title.equals(getString(R.string.menu_regenerate_timetable))) {
+                regenerateRecommendations();
+                return true;
+            }
+
+            return false;
+        });
+        popupMenu.show();
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private String dayOfWeekToKorean(DayOfWeek day) {
@@ -407,11 +754,9 @@ public class RecommendationActivity extends AppCompatActivity {
         if (names.size() == 1) return names.get(0);
 
         if (names.size() == 2) {
-            // A and B -> "A와 B" (use '와'/'과' choice simplified to '과' when ending with vowel? use '와' for readability)
             return names.get(0) + "과 " + names.get(1);
         }
 
-        // 3 or more: "A, B, C" but for Korean day names we can join with ", " and add " 등"
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < names.size(); i++) {
             sb.append(names.get(i));
@@ -492,7 +837,6 @@ public class RecommendationActivity extends AppCompatActivity {
         }).start();
     }
 
-
     private String getTimetableUniqueKey(com.syu.smarttimetable.data.model.Timetable timetable) {
         if (timetable == null || timetable.getLecturesReadOnly().isEmpty()) {
             return "empty_timetable";
@@ -532,15 +876,15 @@ public class RecommendationActivity extends AppCompatActivity {
 
         if (isFavorite) {
             preferenceManager.removeTimetableFavorite(timetableKey);
-            Toast.makeText(this, "즐겨찾기를 해제했습니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "대표 시간표 설정을 해제했습니다.", Toast.LENGTH_SHORT).show();
         } else {
             try {
                 String timetableJson = new Gson().toJson(current.getTimetable());
                 preferenceManager.setTimetableFavorite(timetableKey, timetableJson);
-                Toast.makeText(this, "즐겨찾기에 저장했습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "대표 시간표로 설정했습니다.", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 Log.e(TAG, "Error saving favorite timetable", e);
-                Toast.makeText(this, "즐겨찾기 저장에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "대표 시간표 설정에 실패했습니다.", Toast.LENGTH_SHORT).show();
             }
         }
 

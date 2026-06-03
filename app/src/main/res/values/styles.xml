@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.SmartTimetable.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/smart_input_background</item>
+        <item name="boxStrokeColor">@color/smart_border</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">1dp</item>
+        <item name="boxCornerRadiusTopStart">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/smart_radius_input</item>
+        <item name="hintTextColor">@color/smart_text_muted</item>
+        <item name="android:textColorHint">@color/smart_text_muted</item>
+    </style>
+
+
+    <style name="Widget.SmartTimetable.TextInput.Premium" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/smart_input_background</item>
+        <item name="boxStrokeColor">@color/smart_border</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxCornerRadiusTopStart">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/smart_radius_input</item>
+        <item name="hintTextColor">@color/smart_text_secondary</item>
+        <item name="android:textColorHint">@color/smart_text_muted</item>
+    </style>
+
+    <style name="Widget.SmartTimetable.TextInput.Premium.Dropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/smart_input_background</item>
+        <item name="boxStrokeColor">@color/smart_border</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxCornerRadiusTopStart">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/smart_radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/smart_radius_input</item>
+        <item name="hintTextColor">@color/smart_text_secondary</item>
+        <item name="android:textColorHint">@color/smart_text_muted</item>
+    </style>
+
+    <style name="Widget.SmartTimetable.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/smart_primary</item>
+        <item name="android:textColor">@color/smart_on_primary</item>
+        <item name="cornerRadius">@dimen/smart_auth_button_radius</item>
+        <item name="android:minHeight">@dimen/smart_button_height</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.SmartTimetable.Button.Outline" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/smart_border</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="backgroundTint">@color/smart_surface_card</item>
+        <item name="android:textColor">@color/smart_primary</item>
+        <item name="cornerRadius">@dimen/smart_auth_button_radius</item>
+        <item name="android:minHeight">@dimen/smart_button_height</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Text.SmartTimetable.Title" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/smart_text_primary</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Text.SmartTimetable.Subtitle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/smart_text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+
+    <style name="Text.SmartTimetable.ScreenTitle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/smart_text_primary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:includeFontPadding">true</item>
+    </style>
+
+    <style name="Text.SmartTimetable.ScreenSubtitle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/smart_text_secondary</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:lineSpacingExtra">1dp</item>
+    </style>
+
+    <style name="Text.SmartTimetable.CardTitle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/smart_text_primary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Text.SmartTimetable.CardBody" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/smart_text_secondary</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:lineSpacingExtra">1dp</item>
+    </style>
+</resources>

@@ -31,6 +31,7 @@ public class SignupActivity extends AppCompatActivity {
 
         ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
+        findViewById(R.id.tvLoginPrompt).setOnClickListener(v -> finish());
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);

@@ -199,7 +199,7 @@ public class UserInfoActivity extends AppCompatActivity {
                                   String hint,
                                   String[] items,
                                   SelectionCallback callback) {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_lecture_search, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_user_search, null);
 
         EditText etSearch = dialogView.findViewById(R.id.et_search);
         ListView lvItems = dialogView.findViewById(R.id.lv_lectures);

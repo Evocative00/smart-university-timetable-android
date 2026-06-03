@@ -1,398 +1,533 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_screen_gradient"
-    android:fillViewport="true">
+    android:background="@drawable/bg_screen_gradient">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/recommendation_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="156dp">
 
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/smart_primary"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/smart_primary_dark"
-            app:strokeWidth="1dp">
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="176dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/btn_back"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="뒤로가기"
-                    android:src="@drawable/ic_arrow_back" />
+                    android:contentDescription="@string/btn_back_description"
+                    android:padding="8dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/smart_text_primary" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
 
                 <TextView
-                    android:id="@+id/tv_screen_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/recommendation_title"
-                    android:textColor="@color/white"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_screen_subtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/recommendation_subtitle"
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
-
+                    android:id="@+id/btn_more_actions"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_recommendation_icon_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="⋯"
+                    android:textColor="@color/smart_text_primary"
+                    android:textSize="24sp" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:id="@+id/content_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_screen_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="@string/recommendation_title"
+                android:textColor="@color/smart_text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
 
-            <com.google.android.material.card.MaterialCardView
+            <TextView
+                android:id="@+id/tv_screen_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/recommendation_subtitle_redesign"
+                android:textColor="@color/smart_text_secondary"
+                android:textSize="14sp" />
+
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@color/smart_surface_card"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/smart_border"
-                app:strokeWidth="1dp">
+                android:layout_marginTop="18dp"
+                android:fillViewport="false"
+                android:scrollbars="none">
 
                 <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_tab_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:text="@string/recommendation_tab_1"
+                        android:textAllCaps="false"
+                        android:textSize="13sp"
+                        android:textColor="@color/recommendation_tab_text"
+                        app:backgroundTint="@color/recommendation_tab_background"
+                        android:checkable="true"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="@color/recommendation_tab_stroke"
+                        app:strokeWidth="1dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_tab_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:text="@string/recommendation_tab_2"
+                        android:textAllCaps="false"
+                        android:textSize="13sp"
+                        android:textColor="@color/recommendation_tab_text"
+                        app:backgroundTint="@color/recommendation_tab_background"
+                        android:checkable="true"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="@color/recommendation_tab_stroke"
+                        app:strokeWidth="1dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_tab_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:text="@string/recommendation_tab_3"
+                        android:textAllCaps="false"
+                        android:textSize="13sp"
+                        android:textColor="@color/recommendation_tab_text"
+                        app:backgroundTint="@color/recommendation_tab_background"
+                        android:checkable="true"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="@color/recommendation_tab_stroke"
+                        app:strokeWidth="1dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_more_recommendations"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:text="@string/recommendation_more"
+                        android:textAllCaps="false"
+                        android:textSize="13sp"
+                        android:textColor="@color/recommendation_tab_text"
+                        app:backgroundTint="@color/recommendation_tab_background"
+                        android:checkable="true"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="@color/recommendation_tab_stroke"
+                        app:strokeWidth="1dp" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:id="@+id/content_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/timetable_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:layout_marginTop="18dp"
+                    app:cardBackgroundColor="@color/smart_surface_card"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/smart_border"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:padding="18dp">
 
-                        <TextView
-                            android:id="@+id/tv_rank"
-                            android:layout_width="0dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/rank_default"
-                            android:textColor="@color/smart_text_primary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_prev"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/btn_prev"
-                            app:cornerRadius="16dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_next"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/btn_next"
-                            app:cornerRadius="16dp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            app:cardBackgroundColor="@color/smart_surface_alt"
-                            app:cardCornerRadius="18dp"
-                            app:cardElevation="0dp">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="16dp">
+                                android:layout_weight="1"
+                                android:orientation="vertical">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/label_score"
-                                    android:textColor="@color/smart_text_secondary"
-                                    android:textSize="12sp" />
+                                    android:text="@string/timetable_preview_title"
+                                    android:textColor="@color/smart_text_primary"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
 
                                 <TextView
-                                    android:id="@+id/tv_score"
+                                    android:id="@+id/tv_rank"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="6dp"
-                                    android:text="@string/score_default"
-                                    android:textColor="@color/smart_text_primary"
-                                    android:textSize="22sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            app:cardBackgroundColor="@color/smart_surface_alt"
-                            app:cardCornerRadius="18dp"
-                            app:cardElevation="0dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="16dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/label_credits"
+                                    android:text="@string/rank_default"
                                     android:textColor="@color/smart_text_secondary"
-                                    android:textSize="12sp" />
-
-                                <TextView
-                                    android:id="@+id/tv_credits"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="6dp"
-                                    android:text="@string/credits_default"
-                                    android:textColor="@color/smart_text_primary"
-                                    android:textSize="22sp"
-                                    android:textStyle="bold" />
+                                    android:textSize="13sp" />
                             </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
 
+                            <ImageButton
+                                android:id="@+id/btn_favorite_timetable"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/recommendation_favorite_description"
+                                android:padding="7dp"
+                                android:scaleType="centerInside"
+                                android:src="@drawable/ic_star_border"
+                                app:tint="@color/smart_text_secondary" />
+                        </LinearLayout>
+
+                        <com.syu.smarttimetable.ui.recommendation.TimetablePreviewView
+                            android:id="@+id/timetable_preview"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tv_after_hours_hint"
+                                android:layout_width="0dp"
+                                android:layout_height="34dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_recommendation_evening_chip"
+                                android:gravity="center"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:text="@string/recommendation_after_hours_default"
+                                android:textColor="@color/smart_primary_dark"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:visibility="gone" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_full_timetable_view"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="36dp"
+                                android:layout_marginStart="8dp"
+                                android:minWidth="0dp"
+                                android:paddingStart="14dp"
+                                android:paddingEnd="14dp"
+                                android:text="@string/recommendation_full_timetable_action"
+                                android:textAllCaps="false"
+                                android:textColor="@color/smart_primary_dark"
+                                android:textSize="12sp"
+                                app:cornerRadius="18dp"
+                                app:strokeColor="@color/smart_border"
+                                app:strokeWidth="1dp" />
+                        </LinearLayout>
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:fillViewport="false"
+                    android:scrollbars="none">
 
                     <LinearLayout
                         android:id="@+id/chip_container"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:gravity="start"
+                        android:gravity="start|center_vertical"
                         android:orientation="horizontal" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_regenerate"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:text="@string/btn_regenerate"
-                        app:cornerRadius="18dp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <LinearLayout
-                android:id="@+id/layout_image_actions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_save_image"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/btn_save_image"
-                    app:cornerRadius="18dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_share_image"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:text="@string/btn_share_image"
-                    app:cornerRadius="18dp" />
-            </LinearLayout>
-
-                <com.google.android.material.card.MaterialCardView
-                android:id="@+id/timetable_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@color/smart_surface_card"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/smart_border"
-                app:strokeWidth="1dp">
+                </HorizontalScrollView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:layout_marginTop="14dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_recommendation_quality_chip"
+                        android:gravity="center"
+                        android:minWidth="94dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/recommendation_rating_high"
+                        android:textColor="@color/smart_primary_dark"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_credits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_recommendation_quality_chip"
+                        android:gravity="center"
+                        android:minWidth="72dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/credits_default"
+                        android:textColor="@color/smart_primary_dark"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/included_lectures_summary_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="@color/smart_surface_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:rippleColor="@color/smart_primary_container"
+                    app:strokeColor="@color/smart_border"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="18dp">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/timetable_preview_title"
-                            android:textColor="@color/smart_text_primary"
-                            android:textSize="18sp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:text="@string/included_lectures_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/smart_text_primary"
+                                android:textSize="17sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_included_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="@string/included_lectures_summary_default"
+                                android:textColor="@color/smart_text_secondary"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_recommendation_icon_button"
+                            android:gravity="center"
+                            android:text="›"
+                            android:textColor="@color/smart_primary_dark"
+                            android:textSize="24sp"
                             android:textStyle="bold" />
-
-                        <ImageButton
-                            android:id="@+id/btn_favorite_timetable"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="시간표 즐겨찾기"
-                            android:padding="6dp"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/ic_star_border"
-                            app:tint="@color/smart_text_secondary" />
                     </LinearLayout>
-
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:fillViewport="true"
-                        android:scrollbars="none">
-
-                        <TableLayout
-                            android:id="@+id/timetable_table"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:shrinkColumns="*"
-                            android:stretchColumns="*" />
-                    </HorizontalScrollView>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/smart_surface_card"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/smart_border"
-                app:strokeWidth="1dp">
+                </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
+                    android:id="@+id/lecture_list_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:visibility="gone" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/included_lectures_title"
-                        android:textColor="@color/smart_text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_prev"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:text="@string/btn_prev" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_next"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:text="@string/btn_next" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_regenerate"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:text="@string/btn_regenerate" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_share_image"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:text="@string/btn_share_image" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/empty_state_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/smart_surface_card"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/smart_border"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
-                        android:id="@+id/lecture_list_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:orientation="vertical" />
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="28dp">
 
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/recommendation_empty_title"
+                            android:textColor="@color/smart_text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
+                        <TextView
+                            android:id="@+id/tv_empty_message"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:gravity="center"
+                            android:text="@string/recommendation_empty_message"
+                            android:textColor="@color/smart_text_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tv_empty_guide"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:gravity="start"
+                            android:lineSpacingExtra="4dp"
+                            android:text="@string/recommendation_empty_guide"
+                            android:textColor="@color/smart_text_secondary"
+                            android:textSize="13sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
         </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_action_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="18dp"
+        app:cardBackgroundColor="@color/smart_surface_card"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="6dp"
+        app:strokeColor="@color/smart_border"
+        app:strokeWidth="1dp">
 
         <LinearLayout
-            android:id="@+id/empty_state_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="horizontal"
+            android:padding="10dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/smart_surface_card"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/smart_border"
-                app:strokeWidth="1dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_condition_edit"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="0.9"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/recommendation_condition_edit"
+                android:textAllCaps="false"
+                android:textColor="@color/smart_primary_dark"
+                app:backgroundTint="@color/smart_primary_container"
+                app:cornerRadius="16dp"
+                app:rippleColor="@color/smart_primary"
+                app:strokeColor="@color/smart_primary_container"
+                app:strokeWidth="0dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="28dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/recommendation_empty_title"
-                        android:textColor="@color/smart_text_primary"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_empty_message"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/recommendation_empty_message"
-                        android:textColor="@color/smart_text_secondary"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/tv_empty_guide"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:gravity="start"
-                        android:lineSpacingExtra="4dp"
-                        android:text="@string/recommendation_empty_guide"
-                        android:textColor="@color/smart_text_secondary"
-                        android:textSize="13sp"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save_image"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1.6"
+                android:text="@string/btn_save_image"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/smart_primary_dark"
+                app:cornerRadius="16dp" />
         </LinearLayout>
-
-    </LinearLayout>
-</ScrollView>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

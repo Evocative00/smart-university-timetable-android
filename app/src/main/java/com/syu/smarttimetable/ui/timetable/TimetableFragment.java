@@ -6,9 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,16 +15,20 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseUser;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
+import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.Timetable;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
 import com.syu.smarttimetable.ui.main.MainNavigationActivity;
 import com.syu.smarttimetable.ui.recommendation.RecommendationActivity;
+import com.syu.smarttimetable.ui.recommendation.RecommendationAdapter;
+import com.syu.smarttimetable.ui.recommendation.TimetablePreviewView;
 
 import java.util.List;
 
@@ -47,8 +49,7 @@ public class TimetableFragment extends Fragment {
     private TextView tvFavoriteEmpty;
     private ImageButton btnFavoriteStar;
     private View favoriteDivider;
-    private HorizontalScrollView favoriteTimetableScroll;
-    private TableLayout favoriteTimetableTable;
+    private TimetablePreviewView favoriteTimetablePreview;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,8 +78,7 @@ public class TimetableFragment extends Fragment {
         tvFavoriteEmpty = view.findViewById(R.id.tv_favorite_empty);
         btnFavoriteStar = view.findViewById(R.id.btn_favorite_star);
         favoriteDivider = view.findViewById(R.id.favorite_divider);
-        favoriteTimetableScroll = view.findViewById(R.id.favorite_timetable_scroll);
-        favoriteTimetableTable = view.findViewById(R.id.favorite_timetable_table);
+        favoriteTimetablePreview = view.findViewById(R.id.favorite_timetable_preview);
 
         // 사용자 정보 로딩 전까지 버튼 비활성화
         btnCreate.setEnabled(false);
@@ -192,12 +192,9 @@ public class TimetableFragment extends Fragment {
                 || tvFavoriteEmpty == null
                 || btnFavoriteStar == null
                 || favoriteDivider == null
-                || favoriteTimetableScroll == null
-                || favoriteTimetableTable == null) {
+                || favoriteTimetablePreview == null) {
             return;
         }
-
-        favoriteTimetableTable.removeAllViews();
 
         List<String> favoriteKeys = preferenceManager.getAllFavoriteTimetableKeys();
         if (favoriteKeys.isEmpty()) {
@@ -222,12 +219,13 @@ public class TimetableFragment extends Fragment {
             tvFavoriteEmpty.setVisibility(View.GONE);
             favoriteDivider.setVisibility(View.GONE);
             btnFavoriteStar.setVisibility(View.VISIBLE);
-            favoriteTimetableScroll.setVisibility(View.VISIBLE);
+            favoriteTimetablePreview.setVisibility(View.VISIBLE);
 
-            com.syu.smarttimetable.ui.recommendation.RecommendationAdapter.renderTimetableGrid(
-                    requireContext(),
-                    favoriteTimetableTable,
-                    timetable
+            favoriteTimetablePreview.setTimetable(
+                    timetable,
+                    9,
+                    21,
+                    this::showLectureDetailSheet
             );
 
             btnFavoriteStar.setOnClickListener(v -> {
@@ -250,12 +248,32 @@ public class TimetableFragment extends Fragment {
         if (btnFavoriteStar != null) {
             btnFavoriteStar.setVisibility(View.GONE);
         }
-        if (favoriteTimetableScroll != null) {
-            favoriteTimetableScroll.setVisibility(View.GONE);
+        if (favoriteTimetablePreview != null) {
+            favoriteTimetablePreview.setVisibility(View.GONE);
+            favoriteTimetablePreview.setTimetable(null, 9, 21, null);
         }
-        if (favoriteTimetableTable != null) {
-            favoriteTimetableTable.removeAllViews();
+    }
+
+    private void showLectureDetailSheet(Lecture lecture) {
+        if (lecture == null || !isAdded()) {
+            return;
         }
+
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_lecture_detail, null);
+
+        TextView tvCourseName = view.findViewById(R.id.tv_detail_course_name);
+        TextView tvProfessor = view.findViewById(R.id.tv_detail_professor);
+        TextView tvMeta = view.findViewById(R.id.tv_detail_meta);
+        TextView tvTime = view.findViewById(R.id.tv_detail_time);
+
+        tvCourseName.setText(lecture.getCourseName());
+        tvProfessor.setText(lecture.getProfessor());
+        tvMeta.setText(RecommendationAdapter.buildLectureMetaText(lecture));
+        tvTime.setText(RecommendationAdapter.buildLectureTimeText(lecture));
+
+        dialog.setContentView(view);
+        dialog.show();
     }
 
     private void navigateToCreateTimetable() {

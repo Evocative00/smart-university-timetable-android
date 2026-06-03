@@ -205,7 +205,7 @@ public class RecommendationEngine {
     }
 
     private RecommendationRequest createRequestWithoutConflictedFreeDays(RecommendationRequest original,
-                                                                        List<DayOfWeek> conflictDays) {
+                                                                         List<DayOfWeek> conflictDays) {
         if (original == null || conflictDays == null || conflictDays.isEmpty()) {
             return original;
         }
