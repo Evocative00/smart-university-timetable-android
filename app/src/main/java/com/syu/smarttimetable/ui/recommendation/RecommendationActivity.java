@@ -24,6 +24,9 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
@@ -32,6 +35,7 @@ import com.syu.smarttimetable.data.model.LectureTime;
 import com.syu.smarttimetable.data.model.Timetable;
 import com.syu.smarttimetable.data.repository.ImageStorageRepository;
 import com.syu.smarttimetable.data.repository.LectureRepository;
+import com.syu.smarttimetable.data.repository.RepresentativeTimetableRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationEngine;
 import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
@@ -80,6 +84,7 @@ public class RecommendationActivity extends AppCompatActivity {
     private View timetableCard;
 
     private RecommendationPreferenceManager preferenceManager;
+    private RepresentativeTimetableRepository representativeTimetableRepository;
     private ImageButton btnFavoriteTimetable;
 
     private static final int REQUEST_WRITE_STORAGE = 1001;
@@ -91,6 +96,7 @@ public class RecommendationActivity extends AppCompatActivity {
 
         recommendationRequest = (RecommendationRequest) getIntent().getSerializableExtra("recommendationRequest");
         preferenceManager = new RecommendationPreferenceManager(this);
+        representativeTimetableRepository = new RepresentativeTimetableRepository();
 
         bindViews();
         setupButtons();
@@ -871,24 +877,123 @@ public class RecommendationActivity extends AppCompatActivity {
         }
 
         RecommendationEngine.TimetableScoreTuple current = recommendationResults.get(currentIndex);
-        String timetableKey = getTimetableUniqueKey(current.getTimetable());
+        Timetable timetable = current.getTimetable();
+        String timetableKey = getTimetableUniqueKey(timetable);
         boolean isFavorite = preferenceManager.isTimetableFavorite(timetableKey);
 
         if (isFavorite) {
-            preferenceManager.removeTimetableFavorite(timetableKey);
-            Toast.makeText(this, "대표 시간표 설정을 해제했습니다.", Toast.LENGTH_SHORT).show();
-        } else {
-            try {
-                String timetableJson = new Gson().toJson(current.getTimetable());
-                preferenceManager.setTimetableFavorite(timetableKey, timetableJson);
-                Toast.makeText(this, "대표 시간표로 설정했습니다.", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                Log.e(TAG, "Error saving favorite timetable", e);
-                Toast.makeText(this, "대표 시간표 설정에 실패했습니다.", Toast.LENGTH_SHORT).show();
-            }
+            String timetableJson = preferenceManager.getFavoriteTimetableData(timetableKey);
+            removeRepresentativeTimetableWithUndo(timetableKey, timetableJson);
+            return;
         }
 
+        try {
+            String timetableJson = new Gson().toJson(timetable);
+            saveRepresentativeTimetable(timetableKey, timetableJson, true);
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving representative timetable", e);
+            Toast.makeText(this, getString(R.string.toast_representative_save_failed), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void saveRepresentativeTimetable(String timetableKey, String timetableJson, boolean showSuccessToast) {
+        if (preferenceManager == null || timetableKey == null || timetableJson == null) {
+            return;
+        }
+
+        preferenceManager.setTimetableFavorite(timetableKey, timetableJson);
         updateTimetableFavoriteButton();
+
+        if (showSuccessToast) {
+            Toast.makeText(this, getString(R.string.toast_representative_set), Toast.LENGTH_SHORT).show();
+        }
+
+        syncRepresentativeTimetableToFirestore(timetableKey, timetableJson);
+    }
+
+    private void removeRepresentativeTimetableWithUndo(String timetableKey, String timetableJson) {
+        if (preferenceManager == null || timetableKey == null) {
+            return;
+        }
+
+        preferenceManager.removeTimetableFavorite(timetableKey);
+        updateTimetableFavoriteButton();
+
+        final boolean[] undoClicked = {false};
+        Snackbar snackbar = Snackbar.make(
+                        findViewById(android.R.id.content),
+                        getString(R.string.snackbar_representative_removed),
+                        Snackbar.LENGTH_LONG
+                )
+                .setAction(getString(R.string.action_undo), v -> {
+                    undoClicked[0] = true;
+                    restoreRepresentativeTimetable(timetableKey, timetableJson);
+                });
+
+        snackbar.addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar transientBottomBar, int event) {
+                if (!undoClicked[0]) {
+                    deleteRepresentativeTimetableFromFirestore(timetableKey, timetableJson);
+                }
+            }
+        });
+
+        snackbar.show();
+    }
+
+    private void restoreRepresentativeTimetable(String timetableKey, String timetableJson) {
+        if (timetableKey == null || timetableJson == null || timetableJson.trim().isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_representative_restore_failed), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        saveRepresentativeTimetable(timetableKey, timetableJson, false);
+        Toast.makeText(this, getString(R.string.toast_representative_restored), Toast.LENGTH_SHORT).show();
+    }
+
+    private void syncRepresentativeTimetableToFirestore(String timetableKey, String timetableJson) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || representativeTimetableRepository == null) {
+            return;
+        }
+
+        representativeTimetableRepository
+                .saveRepresentativeTimetable(user.getUid(), timetableKey, timetableJson)
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Representative timetable sync failed", e);
+                    Toast.makeText(
+                            this,
+                            getString(R.string.toast_representative_sync_failed),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                });
+    }
+
+    private void deleteRepresentativeTimetableFromFirestore(String removedKey, String removedJson) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || representativeTimetableRepository == null) {
+            return;
+        }
+
+        representativeTimetableRepository
+                .deleteRepresentativeTimetable(user.getUid())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Representative timetable delete failed", e);
+                    if (preferenceManager != null
+                            && preferenceManager.getCurrentFavoriteKey() == null
+                            && removedKey != null
+                            && removedJson != null
+                            && !removedJson.trim().isEmpty()) {
+                        preferenceManager.setTimetableFavorite(removedKey, removedJson);
+                        updateTimetableFavoriteButton();
+                    }
+                    Toast.makeText(
+                            this,
+                            getString(R.string.toast_representative_delete_failed),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                });
     }
 
     private void updateTimetableFavoriteButton() {

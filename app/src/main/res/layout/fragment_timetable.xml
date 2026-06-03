@@ -134,17 +134,26 @@
                 android:padding="@dimen/smart_main_card_padding">
 
                 <TextView
+                    android:id="@+id/tv_timetable_action_title"
                     style="@style/Text.SmartTimetable.CardTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/timetable_create_title" />
 
                 <TextView
-                    android:id="@+id/tv_user_info_status"
+                    android:id="@+id/tv_timetable_action_desc"
                     style="@style/Text.SmartTimetable.CardBody"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:text="@string/timetable_create_desc_empty" />
+
+                <TextView
+                    android:id="@+id/tv_user_info_status"
+                    style="@style/Text.SmartTimetable.CardBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:text="@string/timetable_loading_user_info"
                     android:visibility="visible" />
 

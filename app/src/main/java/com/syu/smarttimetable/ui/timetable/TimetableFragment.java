@@ -14,14 +14,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.Gson;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
 import com.syu.smarttimetable.R;
 import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
 import com.syu.smarttimetable.data.model.Lecture;
 import com.syu.smarttimetable.data.model.Timetable;
+import com.syu.smarttimetable.data.repository.RepresentativeTimetableRepository;
 import com.syu.smarttimetable.data.repository.UserRepository;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.ui.constraint.HardConstraintActivity;
@@ -40,21 +42,32 @@ public class TimetableFragment extends Fragment {
     private int userGrade = 0;
     private String studentId = "";
     private boolean isUserInfoLoaded = false;
+    private boolean primaryActionOpensRecommendation = false;
+    private boolean pendingFavoriteRemoteDelete = false;
+
     private UserRepository userRepository;
     private RecommendationPreferenceManager preferenceManager;
+    private RepresentativeTimetableRepository representativeTimetableRepository;
 
     private MaterialButton btnCreate;
     private MaterialButton btnViewRecommendation;
+    private TextView tvTimetableActionTitle;
+    private TextView tvTimetableActionDesc;
     private TextView tvUserInfoStatus;
     private TextView tvFavoriteEmpty;
     private ImageButton btnFavoriteStar;
     private View favoriteDivider;
     private TimetablePreviewView favoriteTimetablePreview;
 
+    private Timetable currentFavoriteTimetable;
+    private String currentFavoriteKey;
+    private String currentFavoriteJson;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userRepository = new UserRepository();
+        representativeTimetableRepository = new RepresentativeTimetableRepository();
         refreshRecommendationRequest();
     }
 
@@ -74,21 +87,23 @@ public class TimetableFragment extends Fragment {
 
         btnCreate = view.findViewById(R.id.btn_create_timetable);
         btnViewRecommendation = view.findViewById(R.id.btn_view_recommendation);
+        tvTimetableActionTitle = view.findViewById(R.id.tv_timetable_action_title);
+        tvTimetableActionDesc = view.findViewById(R.id.tv_timetable_action_desc);
         tvUserInfoStatus = view.findViewById(R.id.tv_user_info_status);
         tvFavoriteEmpty = view.findViewById(R.id.tv_favorite_empty);
         btnFavoriteStar = view.findViewById(R.id.btn_favorite_star);
         favoriteDivider = view.findViewById(R.id.favorite_divider);
         favoriteTimetablePreview = view.findViewById(R.id.favorite_timetable_preview);
 
-        // 사용자 정보 로딩 전까지 버튼 비활성화
-        btnCreate.setEnabled(false);
-        btnCreate.setAlpha(0.5f);
+        if (btnCreate != null) {
+            btnCreate.setOnClickListener(v -> handlePrimaryAction());
+        }
+        if (btnViewRecommendation != null) {
+            btnViewRecommendation.setOnClickListener(v -> handleSecondaryAction());
+        }
 
-        btnCreate.setOnClickListener(v -> navigateToCreateTimetable());
-        btnViewRecommendation.setOnClickListener(v -> navigateToRecommendation());
-
-        updateRecommendationButtonVisibility();
         displayFavoriteTimetable();
+        syncFavoriteFromFirestore();
         loadUserInfo();
     }
 
@@ -96,8 +111,8 @@ public class TimetableFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshRecommendationRequest();
-        updateRecommendationButtonVisibility();
         displayFavoriteTimetable();
+        syncFavoriteFromFirestore();
         loadUserInfo();
     }
 
@@ -113,15 +128,12 @@ public class TimetableFragment extends Fragment {
     }
 
     private void updateRecommendationButtonVisibility() {
-        if (btnViewRecommendation == null) return;
-        btnViewRecommendation.setVisibility(
-                recommendationRequest != null ? View.VISIBLE : View.GONE
-        );
-        Log.d(TAG, "updateRecommendationButtonVisibility: " + (recommendationRequest != null ? "VISIBLE" : "GONE"));
+        updateActionCard();
     }
 
     private void loadUserInfo() {
-        setUserInfoStatus("사용자 정보를 불러오는 중...", true);
+        setUserInfoStatus(getString(R.string.timetable_loading_user_info), true);
+        updateActionCard();
 
         FirebaseUser firebaseUser = userRepository.getCurrentFirebaseUser();
         if (firebaseUser == null) {
@@ -159,20 +171,15 @@ public class TimetableFragment extends Fragment {
     }
 
     private void onUserInfoLoadSuccess() {
-        if (btnCreate != null) {
-            btnCreate.setEnabled(true);
-            btnCreate.setAlpha(1f);
-        }
         setUserInfoStatus(null, false);
+        updateActionCard();
         Log.d(TAG, "User info loaded: grade=" + userGrade + ", studentId=" + studentId);
     }
 
     private void onUserInfoLoadFailed(String message) {
-        if (btnCreate != null) {
-            btnCreate.setEnabled(false);
-            btnCreate.setAlpha(0.5f);
-        }
+        isUserInfoLoaded = false;
         setUserInfoStatus(message, true);
+        updateActionCard();
         Log.w(TAG, "User info load failed: " + message);
     }
 
@@ -186,6 +193,90 @@ public class TimetableFragment extends Fragment {
         }
     }
 
+    private void updateActionCard() {
+        if (btnCreate == null || btnViewRecommendation == null) {
+            return;
+        }
+
+        boolean hasFavorite = currentFavoriteTimetable != null;
+        boolean hasRecentRecommendation = recommendationRequest != null;
+
+        if (hasFavorite) {
+            setActionTexts(
+                    getString(R.string.timetable_manage_title),
+                    getString(R.string.timetable_manage_desc)
+            );
+            primaryActionOpensRecommendation = false;
+            btnCreate.setText(R.string.timetable_new_recommendation_button);
+            btnViewRecommendation.setText(R.string.timetable_view_recommendation);
+            btnViewRecommendation.setVisibility(hasRecentRecommendation ? View.VISIBLE : View.GONE);
+        } else if (hasRecentRecommendation) {
+            setActionTexts(
+                    getString(R.string.timetable_select_representative_title),
+                    getString(R.string.timetable_select_representative_desc)
+            );
+            primaryActionOpensRecommendation = true;
+            btnCreate.setText(R.string.timetable_view_recommendation);
+            btnViewRecommendation.setText(R.string.timetable_new_recommendation_button);
+            btnViewRecommendation.setVisibility(View.VISIBLE);
+        } else {
+            setActionTexts(
+                    getString(R.string.timetable_create_title),
+                    getString(R.string.timetable_create_desc_empty)
+            );
+            primaryActionOpensRecommendation = false;
+            btnCreate.setText(R.string.timetable_create_button);
+            btnViewRecommendation.setVisibility(View.GONE);
+        }
+
+        updateActionButtonStates();
+    }
+
+    private void setActionTexts(String title, String description) {
+        if (tvTimetableActionTitle != null) {
+            tvTimetableActionTitle.setText(title);
+        }
+        if (tvTimetableActionDesc != null) {
+            tvTimetableActionDesc.setText(description);
+        }
+    }
+
+    private void updateActionButtonStates() {
+        if (btnCreate == null) {
+            return;
+        }
+
+        boolean createEnabled = isUserInfoLoaded && userGrade > 0 && !studentId.isEmpty();
+        boolean primaryEnabled = primaryActionOpensRecommendation
+                ? recommendationRequest != null
+                : createEnabled;
+
+        btnCreate.setEnabled(primaryEnabled);
+        btnCreate.setAlpha(primaryEnabled ? 1f : 0.5f);
+
+        if (btnViewRecommendation != null && btnViewRecommendation.getVisibility() == View.VISIBLE) {
+            boolean secondaryOpensCreate = primaryActionOpensRecommendation;
+            boolean secondaryEnabled = secondaryOpensCreate ? createEnabled : recommendationRequest != null;
+            btnViewRecommendation.setEnabled(secondaryEnabled);
+            btnViewRecommendation.setAlpha(secondaryEnabled ? 1f : 0.5f);
+        }
+    }
+
+    private void handlePrimaryAction() {
+        if (primaryActionOpensRecommendation) {
+            navigateToRecommendation();
+        } else {
+            navigateToCreateTimetable();
+        }
+    }
+
+    private void handleSecondaryAction() {
+        if (primaryActionOpensRecommendation) {
+            navigateToCreateTimetable();
+        } else {
+            navigateToRecommendation();
+        }
+    }
 
     private void displayFavoriteTimetable() {
         if (preferenceManager == null
@@ -196,15 +287,14 @@ public class TimetableFragment extends Fragment {
             return;
         }
 
-        List<String> favoriteKeys = preferenceManager.getAllFavoriteTimetableKeys();
-        if (favoriteKeys.isEmpty()) {
+        String favoriteKey = preferenceManager.getCurrentFavoriteKey();
+        if (favoriteKey == null) {
             showFavoriteEmptyState();
             return;
         }
 
-        String favoriteKey = favoriteKeys.get(0);
         String timetableJson = preferenceManager.getFavoriteTimetableData(favoriteKey);
-        if (timetableJson == null || timetableJson.trim().isEmpty()) {
+        if (!isValidFavoriteData(favoriteKey, timetableJson)) {
             showFavoriteEmptyState();
             return;
         }
@@ -216,29 +306,39 @@ public class TimetableFragment extends Fragment {
                 return;
             }
 
-            tvFavoriteEmpty.setVisibility(View.GONE);
-            favoriteDivider.setVisibility(View.GONE);
-            btnFavoriteStar.setVisibility(View.VISIBLE);
-            favoriteTimetablePreview.setVisibility(View.VISIBLE);
-
-            favoriteTimetablePreview.setTimetable(
-                    timetable,
-                    9,
-                    21,
-                    this::showLectureDetailSheet
-            );
-
-            btnFavoriteStar.setOnClickListener(v -> {
-                preferenceManager.removeTimetableFavorite(favoriteKey);
-                displayFavoriteTimetable();
-            });
+            showFavoriteTimetable(favoriteKey, timetableJson, timetable);
         } catch (Exception e) {
             Log.e(TAG, "Error parsing favorite timetable", e);
             showFavoriteEmptyState();
         }
     }
 
+    private void showFavoriteTimetable(String favoriteKey, String timetableJson, Timetable timetable) {
+        currentFavoriteKey = favoriteKey;
+        currentFavoriteJson = timetableJson;
+        currentFavoriteTimetable = timetable;
+
+        tvFavoriteEmpty.setVisibility(View.GONE);
+        favoriteDivider.setVisibility(View.GONE);
+        btnFavoriteStar.setVisibility(View.VISIBLE);
+        favoriteTimetablePreview.setVisibility(View.VISIBLE);
+
+        favoriteTimetablePreview.setTimetable(
+                timetable,
+                9,
+                21,
+                this::showLectureDetailSheet
+        );
+
+        btnFavoriteStar.setOnClickListener(v -> removeFavoriteTimetableWithUndo(favoriteKey, timetableJson));
+        updateActionCard();
+    }
+
     private void showFavoriteEmptyState() {
+        currentFavoriteKey = null;
+        currentFavoriteJson = null;
+        currentFavoriteTimetable = null;
+
         if (tvFavoriteEmpty != null) {
             tvFavoriteEmpty.setVisibility(View.VISIBLE);
         }
@@ -252,6 +352,142 @@ public class TimetableFragment extends Fragment {
             favoriteTimetablePreview.setVisibility(View.GONE);
             favoriteTimetablePreview.setTimetable(null, 9, 21, null);
         }
+        updateActionCard();
+    }
+
+    private void syncFavoriteFromFirestore() {
+        if (pendingFavoriteRemoteDelete
+                || preferenceManager == null
+                || representativeTimetableRepository == null
+                || userRepository == null) {
+            return;
+        }
+
+        FirebaseUser firebaseUser = userRepository.getCurrentFirebaseUser();
+        if (firebaseUser == null) {
+            return;
+        }
+
+        String localKey = preferenceManager.getCurrentFavoriteKey();
+        String localJson = localKey == null ? null : preferenceManager.getFavoriteTimetableData(localKey);
+
+        representativeTimetableRepository.getRepresentativeTimetable(firebaseUser.getUid())
+                .addOnSuccessListener(doc -> {
+                    if (!isAdded() || preferenceManager == null) return;
+
+                    if (doc != null && doc.exists()) {
+                        String remoteKey = doc.getString("timetableKey");
+                        String remoteJson = doc.getString("timetableJson");
+
+                        if (isValidFavoriteData(remoteKey, remoteJson)) {
+                            preferenceManager.setTimetableFavorite(remoteKey, remoteJson);
+                            displayFavoriteTimetable();
+                            return;
+                        }
+                    }
+
+                    if (isValidFavoriteData(localKey, localJson)) {
+                        migrateLocalFavoriteToFirestore(firebaseUser.getUid(), localKey, localJson);
+                    } else {
+                        displayFavoriteTimetable();
+                    }
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Representative timetable sync failed", e));
+    }
+
+    private void migrateLocalFavoriteToFirestore(String userId, String favoriteKey, String timetableJson) {
+        if (representativeTimetableRepository == null || !isValidFavoriteData(favoriteKey, timetableJson)) {
+            return;
+        }
+
+        representativeTimetableRepository
+                .saveRepresentativeTimetable(userId, favoriteKey, timetableJson)
+                .addOnFailureListener(e -> Log.e(TAG, "Local representative timetable migration failed", e));
+    }
+
+    private boolean isValidFavoriteData(String favoriteKey, String timetableJson) {
+        return favoriteKey != null
+                && !favoriteKey.trim().isEmpty()
+                && timetableJson != null
+                && !timetableJson.trim().isEmpty();
+    }
+
+    private void removeFavoriteTimetableWithUndo(String favoriteKey, String timetableJson) {
+        if (preferenceManager == null || !isValidFavoriteData(favoriteKey, timetableJson)) {
+            return;
+        }
+
+        pendingFavoriteRemoteDelete = true;
+        preferenceManager.removeTimetableFavorite(favoriteKey);
+        showFavoriteEmptyState();
+
+        final boolean[] undoClicked = {false};
+        Snackbar snackbar = Snackbar.make(
+                        requireView(),
+                        getString(R.string.snackbar_representative_removed),
+                        Snackbar.LENGTH_LONG
+                )
+                .setAction(getString(R.string.action_undo), v -> {
+                    undoClicked[0] = true;
+                    pendingFavoriteRemoteDelete = false;
+                    restoreFavoriteTimetable(favoriteKey, timetableJson);
+                });
+
+        snackbar.addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar transientBottomBar, int event) {
+                if (!undoClicked[0]) {
+                    deleteFavoriteFromFirestore(favoriteKey, timetableJson);
+                }
+            }
+        });
+
+        snackbar.show();
+    }
+
+    private void restoreFavoriteTimetable(String favoriteKey, String timetableJson) {
+        if (preferenceManager == null || !isValidFavoriteData(favoriteKey, timetableJson)) {
+            Toast.makeText(requireContext(), getString(R.string.toast_representative_restore_failed), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        preferenceManager.setTimetableFavorite(favoriteKey, timetableJson);
+        displayFavoriteTimetable();
+
+        FirebaseUser user = userRepository.getCurrentFirebaseUser();
+        if (user != null && representativeTimetableRepository != null) {
+            representativeTimetableRepository
+                    .saveRepresentativeTimetable(user.getUid(), favoriteKey, timetableJson)
+                    .addOnFailureListener(e -> Log.e(TAG, "Representative timetable restore sync failed", e));
+        }
+    }
+
+    private void deleteFavoriteFromFirestore(String favoriteKey, String timetableJson) {
+        FirebaseUser user = userRepository.getCurrentFirebaseUser();
+        if (user == null || representativeTimetableRepository == null) {
+            pendingFavoriteRemoteDelete = false;
+            return;
+        }
+
+        representativeTimetableRepository
+                .deleteRepresentativeTimetable(user.getUid())
+                .addOnSuccessListener(unused -> pendingFavoriteRemoteDelete = false)
+                .addOnFailureListener(e -> {
+                    pendingFavoriteRemoteDelete = false;
+                    Log.e(TAG, "Representative timetable delete failed", e);
+                    if (!isAdded()) {
+                        return;
+                    }
+                    if (preferenceManager != null && preferenceManager.getCurrentFavoriteKey() == null) {
+                        preferenceManager.setTimetableFavorite(favoriteKey, timetableJson);
+                        displayFavoriteTimetable();
+                    }
+                    Toast.makeText(
+                            requireContext(),
+                            getString(R.string.toast_representative_delete_failed),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                });
     }
 
     private void showLectureDetailSheet(Lecture lecture) {
