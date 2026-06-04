@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
@@ -43,7 +44,6 @@ public class TimetableFragment extends Fragment {
     private String studentId = "";
     private boolean isUserInfoLoaded = false;
     private boolean primaryActionOpensRecommendation = false;
-    private boolean pendingFavoriteRemoteDelete = false;
 
     private UserRepository userRepository;
     private RecommendationPreferenceManager preferenceManager;
@@ -84,6 +84,8 @@ public class TimetableFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         preferenceManager = new RecommendationPreferenceManager(requireContext());
+        configureFavoriteScope();
+        refreshRecommendationRequest();
 
         btnCreate = view.findViewById(R.id.btn_create_timetable);
         btnViewRecommendation = view.findViewById(R.id.btn_view_recommendation);
@@ -110,6 +112,7 @@ public class TimetableFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        configureFavoriteScope();
         refreshRecommendationRequest();
         displayFavoriteTimetable();
         syncFavoriteFromFirestore();
@@ -117,12 +120,21 @@ public class TimetableFragment extends Fragment {
     }
 
     private void refreshRecommendationRequest() {
+        RecommendationRequest latestRequest = null;
+        boolean loadedFromCurrentSession = false;
+
         if (getActivity() instanceof MainNavigationActivity) {
-            RecommendationRequest req =
-                    ((MainNavigationActivity) getActivity()).getLastRecommendationRequest();
-            if (req != null) {
-                recommendationRequest = req;
-            }
+            latestRequest = ((MainNavigationActivity) getActivity()).getLastRecommendationRequest();
+            loadedFromCurrentSession = latestRequest != null;
+        }
+
+        if (latestRequest == null && preferenceManager != null) {
+            latestRequest = preferenceManager.getRecentRecommendationRequest();
+        }
+
+        recommendationRequest = latestRequest;
+        if (loadedFromCurrentSession && preferenceManager != null) {
+            preferenceManager.saveRecentRecommendationRequest(latestRequest);
         }
         Log.d(TAG, "refreshRecommendationRequest: " + (recommendationRequest != null ? "있음" : "없음"));
     }
@@ -208,7 +220,7 @@ public class TimetableFragment extends Fragment {
             );
             primaryActionOpensRecommendation = false;
             btnCreate.setText(R.string.timetable_new_recommendation_button);
-            btnViewRecommendation.setText(R.string.timetable_view_recommendation);
+            btnViewRecommendation.setText(R.string.timetable_recent_recommendation_button);
             btnViewRecommendation.setVisibility(hasRecentRecommendation ? View.VISIBLE : View.GONE);
         } else if (hasRecentRecommendation) {
             setActionTexts(
@@ -216,7 +228,7 @@ public class TimetableFragment extends Fragment {
                     getString(R.string.timetable_select_representative_desc)
             );
             primaryActionOpensRecommendation = true;
-            btnCreate.setText(R.string.timetable_view_recommendation);
+            btnCreate.setText(R.string.timetable_recent_recommendation_button);
             btnViewRecommendation.setText(R.string.timetable_new_recommendation_button);
             btnViewRecommendation.setVisibility(View.VISIBLE);
         } else {
@@ -355,9 +367,22 @@ public class TimetableFragment extends Fragment {
         updateActionCard();
     }
 
+
+    private void configureFavoriteScope() {
+        if (preferenceManager == null || userRepository == null) {
+            return;
+        }
+        FirebaseUser firebaseUser = userRepository.getCurrentFirebaseUser();
+        preferenceManager.setCurrentUserId(firebaseUser != null ? firebaseUser.getUid() : null);
+    }
+
+    private boolean isCurrentUser(String userId) {
+        FirebaseUser currentUser = userRepository != null ? userRepository.getCurrentFirebaseUser() : null;
+        return currentUser != null && userId != null && userId.equals(currentUser.getUid());
+    }
+
     private void syncFavoriteFromFirestore() {
-        if (pendingFavoriteRemoteDelete
-                || preferenceManager == null
+        if (preferenceManager == null
                 || representativeTimetableRepository == null
                 || userRepository == null) {
             return;
@@ -368,12 +393,15 @@ public class TimetableFragment extends Fragment {
             return;
         }
 
+        String userId = firebaseUser.getUid();
+        configureFavoriteScope();
+
         String localKey = preferenceManager.getCurrentFavoriteKey();
         String localJson = localKey == null ? null : preferenceManager.getFavoriteTimetableData(localKey);
 
-        representativeTimetableRepository.getRepresentativeTimetable(firebaseUser.getUid())
+        representativeTimetableRepository.getRepresentativeTimetable(userId)
                 .addOnSuccessListener(doc -> {
-                    if (!isAdded() || preferenceManager == null) return;
+                    if (!isAdded() || preferenceManager == null || !isCurrentUser(userId)) return;
 
                     if (doc != null && doc.exists()) {
                         String remoteKey = doc.getString("timetableKey");
@@ -387,7 +415,7 @@ public class TimetableFragment extends Fragment {
                     }
 
                     if (isValidFavoriteData(localKey, localJson)) {
-                        migrateLocalFavoriteToFirestore(firebaseUser.getUid(), localKey, localJson);
+                        migrateLocalFavoriteToFirestore(userId, localKey, localJson);
                     } else {
                         displayFavoriteTimetable();
                     }
@@ -417,11 +445,13 @@ public class TimetableFragment extends Fragment {
             return;
         }
 
-        pendingFavoriteRemoteDelete = true;
+        final boolean[] undoClicked = {false};
+
         preferenceManager.removeTimetableFavorite(favoriteKey);
         showFavoriteEmptyState();
 
-        final boolean[] undoClicked = {false};
+        Task<Void> remoteDeleteTask = requestFavoriteDeleteFromFirestore(favoriteKey, timetableJson, undoClicked);
+
         Snackbar snackbar = Snackbar.make(
                         requireView(),
                         getString(R.string.snackbar_representative_removed),
@@ -429,23 +459,13 @@ public class TimetableFragment extends Fragment {
                 )
                 .setAction(getString(R.string.action_undo), v -> {
                     undoClicked[0] = true;
-                    pendingFavoriteRemoteDelete = false;
-                    restoreFavoriteTimetable(favoriteKey, timetableJson);
+                    restoreFavoriteTimetable(favoriteKey, timetableJson, remoteDeleteTask);
                 });
-
-        snackbar.addCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar transientBottomBar, int event) {
-                if (!undoClicked[0]) {
-                    deleteFavoriteFromFirestore(favoriteKey, timetableJson);
-                }
-            }
-        });
 
         snackbar.show();
     }
 
-    private void restoreFavoriteTimetable(String favoriteKey, String timetableJson) {
+    private void restoreFavoriteTimetable(String favoriteKey, String timetableJson, Task<Void> remoteDeleteTask) {
         if (preferenceManager == null || !isValidFavoriteData(favoriteKey, timetableJson)) {
             Toast.makeText(requireContext(), getString(R.string.toast_representative_restore_failed), Toast.LENGTH_SHORT).show();
             return;
@@ -454,27 +474,39 @@ public class TimetableFragment extends Fragment {
         preferenceManager.setTimetableFavorite(favoriteKey, timetableJson);
         displayFavoriteTimetable();
 
-        FirebaseUser user = userRepository.getCurrentFirebaseUser();
-        if (user != null && representativeTimetableRepository != null) {
-            representativeTimetableRepository
-                    .saveRepresentativeTimetable(user.getUid(), favoriteKey, timetableJson)
-                    .addOnFailureListener(e -> Log.e(TAG, "Representative timetable restore sync failed", e));
+        Runnable remoteRestore = () -> {
+            FirebaseUser user = userRepository.getCurrentFirebaseUser();
+            if (user != null && representativeTimetableRepository != null) {
+                representativeTimetableRepository
+                        .saveRepresentativeTimetable(user.getUid(), favoriteKey, timetableJson)
+                        .addOnFailureListener(e -> Log.e(TAG, "Representative timetable restore sync failed", e));
+            }
+        };
+
+        if (remoteDeleteTask != null) {
+            remoteDeleteTask.addOnCompleteListener(task -> remoteRestore.run());
+        } else {
+            remoteRestore.run();
         }
     }
 
-    private void deleteFavoriteFromFirestore(String favoriteKey, String timetableJson) {
+    private Task<Void> requestFavoriteDeleteFromFirestore(
+            String favoriteKey,
+            String timetableJson,
+            boolean[] undoClicked
+    ) {
         FirebaseUser user = userRepository.getCurrentFirebaseUser();
         if (user == null || representativeTimetableRepository == null) {
-            pendingFavoriteRemoteDelete = false;
-            return;
+            return null;
         }
 
-        representativeTimetableRepository
+        return representativeTimetableRepository
                 .deleteRepresentativeTimetable(user.getUid())
-                .addOnSuccessListener(unused -> pendingFavoriteRemoteDelete = false)
                 .addOnFailureListener(e -> {
-                    pendingFavoriteRemoteDelete = false;
                     Log.e(TAG, "Representative timetable delete failed", e);
+                    if (undoClicked != null && undoClicked[0]) {
+                        return;
+                    }
                     if (!isAdded()) {
                         return;
                     }
@@ -526,7 +558,11 @@ public class TimetableFragment extends Fragment {
     }
 
     private void navigateToRecommendation() {
-        if (recommendationRequest == null) return;
+        if (recommendationRequest == null) {
+            Toast.makeText(requireContext(), R.string.toast_recent_recommendation_missing, Toast.LENGTH_SHORT).show();
+            updateActionCard();
+            return;
+        }
         Intent intent = new Intent(requireContext(), RecommendationActivity.class);
         intent.putExtra("recommendationRequest", recommendationRequest);
         startActivity(intent);

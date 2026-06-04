@@ -121,13 +121,14 @@
 조건을 입력하고 나에게 맞는 시간표를 추천받아보세요.</string>
     <string name="timetable_manage_title">시간표 관리</string>
     <string name="timetable_manage_desc">대표 시간표가 설정되어 있습니다.
-조건을 바꿔 새로운 추천을 받거나 최근 추천 결과를 확인하세요.</string>
+조건을 바꿔 새로운 추천을 받거나 최근 조건으로 다시 확인하세요.</string>
     <string name="timetable_select_representative_title">대표 시간표 선택</string>
-    <string name="timetable_select_representative_desc">최근 추천 결과에서 다른 시간표를 대표로 설정할 수 있습니다.</string>
+    <string name="timetable_select_representative_desc">최근 조건으로 추천을 다시 생성하거나 새 조건을 입력할 수 있습니다.</string>
     <string name="timetable_loading_user_info">사용자 정보를 불러오는 중…</string>
     <string name="timetable_create_button">시간표 생성하기</string>
     <string name="timetable_new_recommendation_button">새 추천 받기</string>
     <string name="timetable_view_recommendation">추천 결과 보기</string>
+    <string name="timetable_recent_recommendation_button">최근 조건으로 다시 보기</string>
     <string name="snackbar_representative_removed">대표 시간표를 해제했어요.</string>
     <string name="action_undo">되돌리기</string>
     <string name="toast_representative_set">대표 시간표로 설정했습니다.</string>
@@ -136,6 +137,7 @@
     <string name="toast_representative_restore_failed">대표 시간표를 되돌릴 수 없습니다.</string>
     <string name="toast_representative_sync_failed">대표 시간표는 저장됐지만 계정 동기화에 실패했습니다.</string>
     <string name="toast_representative_delete_failed">대표 시간표 해제에 실패해 복구했습니다.</string>
+    <string name="toast_recent_recommendation_missing">최근 추천 조건이 없습니다. 새 추천을 먼저 받아주세요.</string>
     <string name="toast_save_success">갤러리에 저장되었습니다.</string>
     <string name="toast_save_failed">저장에 실패했습니다.</string>
     <string name="toast_share_failed">공유에 실패했습니다.</string>

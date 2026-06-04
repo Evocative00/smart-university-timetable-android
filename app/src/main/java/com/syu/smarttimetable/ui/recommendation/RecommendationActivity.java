@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -96,6 +97,7 @@ public class RecommendationActivity extends AppCompatActivity {
 
         recommendationRequest = (RecommendationRequest) getIntent().getSerializableExtra("recommendationRequest");
         preferenceManager = new RecommendationPreferenceManager(this);
+        preferenceManager.setCurrentUserId(getCurrentUserId());
         representativeTimetableRepository = new RepresentativeTimetableRepository();
 
         bindViews();
@@ -252,6 +254,7 @@ public class RecommendationActivity extends AppCompatActivity {
 
             setContentVisible(true);
             renderCurrentRecommendation();
+            saveRecentRecommendationRequestIfAvailable();
             return;
         }
 
@@ -316,6 +319,7 @@ public class RecommendationActivity extends AppCompatActivity {
 
                         setContentVisible(true);
                         renderCurrentRecommendation();
+                        saveRecentRecommendationRequestIfAvailable();
 
                         if (conflictDays != null && !conflictDays.isEmpty()) {
                             showFreeDayConflictNotice(conflictDays);
@@ -330,6 +334,14 @@ public class RecommendationActivity extends AppCompatActivity {
                 runOnUiThread(() -> showEmptyState("추천 결과를 불러오는 중 오류가 발생했습니다."));
             }
         }).start();
+    }
+
+
+    private void saveRecentRecommendationRequestIfAvailable() {
+        if (preferenceManager == null || recommendationRequest == null) {
+            return;
+        }
+        preferenceManager.saveRecentRecommendationRequest(recommendationRequest);
     }
 
     private void showFreeDayConflictNotice(List<DayOfWeek> conflictDays) {
@@ -916,10 +928,13 @@ public class RecommendationActivity extends AppCompatActivity {
             return;
         }
 
+        final boolean[] undoClicked = {false};
+
         preferenceManager.removeTimetableFavorite(timetableKey);
         updateTimetableFavoriteButton();
 
-        final boolean[] undoClicked = {false};
+        Task<Void> remoteDeleteTask = requestRepresentativeTimetableDelete(timetableKey, timetableJson, undoClicked);
+
         Snackbar snackbar = Snackbar.make(
                         findViewById(android.R.id.content),
                         getString(R.string.snackbar_representative_removed),
@@ -927,28 +942,29 @@ public class RecommendationActivity extends AppCompatActivity {
                 )
                 .setAction(getString(R.string.action_undo), v -> {
                     undoClicked[0] = true;
-                    restoreRepresentativeTimetable(timetableKey, timetableJson);
+                    restoreRepresentativeTimetable(timetableKey, timetableJson, remoteDeleteTask);
                 });
-
-        snackbar.addCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar transientBottomBar, int event) {
-                if (!undoClicked[0]) {
-                    deleteRepresentativeTimetableFromFirestore(timetableKey, timetableJson);
-                }
-            }
-        });
 
         snackbar.show();
     }
 
-    private void restoreRepresentativeTimetable(String timetableKey, String timetableJson) {
+    private void restoreRepresentativeTimetable(String timetableKey, String timetableJson, Task<Void> remoteDeleteTask) {
         if (timetableKey == null || timetableJson == null || timetableJson.trim().isEmpty()) {
             Toast.makeText(this, getString(R.string.toast_representative_restore_failed), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        saveRepresentativeTimetable(timetableKey, timetableJson, false);
+        if (preferenceManager != null) {
+            preferenceManager.setTimetableFavorite(timetableKey, timetableJson);
+            updateTimetableFavoriteButton();
+        }
+
+        if (remoteDeleteTask != null) {
+            remoteDeleteTask.addOnCompleteListener(task -> syncRepresentativeTimetableToFirestore(timetableKey, timetableJson));
+        } else {
+            syncRepresentativeTimetableToFirestore(timetableKey, timetableJson);
+        }
+
         Toast.makeText(this, getString(R.string.toast_representative_restored), Toast.LENGTH_SHORT).show();
     }
 
@@ -970,16 +986,23 @@ public class RecommendationActivity extends AppCompatActivity {
                 });
     }
 
-    private void deleteRepresentativeTimetableFromFirestore(String removedKey, String removedJson) {
+    private Task<Void> requestRepresentativeTimetableDelete(
+            String removedKey,
+            String removedJson,
+            boolean[] undoClicked
+    ) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null || representativeTimetableRepository == null) {
-            return;
+            return null;
         }
 
-        representativeTimetableRepository
+        return representativeTimetableRepository
                 .deleteRepresentativeTimetable(user.getUid())
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Representative timetable delete failed", e);
+                    if (undoClicked != null && undoClicked[0]) {
+                        return;
+                    }
                     if (preferenceManager != null
                             && preferenceManager.getCurrentFavoriteKey() == null
                             && removedKey != null
@@ -994,6 +1017,11 @@ public class RecommendationActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT
                     ).show();
                 });
+    }
+
+    private String getCurrentUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user != null ? user.getUid() : null;
     }
 
     private void updateTimetableFavoriteButton() {

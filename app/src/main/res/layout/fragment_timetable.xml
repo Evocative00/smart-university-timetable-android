@@ -172,7 +172,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/smart_button_height"
                     android:layout_marginTop="9dp"
-                    android:text="@string/timetable_view_recommendation"
+                    android:text="@string/timetable_recent_recommendation_button"
                     android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
