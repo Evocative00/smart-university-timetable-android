@@ -12,6 +12,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.syu.smarttimetable.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.syu.smarttimetable.common.utils.RecommendationPreferenceManager;
 import com.syu.smarttimetable.common.utils.ConstraintStateManager;
 import com.syu.smarttimetable.data.model.HardConstraint;
 import com.syu.smarttimetable.data.model.Lecture;
@@ -90,13 +93,13 @@ public class SoftConstraintActivity extends AppCompatActivity {
             SoftConstraint softConstraint = new SoftConstraint();
             softConstraint.setSkipped(true);
             saveSoftConstraintState(softConstraint);
-            navigateToMain(softConstraint);
+            navigateToRecommendation(softConstraint);
         });
 
         buttonRecommend.setOnClickListener(v -> {
             SoftConstraint softConstraint = collectConstraintFromUi();
             saveSoftConstraintState(softConstraint);
-            navigateToMain(softConstraint);
+            navigateToRecommendation(softConstraint);
         });
 
         setupNoneDayMutualExclusion();
@@ -237,7 +240,7 @@ public class SoftConstraintActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    private void navigateToMain(SoftConstraint softConstraint) {
+    private void navigateToRecommendation(SoftConstraint softConstraint) {
         int targetCredits = hardConstraint != null ? hardConstraint.getTargetCredits() : 0;
         int minCredits = Math.max(0, targetCredits - 1);
         int maxCredits = targetCredits + 1;
@@ -266,9 +269,13 @@ public class SoftConstraintActivity extends AppCompatActivity {
                 studentId
         );
 
-        Intent intent = new Intent(this, com.syu.smarttimetable.ui.main.MainNavigationActivity.class);
+        RecommendationPreferenceManager preferenceManager = new RecommendationPreferenceManager(this);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        preferenceManager.setCurrentUserId(currentUser != null ? currentUser.getUid() : null);
+        preferenceManager.saveRecentRecommendationRequest(recommendationRequest);
+
+        Intent intent = new Intent(this, com.syu.smarttimetable.ui.recommendation.RecommendationActivity.class);
         intent.putExtra("recommendationRequest", recommendationRequest);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
     }

@@ -42,6 +42,7 @@ import com.syu.smarttimetable.data.model.enums.DayOfWeek;
 import com.syu.smarttimetable.domain.recommendation.RecommendationRequest;
 import com.syu.smarttimetable.domain.timetable.TimetableImageExporter;
 import com.syu.smarttimetable.ui.timetable.TimetableCacheManager;
+import com.syu.smarttimetable.ui.main.MainNavigationActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +109,7 @@ public class RecommendationActivity extends AppCompatActivity {
     private void bindViews() {
         ImageButton btnBack = findViewById(R.id.btn_back);
         if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
+            btnBack.setOnClickListener(v -> navigateToTimetableHome());
         }
 
         tvScreenTitle = findViewById(R.id.tv_screen_title);
@@ -184,7 +185,7 @@ public class RecommendationActivity extends AppCompatActivity {
         }
 
         if (btnConditionEdit != null) {
-            btnConditionEdit.setOnClickListener(v -> finish());
+            btnConditionEdit.setOnClickListener(v -> navigateToConditionHome());
         }
 
         if (btnMoreActions != null) {
@@ -198,6 +199,27 @@ public class RecommendationActivity extends AppCompatActivity {
         if (btnFullTimetableView != null) {
             btnFullTimetableView.setOnClickListener(v -> showFullTimetableSheet());
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        navigateToTimetableHome();
+    }
+
+    private void navigateToTimetableHome() {
+        navigateToMainTab(MainNavigationActivity.TARGET_TAB_TIMETABLE);
+    }
+
+    private void navigateToConditionHome() {
+        navigateToMainTab(MainNavigationActivity.TARGET_TAB_CONSTRAINT);
+    }
+
+    private void navigateToMainTab(String targetTab) {
+        Intent intent = new Intent(this, MainNavigationActivity.class);
+        intent.putExtra(MainNavigationActivity.EXTRA_TARGET_TAB, targetTab);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 
     private void moveToRecommendation(int targetIndex) {
@@ -435,6 +457,17 @@ public class RecommendationActivity extends AppCompatActivity {
             tvEmptyGuide.setVisibility(View.VISIBLE);
         }
 
+        if (bottomActionContainer != null) {
+            bottomActionContainer.setVisibility(View.VISIBLE);
+        }
+        if (btnConditionEdit != null) {
+            btnConditionEdit.setVisibility(View.VISIBLE);
+            setButtonEnabled(btnConditionEdit, true);
+        }
+        if (btnSaveImage != null) {
+            btnSaveImage.setVisibility(View.GONE);
+        }
+
         setNavigationEnabled(false);
 
         boolean canRegenerate = recommendationRequest != null;
@@ -450,6 +483,12 @@ public class RecommendationActivity extends AppCompatActivity {
         }
         if (bottomActionContainer != null) {
             bottomActionContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        if (visible && btnSaveImage != null) {
+            btnSaveImage.setVisibility(View.VISIBLE);
+        }
+        if (visible && btnConditionEdit != null) {
+            btnConditionEdit.setVisibility(View.VISIBLE);
         }
     }
 

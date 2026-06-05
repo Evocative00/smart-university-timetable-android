@@ -28,6 +28,13 @@ import java.io.File;
 
 public class MainNavigationActivity extends AppCompatActivity {
 
+    public static final String EXTRA_TARGET_TAB = "targetTab";
+    public static final String TARGET_TAB_TIMETABLE = "timetable";
+    public static final String TARGET_TAB_CONSTRAINT = "constraint";
+    public static final String TARGET_TAB_CALENDAR = "calendar";
+    public static final String TARGET_TAB_SCHOOL = "school";
+    public static final String TARGET_TAB_PROFILE = "profile";
+
     private BottomNavigationView bottomNavigation;
     private RecommendationRequest lastRecommendationRequest;
 
@@ -43,12 +50,12 @@ public class MainNavigationActivity extends AppCompatActivity {
                     (RecommendationRequest) getIntent().getSerializableExtra("recommendationRequest");
         }
 
+        setupNavListener();
+
         if (savedInstanceState == null) {
-            loadFragment(new TimetableFragment());
-            bottomNavigation.setSelectedItemId(R.id.nav_timetable);
+            selectTab(resolveTargetTabItemId(getIntent()));
         }
 
-        setupNavListener();
         updateProfileIcon();
     }
 
@@ -69,10 +76,7 @@ public class MainNavigationActivity extends AppCompatActivity {
                 lastRecommendationRequest = req;
             }
         }
-        loadFragment(new TimetableFragment());
-        bottomNavigation.setOnItemSelectedListener(null);
-        bottomNavigation.setSelectedItemId(R.id.nav_timetable);
-        setupNavListener();
+        selectTab(resolveTargetTabItemId(intent));
     }
 
     private void setupNavListener() {
@@ -139,6 +143,54 @@ public class MainNavigationActivity extends AppCompatActivity {
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(scaled, 0, 0, paint);
         return new BitmapDrawable(getResources(), output);
+    }
+
+    private int resolveTargetTabItemId(Intent intent) {
+        if (intent == null) {
+            return R.id.nav_timetable;
+        }
+
+        String targetTab = intent.getStringExtra(EXTRA_TARGET_TAB);
+        if (TARGET_TAB_CONSTRAINT.equals(targetTab)) {
+            return R.id.nav_constraint;
+        } else if (TARGET_TAB_CALENDAR.equals(targetTab)) {
+            return R.id.nav_calendar;
+        } else if (TARGET_TAB_SCHOOL.equals(targetTab)) {
+            return R.id.nav_school;
+        } else if (TARGET_TAB_PROFILE.equals(targetTab)) {
+            return R.id.nav_profile;
+        }
+
+        return R.id.nav_timetable;
+    }
+
+    private void selectTab(int itemId) {
+        Fragment fragment = createFragmentForItem(itemId);
+        if (fragment == null) {
+            itemId = R.id.nav_timetable;
+            fragment = new TimetableFragment();
+        }
+
+        loadFragment(fragment);
+
+        bottomNavigation.setOnItemSelectedListener(null);
+        bottomNavigation.setSelectedItemId(itemId);
+        setupNavListener();
+    }
+
+    private Fragment createFragmentForItem(int itemId) {
+        if (itemId == R.id.nav_timetable) {
+            return new TimetableFragment();
+        } else if (itemId == R.id.nav_calendar) {
+            return new CalendarFragment();
+        } else if (itemId == R.id.nav_school) {
+            return new SchoolHomeFragment();
+        } else if (itemId == R.id.nav_constraint) {
+            return new ConstraintFragment();
+        } else if (itemId == R.id.nav_profile) {
+            return new ProfileFragment();
+        }
+        return null;
     }
 
     public RecommendationRequest getLastRecommendationRequest() {
